@@ -1,9 +1,20 @@
+
+#pragma warning( disable : 4710) // Disable warning for functions that have not been inlined
+#pragma warning( disable : 4711) // Disable warning for functions that have been selected for automatic inline expansion
+
+#pragma warning( push )
+#pragma warning( disable : 4820) // Disable warning for added Padding at the end of a Structure
+#pragma warning( disable : 4514) // Disable warning for unused inline functions
+
 #include "cpp-terminal/color.hpp"
 #include "cpp-terminal/exception.hpp"
 #include "cpp-terminal/io.hpp"
 #include "cpp-terminal/style.hpp"
 #include "cpp-terminal/tty.hpp"
 #include "cpp-terminal/version.hpp"
+
+#pragma warning( pop ) 
+
 
 #include <iostream>
 
