@@ -28,8 +28,6 @@ target_include_directories(cpp_terminal_tryout PUBLIC
 # ===========================
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	set(COMPILER_FLAGS 
-		# Enable all diagnostics and warnings
-		# -Weverything
 		
 		# set compiler flags for debugging
 		#---------------------------------
@@ -52,8 +50,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 # =========================
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	set(COMPILER_FLAGS
-		# Enable all diagnostics and warnings
-		-Weverything
 		
 		# Enable link time optimisations
 		-flto
@@ -75,13 +71,11 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 			-O3 
 		>
 	)
-# Compiler Options for GNU:
-# =========================
+# Compiler Options for MSVC:
+# ==========================
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(COMPILER_FLAGS
-		# Displays all warnings displayed by /W4 and all other warnings that 
-		#/W4 doesn't include—for example, warnings that are off by default.
-		/Wall 
+		/W3
 	
 		# set compiler flags for debugging
 		#---------------------------------
