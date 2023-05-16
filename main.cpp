@@ -46,7 +46,7 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 		return version();
 	}else if(0 == strcmp(listOfArgumentStrings[0], "--help") 
 				|| 0 == strcmp(listOfArgumentStrings[0], "help") 
-				|| 0 == 0 == strcmp(listOfArgumentStrings[0], "-h")){
+				|| 0 == strcmp(listOfArgumentStrings[0], "-h")){
 		return help();
 	}else{
 		std::cout 	<< "This command will later create a new file with the file name '" 
