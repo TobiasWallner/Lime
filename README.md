@@ -1,5 +1,5 @@
 # Lime
-Lime is a modern and fast editor that works in the command line.
+Lime is a modern and fast editor that works in the command line.x
 
 # Lime - The command line editor
 
