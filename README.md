@@ -1,5 +1,5 @@
 # Lime
-Lime is a modern and fast editor that works in the command line.x
+Lime is a modern and fast editor that works in the command line.
 
 # Lime - The command line editor
 
@@ -60,6 +60,3 @@ You can easily get those by installing Visual Studio (Community Eddition is enou
 - Helena Schneider 11812332
 - Stefan Schüttengruber 11807476
 - Tobias Wallner 11775206 (Team Lead)
-
-
-## links
