@@ -13,6 +13,47 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
  
  **Computer games** use the keys 'W'-up, 'A'-left, 'S'-down, 'D'-right for movement and navigation. Lime is inspired to use those or the same layout for the other hand with 'I'-up, 'J'-left, 'K'-down, 'L'-right for navigation as well.
 
+## Usage
+
+### Complilation on Windows
+
+**with MSVC:**
+```bash
+cmake -S . -B build_vs17 -G "Visual Studio 17 2022"  
+cmake --build build_vs17 --config Release --target cpp_terminal_tryout
+```
+We compiled with VS17 but you may use a newer build generator as you like.
+
+**with Clang **
+
+
+The Developers of this repository prefere to build with Clang and Ninja like shown below.
+```bash
+SET CC=clang
+SET CXX=clang++
+cmake -S . -B build_clang -G "Ninja Multi-Config"
+cmake --build build_clang --config Release --target cpp_terminal_tryout
+```
+
+### Compilation on Linux
+
+with Clang and Ninja as a build tool generator but you may use any other generator as well:
+```bash
+export CC=clang
+export CXX=clang++
+cmake -S . -B build_clang -G "Ninja Multi-Config"
+cmake --build build_clang --config Release --target cpp_terminal_tryout
+```
+
+### Compiled output
+
+The compiled output can then be found in the folder "build_clang/Release/".
+
+## Trouble Shooting
+
+If you use Clang on windows you will need some additional libraries that will have to be linked to your project in order to access the Windows Console API.
+You can easily get those by installing Visual Studio (Community Eddition is enough) and then install the C++ Desktop Developement in the Visual Studio Package Manager (not to confuse wih vcpack).
+
 ## Team
 - Rafał Górniak 12232999
 - Sondre Hatlehol 12202296
