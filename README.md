@@ -1,5 +1,5 @@
 # Lime
-Lime is a modern and fast editor that works in the command line.
+Lime is a modern and fast editor that works in the command line.x
 
 # Lime - The command line editor
 
@@ -24,7 +24,7 @@ cmake --build build_vs17 --config Release --target cpp_terminal_tryout
 ```
 We compiled with VS17 but you may use a newer build generator as you like.
 
-**with Clang **
+**with Clang**
 
 
 The Developers of this repository prefere to build with Clang and Ninja like shown below.
