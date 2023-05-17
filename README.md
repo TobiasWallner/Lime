@@ -20,7 +20,7 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 **with MSVC:**
 ```bash
 cmake -S . -B build_vs17 -G "Visual Studio 17 2022"  
-cmake --build build_vs17 --config Release --target cpp_terminal_tryout
+cmake --build build_vs17 --config Release --target lime
 ```
 We compiled with VS17 but you may use a newer build generator as you like.
 
@@ -32,7 +32,7 @@ The Developers of this repository prefere to build with Clang and Ninja like sho
 SET CC=clang
 SET CXX=clang++
 cmake -S . -B build_clang -G "Ninja Multi-Config"
-cmake --build build_clang --config Release --target cpp_terminal_tryout
+cmake --build build_clang --config Release --target lime
 ```
 
 ### Compilation on Linux
@@ -42,7 +42,7 @@ with Clang and Ninja as a build tool generator but you may use any other generat
 export CC=clang
 export CXX=clang++
 cmake -S . -B build_clang -G "Ninja Multi-Config"
-cmake --build build_clang --config Release --target cpp_terminal_tryout
+cmake --build build_clang --config Release --target lime
 ```
 
 ### Compiled output
