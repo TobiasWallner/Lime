@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.0)
 
-project(Lime)
+project(lime)
 
 
 # Basic compiler settings
@@ -16,11 +16,11 @@ add_subdirectory("${MODULES_PATH}/cpp-terminal" "${MODULES_PATH}/cpp-terminal_bu
 
 
 # project building process: 
-add_executable(Lime
+add_executable(lime
 	main.cpp
     )
 
-target_include_directories(Lime PUBLIC
+target_include_directories(lime PUBLIC
 	${MODULES_PATH}/cpp-terminal
 
     )
@@ -103,13 +103,13 @@ else()
 endif()
 
 
-target_compile_options(Lime PUBLIC
+target_compile_options(lime PUBLIC
 
 	${COMPILER_FLAGS}
 	
     )
 
-target_link_libraries(Lime
+target_link_libraries(lime
 	cpp-terminal
     
     )
