@@ -18,6 +18,7 @@ add_subdirectory("${MODULES_PATH}/cpp-terminal" "${MODULES_PATH}/cpp-terminal_bu
 # project building process: 
 add_executable(lime
 	main.cpp
+	lime/lime.cpp	lime/lime.hpp
     )
 
 target_include_directories(lime PUBLIC
@@ -99,7 +100,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 		>
 	)
 else()
-	message( SEND_ERROR "The compiler you are using is not handeled. Add your compiler and compiler flags to the if(CMAKE_CXX_COMPILER_ID STREQUAL <your compiler>) in the CMakeLists.txt")
+	message( SEND_ERROR "The compiler you are using is not handeled. Add your compiler and compiler flags to the if(CMAKE_CXX_COMPILER_ID STREQUAL <your compiler>) in the CMakeLists.txt of the root folder")
 endif()
 
 
