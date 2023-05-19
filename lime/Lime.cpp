@@ -36,10 +36,10 @@ int Lime::run(){
 	
 	// set options for the console
 	const auto Options = {
-		Term::Option::NoClearScreen, 
-		Term::Option::NoSignalKeys, 
-		Term::Option::Cursor, 
-		Term::Option::Raw
+		Term::Option::ClearScreen, 	// start from a cear screen
+		Term::Option::NoSignalKeys, // deactivate key combinations that generate a signal or interrupt
+		Term::Option::NoCursor, 	// deactivate the cursor, we will display it ourselfs
+		Term::Option::Raw			// get the raw and unprozessed io data from the console buffers
 	};
 	
 	Term::terminal.setOptions(Options);
