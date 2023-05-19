@@ -8,23 +8,17 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
 
-# dependencies
+# ----------- dependencies ------------
 set(MODULES_PATH "modules")
 
-# cpp-terminal
-add_subdirectory("${MODULES_PATH}/cpp-terminal" "${MODULES_PATH}/cpp-terminal_build")
-
+add_subdirectory("${MODULES_PATH}/cpp-terminal" "modules/cpp-terminal_build")
+add_subdirectory("${MODULES_PATH}/cpp-terminal-gui" "modules/cpp-terminal-gui_build")
 
 # project building process: 
 add_executable(lime
 	main.cpp
 	lime/lime.cpp	lime/lime.hpp
-    )
-
-target_include_directories(lime PUBLIC
-	${MODULES_PATH}/cpp-terminal
-
-    )
+)
 
 # Compiler Options for Clang:
 # ===========================
@@ -103,17 +97,39 @@ else()
 	message( SEND_ERROR "The compiler you are using is not handeled. Add your compiler and compiler flags to the if(CMAKE_CXX_COMPILER_ID STREQUAL <your compiler>) in the CMakeLists.txt of the root folder")
 endif()
 
+#
+# Target settings for cpp-terminal-gui
+#
+
+target_include_directories(cpp-terminal-gui PUBLIC
+	${MODULES_PATH}/cpp-terminal
+)
+
+target_compile_options(cpp-terminal-gui PUBLIC
+	${COMPILER_FLAGS}
+)
+
+target_link_libraries(cpp-terminal-gui PUBLIC
+	cpp-terminal
+)
+
+#
+# Target settings for lime
+#
+
+target_include_directories(lime PUBLIC
+	${MODULES_PATH}/cpp-terminal
+	${MODULES_PATH}/cpp-terminal-gui
+)
 
 target_compile_options(lime PUBLIC
-
 	${COMPILER_FLAGS}
-	
-    )
+)
 
-target_link_libraries(lime
+target_link_libraries(lime PUBLIC
 	cpp-terminal
-    
-    )
+    cpp-terminal-gui
+)
 
 
 
