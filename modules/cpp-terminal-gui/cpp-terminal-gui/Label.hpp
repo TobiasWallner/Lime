@@ -6,10 +6,12 @@
 // C++ STD
 #include <string>
 #include <string_view>
-#include <variant>
+#include <cinttypes>
+#include <size_t>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
+#include <cpp-terminal/platform/conversion.hpp>
 
 namespace TermGui{
 
@@ -35,10 +37,17 @@ namespace TermGui{
 */
 class Label : public RenderTrait{
 private:
-	//the string that gets displayed	
-	std::string _string; 
-	
-	//the cursour _position relative to the parent. 
+
+	struct ColorChangeIndex{
+		Term::Color color; 	// the color that it is going to change to
+		int index;			// the index at which it is going to change, 
+							// the change will be applied before the character of that index will be printed.
+	}
+
+	std::u32string _string; 
+	std::vector<ColorChangeIndex> _foregroundColour;
+	std::vector<ColorChangeIndex> _backgroundColour;
+
 	Term::Cursor _position; 
 	
 	//the label will only be printed up to the given length. If the length is negative then the whole label will be printed regardles.
@@ -47,16 +56,67 @@ private:
 public:
 			
 	Label(const std::string& string, Term::Cursor position = {0, 0}, int label_length = -1) : 
+			_string(Term::Private::utf8_to_utf32(string)), 
+			_position(position),
+			_label_length(label_length){}
+			
+	Label(std::string_view string, Term::Cursor position = {0, 0}, int label_length = -1) : 
+			_string(Term::Private::utf8_to_utf32(string)), 
+			_position(position),
+			_label_length(label_length){}
+			
+	Label(const std::u32string& string, Term::Cursor position = {0, 0}, int label_length = -1) : 
 			_string(string), 
 			_position(position),
 			_label_length(label_length){}
 			
-	Label(std::string&& string, Term::Cursor position = {0, 0}, int label_length = -1) : 
+	Label(std::u32string&& string, Term::Cursor position = {0, 0}, int label_length = -1) : 
 			_string(std::move(string)), 
 			_position(position),
 			_label_length(label_length){}
 	
-	inline void set_string(std::string&& string){this->_string = string;};
+	/*---- append ----*/
+	inline void append(const std::string& string){
+		Term::Private::append_utf8_to_utf32(this->_string, string);
+	}
+	
+	inline void append(const std::string_view& string){
+		Term::Private::append_utf8_to_utf32(this->_string, string);
+	}
+	
+	inline void append(const char* string, std::size_t size){
+		Term::Private::append_utf8_to_utf32(this->_string, string, size);
+	}
+	
+	inline void append(const std::u32string& string){
+		this->_string.append(string);
+	}
+	
+	/*---- assign ----*/
+	inline void assign(const std::string& string){
+		this->_string.clear();
+		this->append(string);
+	}
+	
+	inline void assign(const std::string_view& string){
+		this->_string.clear();
+		this->append(string);
+	}
+	
+	inline void assign(const char* string, std::size_t size){
+		this->_string.clear();
+		this->append(string);
+	}
+	
+	inline void assign(const std::u32string& string){
+		this->_string = string;
+	}
+	
+	inline void assign(std::u32string&& string){
+		this->_string = std::move(string);
+	}
+	
+	/**/
 	
 	inline void set_position(Term::Cursor position){this->_position = position;};
 	
