@@ -18,32 +18,71 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 ### Complilation on Windows
 
 **with MSVC:**
-```bash
+```
 cmake -S . -B build_vs17 -G "Visual Studio 17 2022"  
 cmake --build build_vs17 --config Release --target lime
 ```
 We compiled with VS17 but you may use a newer build generator as you like.
 
 **with Clang**
-
-
 The Developers of this repository prefere to build with Clang and Ninja like shown below.
-```bash
+```
 SET CC=clang
 SET CXX=clang++
 cmake -S . -B build_clang -G "Ninja Multi-Config"
 cmake --build build_clang --config Release --target lime
 ```
 
+**with GCC flavoured by MSYS2**
+```
+SET CC=gcc
+SET CXX=g++
+cmake -S . -B build_gcc -G "Ninja Multi-Config"
+cmake --build build_gcc --config Release --target lime
+```
+
+#### How to install CMake
+You can get CMake from here [https://cmake.org/download/](https://cmake.org/download/)
+
+#### How to install Visual Studio
+1) Download Visual Studio from the microsoft omepage [https://visualstudio.microsoft.com/](https://visualstudio.microsoft.com/)
+2) Install the programm
+3) open the launcher, select C++ for Desktop and install all files.
+
+#### How to install Clang
+1) Download the release that fits your platform here [https://github.com/llvm/llvm-project/releases](https://github.com/llvm/llvm-project/releases) or compile the git repository yourself.
+2) Add the binary folder that contains `clang` and `clang++` to the PATH variables.
+
+#### How to install GCC with MSYS2**
+1) Download MSYS2 from here [https://www.msys2.org/](https://www.msys2.org/) and follow the installation prozess
+2) In the MSYS2 terminal install the following `pacman -S mingw-w64-ucrt-x86_64-gcc`
+3) Add the gcc compiler to your PATH, it should be located somwhere at `...\msys64\ucrt64\bin`.
+
+#### How to install Ninja
+1) Install it by downloading binaries or cloning the repo and compileing yourself from here `https://ninja-build.org/`
+2) Copy the `ninja.exe` executable to wherever you want and set a PATH variable to its location.
+
+
 ### Compilation on Linux
 
+**with Clang**
 with Clang and Ninja as a build tool generator but you may use any other generator as well:
-```bash
+```
 export CC=clang
 export CXX=clang++
 cmake -S . -B build_clang -G "Ninja Multi-Config"
 cmake --build build_clang --config Release --target lime
 ```
+
+**with GCC flavoured by MSYS2**
+```
+export CC=gcc
+export CXX=g++
+cmake -S . -B build_gcc -G "Ninja Multi-Config"
+cmake --build build_gcc --config Release --target lime
+```
+
+
 
 ### Compiled output
 
