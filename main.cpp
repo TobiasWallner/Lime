@@ -1,6 +1,7 @@
 
 // C++ std
 #include <iostream>
+#include <cstring>
 
 // Project
 #include "lime/Lime.hpp"
@@ -22,13 +23,13 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 	
 	if(numberOfArguments <= 0){
 		return Lime().run();
-	}else if(0 == strcmp(listOfArgumentStrings[0], "--version") 
-				|| 0 == strcmp(listOfArgumentStrings[0], "version") 
-				|| 0 == strcmp(listOfArgumentStrings[0], "-v")){
+	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--version") 
+				|| 0 == std::strcmp(listOfArgumentStrings[0], "version") 
+				|| 0 == std::strcmp(listOfArgumentStrings[0], "-v")){
 		return version();
-	}else if(0 == strcmp(listOfArgumentStrings[0], "--help") 
-				|| 0 == strcmp(listOfArgumentStrings[0], "help") 
-				|| 0 == strcmp(listOfArgumentStrings[0], "-h")){
+	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--help") 
+				|| 0 == std::strcmp(listOfArgumentStrings[0], "help") 
+				|| 0 == std::strcmp(listOfArgumentStrings[0], "-h")){
 		return help();
 	}else{
 		std::cout 	<< "This command will later create a new file with the file name '" 
