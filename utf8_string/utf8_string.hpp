@@ -225,6 +225,8 @@ public:
 	friend inline BaseString& operator<<(BaseString& stream, std::initializer_list<char> ilist){return stream.append(ilist);}
 	
 	/// assigns a char c-string
+	inline BaseString& assign(const BaseString& str){this->operator=(str); return *this;}
+	inline BaseString& assign(BaseString&& str){this->operator=(std::move(str)); return *this;}
 	inline BaseString& assign(char c){this->clear(); return this->append(c);}
 	inline BaseString& assign(const char* str){this->clear(); return this->append(str);}
 	inline BaseString& assign(const char* first, const char* last){this->clear(); return this->append(first, last);}
@@ -253,17 +255,13 @@ public:
 	friend inline BaseString operator+(BaseString&& lhs, const BaseString& rhs){lhs += rhs; return lhs;}
 	
 	/// concattenate two BaseStrings and use the memory of the rhs
-	friend inline BaseString operator+(const BaseString& lhs, BaseString&& rhs){ rhs.insert(rhs.begin(), lhs.cbegin(), lhs.cend()); return rhs;}
+	friend inline BaseString operator+(const BaseString& lhs, BaseString&& rhs){rhs.insert(rhs.begin(), lhs.cbegin(), lhs.cend()); return rhs;}
 	
 	/// concattenate two BaseStrings and use the memory of the lhs
 	friend inline BaseString operator+(BaseString&& lhs, BaseString&& rhs){lhs += rhs; return lhs;}
 	
-	
 	/// appends this BaseString to the provided std::string
-	inline BaseString& append_to(std::string& str) const { 
-		for(auto elem : *this) str.append(elem.to_string_view()); 
-		return *this; 
-	}
+	inline void append_to(std::string& str) const {for(auto elem : *this) str.append(elem.to_std_string_view());}
 	
 	/// returns the size of an c-string that would hold the same information
 	inline size_type c_str_size() const {
