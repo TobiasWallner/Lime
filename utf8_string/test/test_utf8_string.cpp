@@ -144,6 +144,32 @@ int main(){
 		assert(utf8_1.empty() == true, "lhs has not been moved");
 		assert(utf8_2.empty() == false, "rhs has not been moved");
 	}
+	{// use += to concattenate two strings
+		std::string input1("🦄水");
+		std::string input2("ßaä");
+		utf8::string utf8_1;
+		utf8::string utf8_2;
+		utf8_1 = input1;
+		utf8_2 = input2;
+	
+		utf8_1 += utf8_2;
+		auto expected = input1 + input2;
+		auto result = utf8_1.to_std_string();
+		assert(result == expected, "error result should be: '" << expected << "' but is '" << result << "'.");
+	}
+	{// use append to concattenate two strings
+		std::string input1("🦄水");
+		std::string input2("ßaä");
+		utf8::string utf8_1;
+		utf8::string utf8_2;
+		utf8_1 = input1;
+		utf8_2 = input2;
+	
+		utf8_1.append(utf8_2);
+		auto expected = input1 + input2;
+		auto result = utf8_1.to_std_string();
+		assert(result == expected, "error result should be: '" << expected << "' but is '" << result << "'.");
+	}
 	
 	std::cout << "finished tests" << std::endl;
 	return 0;
