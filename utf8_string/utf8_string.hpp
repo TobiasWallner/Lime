@@ -244,7 +244,7 @@ public:
 	
 	/// concattenate two BaseStrings
 	friend inline BaseString operator+(const BaseString& lhs, const BaseString& rhs){
-		string result;
+		BaseString result;
 		result.reserve(lhs.size() + rhs.size());
 		result = lhs;
 		result += rhs;
