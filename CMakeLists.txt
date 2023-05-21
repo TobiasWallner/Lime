@@ -12,12 +12,29 @@ set(CMAKE_CXX_STANDARD 17)
 set(MODULES_PATH "modules")
 
 add_subdirectory("${MODULES_PATH}/cpp-terminal" "modules/cpp-terminal_build")
-add_subdirectory("${MODULES_PATH}/cpp-terminal-gui" "modules/cpp-terminal-gui_build")
 
 # project building process: 
 add_executable(lime
 	main.cpp
-	lime/lime.cpp	lime/lime.hpp
+	
+	# utf8_string
+	utf8_string/utf8_char.hpp
+	utf8_string/utf8_string.hpp
+	
+	# lime
+	lime/lime.cpp				lime/lime.hpp
+	
+	# cpp-terminal-gui
+	cpp-terminal-gui/RenderTrait.hpp
+	cpp-terminal-gui/Label.cpp	cpp-terminal-gui/Label.hpp
+	
+)
+
+target_include_directories(lime PUBLIC
+	${MODULES_PATH}/cpp-terminal
+	lime
+	cpp-terminal-gui
+	utf8_string
 )
 
 # Compiler Options for Clang:
@@ -28,18 +45,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# set compiler flags for debugging
 		#---------------------------------
 		$<$<CONFIG:Debug>:
-		
-			# Enable Optimisations that will not disturb debugging
-			-O0
-			-g
+			-O0	# disable optimisations
+			-g	# enable debug information
 		>
 		
 		# set compiler flags for release
 		#-------------------------------
 		$<$<CONFIG:Release>:
-			
-			# Enable all Optimisations
-			-O3 
+			-O3 # Enable all Optimisations
 		>
 	)
 # Compiler Options for GNU:
@@ -53,18 +66,14 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		# set compiler flags for debugging
 		#---------------------------------
 		$<$<CONFIG:Debug>:
-		
-			# Enable Optimisations that will not disturb debugging
-			-O0
-			-g
+			-O0	# disable optimisations
+			-g	# enable debug information
 		>
 		
 		# set compiler flags for release
 		#-------------------------------
 		$<$<CONFIG:Release>:
-			
-			# Enable all Optimisations
-			-O3 
+			-O3 # Enable all Optimisations
 		>
 	)
 # Compiler Options for MSVC:
@@ -98,38 +107,15 @@ else()
 endif()
 
 #
-# Target settings for cpp-terminal-gui
-#
-
-target_include_directories(cpp-terminal-gui PUBLIC
-	${MODULES_PATH}/cpp-terminal
-)
-
-target_compile_options(cpp-terminal-gui PUBLIC
-	${COMPILER_FLAGS}
-)
-
-target_link_libraries(cpp-terminal-gui PUBLIC
-	cpp-terminal
-)
-
-#
 # Target settings for lime
 #
-
-target_include_directories(lime PUBLIC
-	${MODULES_PATH}/cpp-terminal
-	${MODULES_PATH}/cpp-terminal-gui
-)
 
 target_compile_options(lime PUBLIC
 	${COMPILER_FLAGS}
 )
 
+
 target_link_libraries(lime PUBLIC
 	cpp-terminal
-    cpp-terminal-gui
 )
-
-
 
