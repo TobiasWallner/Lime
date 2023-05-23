@@ -18,15 +18,14 @@ add_executable(lime
 	main.cpp
 	
 	# utf8_string
-	utf8_string/utf8_char.hpp
-	utf8_string/utf8_string.hpp
+	# currently not needed undomment once needed
+	# utf8_string/utf8_char.hpp
+	# utf8_string/utf8_string.hpp
 	
 	# lime
 	lime/lime.cpp				lime/lime.hpp
 	
 	# cpp-terminal-gui
-	cpp-terminal-gui/RenderTrait.hpp
-	cpp-terminal-gui/Label.cpp	cpp-terminal-gui/Label.hpp
 	
 )
 
