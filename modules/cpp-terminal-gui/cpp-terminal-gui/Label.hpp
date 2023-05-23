@@ -46,8 +46,6 @@ private:
 	
 
 	utf8::string _string; // the string that should be printed
-	
-	
 
 	Term::Cursor _position; 	// position of the label
 	
@@ -69,21 +67,11 @@ public:
 			_label_length(label_length){}
 	
 	inline void change_foreground(Term::Color foregroundColor){
-		this->_foregroundColour.push_back(
-			ColorChangeIndex{
-				foregroundColor, 
-				static_cast<size_type>(_string.size())
-			}
-		);
+		
 	}
 	
 	inline void change_background(Term::Color backgroundColor){
-		this->_backgroundColour.push_back(
-			ColorChangeIndex{
-				backgroundColor, 
-				static_cast<size_type>(_string.size())
-			}
-		);
+		
 	}
 	
 	/*---- append ----*/

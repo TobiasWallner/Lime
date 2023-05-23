@@ -8,9 +8,9 @@
 #include <cstring>
 
 #define assert(condition, message) if(!(condition)){ \
-										std::cout << "test failed at line: " << std::dec << __LINE__ << std::endl; \
+										std::cout << "test failed at line: " << __LINE__ << std::endl; \
 										std::cout << "with message: " << message << std::endl;	\
-										exit(-1); \
+										exit(EXIT_FAILURE); \
 									}
 									
 int main(){
