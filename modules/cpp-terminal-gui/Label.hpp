@@ -5,7 +5,7 @@
 
 // C++ STD
 #include <cstdio>
-#include <vector>
+#include <list>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
@@ -15,7 +15,6 @@
 #include <utf8_string.hpp>
 
 namespace TermGui{
-
 
 /**
 	A Label can store a formated and coloured string that can be rendered to the console terminal.
@@ -43,17 +42,16 @@ public:
 
 private:
 
-	struct ColorChangeIndex{
-		Term::Color color; 		// the color that it is going to change to
-		size_type index;		// the index at which it is going to change, 
-								// the change will be applied before the character of that index will be printed.
-	};
+	// CommandIndexPair represents a command and the position at which the command should be printed into the output stream.
+	
 
-	utf8::string _string; 
-	std::vector<ColorChangeIndex> _foregroundColour;
-	std::vector<ColorChangeIndex> _backgroundColour;
+	utf8::string _string; // the string that should be printed
+	
+	
 
-	Term::Cursor _position; 
+	Term::Cursor _position; 	// position of the label
+	
+	size_type _cursor_position; // poition of the cursor within the 
 	
 	//the label will only be printed up to the given length. If the length is negative then the whole label will be printed regardles.
 	int _label_length = -1; 

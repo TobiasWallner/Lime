@@ -12,6 +12,9 @@ namespace TermGui{
 /**
 	This is an Abstract class that provides a render function for Objects
 	that can be rendered to the Console
+	
+	Derived classes have to implement the following functions:
+	virtual render(std::string& outputString) = 0;
 */
 class RenderTrait{
 	public:
