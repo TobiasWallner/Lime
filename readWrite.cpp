@@ -2,10 +2,16 @@
 #include <fstream>
 #include <iostream>
 
+/*!!!!!!!!!!!!!!!
+	you can do this is a .cpp file but blease do not
+*/
 using namespace std;
 
+/*!!!!!!!!!!!!!!!
+	There is a std::list that already does everything for you
+*/
 //A node is one element of the doubly linked list. Stores one line as a string.
-struct node{
+struct node{ 
     string line;
     node* next;
     node* prev;
@@ -17,6 +23,17 @@ struct node{
     }
 };
 
+/*!!!!!!!!!!!!!!!
+	There is already a list
+	
+	use something like:
+	
+	
+	useing Line = std::string;
+	useing Text = std::list<Line>;
+	
+	or make classes instead
+*/
 //The list stores all the lines of the written file.
 struct list{
     size_t length;
@@ -30,6 +47,21 @@ struct list{
     }
 };
 
+
+/*!!!!!!!!!!!!!!!
+	use some of the following functions instead: 
+		
+		* file.getline() https://en.cppreference.com/w/cpp/io/basic_istream/getline
+			this is probably the easiest way to do it but is not the most performant one
+		
+		* file.read() https://en.cppreference.com/w/cpp/io/basic_istream/read
+			this one is more performant, but you have to programm more yourself,
+			because this function will not check for line endings.
+		
+		* file.readsome() https://en.cppreference.com/w/cpp/io/basic_istream/readsome
+			this is probably the fastest one but we would have to benchmark different
+			approaches against each other to do so.
+*/
 //Reads a file and saves each line inside a node inside a list.
 void readFile(list &list){
     ifstream file ("data.txt");
@@ -58,6 +90,12 @@ void writeFile(list &list){
     ofstream file ("data.txt");
     if(file.is_open()){
         while(temp){
+			/*!!!!!!!!!!!!!!!
+				moveing into a filestream is pointless.
+				the file will need to make a copy of the string anyway
+				so you can allso pass it as you would normally do.
+				no std::move needed here.
+			*/
             file << (std::move(temp->line)) << "\n";
             temp = temp->next;
         }
