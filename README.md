@@ -95,6 +95,8 @@ then go into the build directory like for example with `cd build_clang` and run 
 CMake will then run all tests of this project. 
 Test of external projects will be turned off and not executed.
 
+Note that MSVC does not have a `--target all`. There if you just remove the `--target ...` command as a whole Visual Studio will build all test executables.
+
 ### Compiled output
 
 The compiled output can then be found in the folder "build_clang/Release/".
