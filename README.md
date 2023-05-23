@@ -82,7 +82,18 @@ cmake -S . -B build_gcc -G "Ninja Multi-Config"
 cmake --build build_gcc --config Release --target lime
 ```
 
+### Testing
 
+This Project supports CMake tests using `ctest`.
+In order to run the tests build the project with the flag `--target all`.
+For example:
+```
+cmake --build build_clang --config Release --target all
+```
+
+then go into the build directory like for example with `cd build_clang` and run the command `ctest`.
+CMake will then run all tests of this project. 
+Test of external projects will be turned off and not executed.
 
 ### Compiled output
 
