@@ -7,10 +7,9 @@
 
 namespace TermGui{
 
-void Label::render(std::string& output_string) const {
-	Term::cursor_right(output_string, this->_position.column());
-	Term::cursor_down(output_string, this->_position.row());
-	this->_string.append_to(output_string);
+void Label::render(std::string& outputString) const {
+	outputString += Term::cursor_right(this->_position.column());
+	outputString += Term::cursor_down(this->_position.row());
 }
 	
 }
