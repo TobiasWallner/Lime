@@ -67,6 +67,17 @@ int main(){
 		assert(commandList.size() == expected, "command list should have size: " << expected << " but has size: " << commandList.size());
 		assert(std::is_sorted(commandList.begin(), commandList.end(), smaller), "the list is not sorted after 3 insertions");
 	}
+	{// insert two different commands into the same index has size 1. Size of underlieing container has size 2
+		TermGui::CommandList commandList;
+		TermGui::ForegroundColor forgroundColor(10, 50, 80);
+		TermGui::BackgroundColor backgroundColor(90, 60, 20);
+		commandList.insert(forgroundColor, 1);
+		commandList.insert(backgroundColor, 1);
+		const auto expected_number_of_index_events = 1;
+		assert(commandList.size() == expected, "command list should have size: " << expected_number_of_index_events << " but has size: " << commandList.size());
+		const auto expected_number_of_efents_at_first_index = 2;
+		assert(commandList.front().size() == expected_number_of_efents_at_first_index, "command list should have size: " << expected_number_of_efents_at_first_index << " but has size: " << commandList.size());
+	}
 	
 	
 	std::cout << "finished " << __FILE__ << std::endl;
