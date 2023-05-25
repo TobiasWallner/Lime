@@ -60,6 +60,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		$<$<CONFIG:Debug>:
 			-O0	# disable optimisations
 			-g	# enable debug information
+			-ggdb # extra flag for the debugger
 		>
 		
 		# set compiler flags for release
