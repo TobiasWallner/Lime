@@ -15,6 +15,16 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 
 ## Usage
 
+### download releases
+
+[Download Releases from here.](https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject/releases)
+
+### download source
+
+```
+git clone --recurse-submodules https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject
+```
+
 ### Complilation on Windows
 
 **with MSVC:**
