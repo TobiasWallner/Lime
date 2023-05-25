@@ -22,8 +22,10 @@ bool TermGui::CommandList::CommandPoint::insert(std::unique_ptr<Command>&& pComm
 	}else{
 		// find the first in reverse that is smaller or equal
 		auto itr = this->find_first_smaller_equal_reverse(pCommand->type());
-		// it has not the same type -> insert it afterwards, else return false
-		if((*itr)->type() != pCommand->type()){
+		if(itr == this->rend()){
+			this->commands.push_front(std::move(pCommand));
+			return true;
+		}else if((*itr)->type() != pCommand->type()){
 			this->commands.insert(itr.base(), std::move(pCommand));
 			return true;
 		}else{

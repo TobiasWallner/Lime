@@ -185,6 +185,14 @@ public:
 	inline const_reverse_iterator rend() const {return this->commands.rend();}
 	inline const_reverse_iterator rcend() const {return this->commands.crend();}
 	
+	/// returns a reference to the first element
+	inline reference front(){return this->commands.front();}
+	inline const_reference front() const {return this->commands.front();}
+	
+	/// returns a reference to the last element
+	inline reference back(){return this->commands.back();}
+	inline const_reference back() const {return this->commands.back();}
+	
 	/// make an ordered/sorted insert of the command at the given position into the list.
 	/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 	/// note that the simple insert will not override existing commands and would return false in that case
