@@ -15,7 +15,6 @@
 
 namespace TermGui{
 
-
 /// Stores a list of commands and the position at which they should be executed.
 /// the command list and their execution follows the following rules:
 /// 	* all commands are sorted by their index number - the index at which they will be executed.
@@ -23,7 +22,7 @@ namespace TermGui{
 /// 	* commands are expected to be executed before anything else. 
 /// 	* there can only be one Command of one type at any given index.
 class CommandList{
-private:	
+public:	
 	/// A command point stores commands and the index at which those commands will be executed
 	/// Each CommandPoint can only ever have one of each command types. 
 	/// Commands will be stored in ascending order according to the enum of the command types.
@@ -44,10 +43,9 @@ private:
 		using reference = list_type::reference;
 		using const_reference = list_type::const_reference;
 		using pointer = list_type::pointer;
-	private:
-		list_type commands;		// list of commands to be executed 
-		
 	public:
+		list_type commands;		// list of commands to be executed 
+
 		// public member index position because the position of the Command execution might
 		// change if the string that it is connected to changes in lenght
 		size_type index; 		// the index at which the command should be executed
@@ -102,7 +100,10 @@ private:
 		/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 		/// note that the simple insert will not override existing commands and would return false in that case
 		bool insert(std::unique_ptr<Command>&& pCommand);
-	
+		
+		/// returns true if this list has changed due to this insertions
+		/// returns false if this list has changed unchanged
+		bool insert(const list_type& listOfCommands)
 	
 		/// make an ordered/sorted insert of the command at the given position into the list.
 		/// returns true if the operation was successfull, returns false if the new command could not be inserted.
@@ -112,6 +113,10 @@ private:
 		/// returns 'true' if a command with the same type already exists within this list. 
 		/// returns 'false' otherwise.
 		bool contains(CommandType type);
+		
+		friend inline greater_equal(const CommandPoint& lhs, const CommandPoint& rhs){ return lhs.index >= rhs.index;}
+		
+		
 		
 	private:
 		/// returns the first found iterator to an object that has an index that is smaller or equal.
@@ -156,6 +161,10 @@ public:
 	
 	/// The command list is move assignment constructable
 	CommandList& operator=(CommandList&& other) = default;
+	
+	/// constructs the Command List with a sublist of all elements that are 
+	/// within the range of indizes of [pos, pos + count) of other. 
+	CommandList(const CommandList& other, size_type pos, size_type count);
 	
 	/// returns 'true' if the container is empty and 'false' otherwise
 	inline bool empty() const {return this->commands.empty();}
@@ -211,6 +220,9 @@ public:
 		using RawType = typename std::remove_reference<Type>::type;
 		return this->insert(std::make_unique<RawType>(std::forward<Type>(Object)), index);
 	}
+	
+	bool insert(const CommandPoint::list_type& listOfCommands, index);
+	bool insert(CommandPoint::list_type&& listOfCommands, index);
 	
 	/// make an ordered/sorted insert of the command at the given position into the list.
 	/// returns true if the operation was successfull, returns false if the new command could not be inserted.

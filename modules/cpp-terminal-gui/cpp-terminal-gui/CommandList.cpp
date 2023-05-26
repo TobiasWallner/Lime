@@ -34,6 +34,45 @@ bool TermGui::CommandList::CommandPoint::insert(std::unique_ptr<Command>&& pComm
 	}
 }
 	
+bool TermGui::CommandList::CommandPoint::insert(const list_type& listOfCommands){
+	bool result = false;
+	for(const auto& elem : listOfCommands){
+		if(this->commands.empty()){
+			this->commands.push_back(std::make_unique<Command>(*elem)); // copy - malloc
+			result = true;
+		}else{
+			auto itr = this->find_first_smaller_equal_reverse(pCommand->type());
+			if(itr == this->rend()){
+				this->commands.push_front(std::make_unique<Command>(*elem)); // copy - malloc
+				result = true;
+			}else if((*itr)->type() != pCommand->type()){
+				this->commands.insert(itr.base(), std::make_unique<Command>(*elem)); // copy - malloc
+				result = true;
+			}
+		}
+	}
+	return result;
+}
+
+bool TermGui::CommandList::CommandPoint::insert(CommandPoint::list_type&& listOfCommands){
+	bool result = false;
+	for(auto& elem : listOfCommands){
+		if(this->commands.empty()){
+			this->commands.push_back(std::move(elem));
+			result = true;
+		}else{
+			auto itr = this->find_first_smaller_equal_reverse(pCommand->type());
+			if(itr == this->rend()){
+				this->commands.push_front(std::move(elem));
+				result = true;
+			}else if((*itr)->type() != pCommand->type()){
+				this->commands.insert(itr.base(), std::move(elem));
+				result = true;
+			}
+		}
+	}
+	return result;
+}
 	
 bool TermGui::CommandList::CommandPoint::insert_override(std::unique_ptr<Command>&& pCommand){
 	return false;
@@ -59,6 +98,21 @@ TermGui::CommandList::CommandPoint::reverse_iterator TermGui::CommandList::Comma
 
 // ++++++++++++++++++++++++ Command List ++++++++++++++++++++++++
 
+TermGui::CommandList::CommandList(const CommandList& other, size_type pos, size_type count){
+	auto itr = other.cbegin();
+	const auto end = other.cend();
+	// search the first iterator of the copy
+	for(; itr != end && itr->index < pos; ++itr);
+	auto first = itr;
+	
+	// search the end iterat
+	for(; itr != end && itr->index < (pos + count); ++itr);
+	auto last = itr;
+	
+	this->commands.assign(first, last)
+}
+
+
 bool TermGui::CommandList::insert(std::unique_ptr<Command>&& pCommand, size_type index){
 	if(this->commands.empty()){
 		// insert a new/first command point
@@ -81,6 +135,42 @@ bool TermGui::CommandList::insert(std::unique_ptr<Command>&& pCommand, size_type
 		}
 	}
 	
+}
+
+bool TermGui::CommandList::insert(const CommandList::CommandPoint::list_type& listOfCommands, index){
+	if(this->commands.empty()){
+		this->commands.push_back(listOfCommands, index));
+		return true;
+	}else{
+		auto itr = this->find_first_smaller_equal_reverse(index);
+		if(itr->index == index){
+			// insert into existing container with same index
+			const bool result = itr->insert(listOfCommands);
+			return result;
+		}else{
+			// no container with this index exists -> make one
+			this->commands.insert(itr.base(), listOfCommands, index));
+			return true;
+		}
+	}
+}
+
+bool TermGui::CommandList::insert(CommandPoint::list_type&& listOfCommands, index){
+	if(this->commands.empty()){
+		this->commands.push_back(std::move(listOfCommands), index));
+		return true;
+	}else{
+		auto itr = this->find_first_smaller_equal_reverse(index);
+		if(itr->index == index){
+			// insert into existing container with same index
+			const bool result = itr->insert(std::move(listOfCommands));
+			return result;
+		}else{
+			// no container with this index exists -> make one
+			this->commands.insert(itr.base(), std::move(listOfCommands), index));
+			return true;
+		}
+	}
 }
 
 bool TermGui::CommandList::insert_override(std::unique_ptr<Command>&& pCommand, size_type index){
