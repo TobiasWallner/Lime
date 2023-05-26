@@ -7,14 +7,14 @@
 #include <sstream>
 #include <bitset>
 #include <cstring>
+#include <stdlib.h>
 
 #define assert(condition, message) if(!(condition)){ \
 										std::cout << "test failed at line: " << __LINE__ << std::endl; \
 										std::cout << "with message: " << message << std::endl;	\
-										exit(-1); \
+										exit(EXIT_FAILURE); \
 									}
 int main(){
-	
 	{// utf8 identifier test
 		const char* input = "d";
 		const auto length = utf8::identify(input[0]);
@@ -210,5 +210,5 @@ int main(){
 	
 	
 	std::cout << "finished tests" << std::endl;
-	return 0;
+	return EXIT_SUCCESS;
 }

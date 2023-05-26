@@ -252,13 +252,13 @@ public:
 	}
 	
 	/// concattenate two BaseStrings and use the memory of the lhs
-	friend inline BaseString operator+(BaseString&& lhs, const BaseString& rhs){lhs += rhs; return lhs;}
+	friend inline BaseString operator+(BaseString&& lhs, const BaseString& rhs){lhs += rhs; return std::move(lhs);}
 	
 	/// concattenate two BaseStrings and use the memory of the rhs
-	friend inline BaseString operator+(const BaseString& lhs, BaseString&& rhs){rhs.insert(rhs.begin(), lhs.cbegin(), lhs.cend()); return rhs;}
+	friend inline BaseString operator+(const BaseString& lhs, BaseString&& rhs){rhs.insert(rhs.begin(), lhs.cbegin(), lhs.cend()); return std::move(rhs);}
 	
 	/// concattenate two BaseStrings and use the memory of the lhs
-	friend inline BaseString operator+(BaseString&& lhs, BaseString&& rhs){lhs += rhs; return lhs;}
+	friend inline BaseString operator+(BaseString&& lhs, BaseString&& rhs){lhs += rhs; return std::move(lhs);}
 	
 	/// appends this BaseString to the provided std::string
 	inline void append_to(std::string& str) const {for(auto elem : *this) str.append(elem.to_std_string_view());}

@@ -2,39 +2,31 @@ cmake_minimum_required(VERSION 3.22.0)
 
 project(lime)
 
-
 # Basic compiler settings
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
-
 # ----------- dependencies ------------
 set(MODULES_PATH "modules")
 
-add_subdirectory("${MODULES_PATH}/cpp-terminal" "modules/cpp-terminal_build")
+# external dependencies
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # allow to override variables within the CMakeLists.txt of the library
+set(CPPTERMINAL_BUILD_EXAMPLES OFF) # disable building examples
+set(CPPTERMINAL_ENABLE_INSTALL OFF) # disable the installation of the library
+set(CPPTERMINAL_ENABLE_TESTING OFF) # disable the tests of the library ... when running 'ctest' we only want to see our own tests
+add_subdirectory("${MODULES_PATH}/cpp-terminal")
+
+# internal dependencies
+enable_testing() # enable testing for internal libraries
+add_subdirectory("${MODULES_PATH}/utf8_string")
+add_subdirectory("${MODULES_PATH}/cpp-terminal-gui")
 
 # project building process: 
 add_executable(lime
 	main.cpp
 	
-	# utf8_string
-	utf8_string/utf8_char.hpp
-	utf8_string/utf8_string.hpp
-	
 	# lime
 	lime/lime.cpp				lime/lime.hpp
-	
-	# cpp-terminal-gui
-	cpp-terminal-gui/RenderTrait.hpp
-	cpp-terminal-gui/Label.cpp	cpp-terminal-gui/Label.hpp
-	
-)
-
-target_include_directories(lime PUBLIC
-	${MODULES_PATH}/cpp-terminal
-	lime
-	cpp-terminal-gui
-	utf8_string
 )
 
 # Compiler Options for Clang:
@@ -117,5 +109,6 @@ target_compile_options(lime PUBLIC
 
 target_link_libraries(lime PUBLIC
 	cpp-terminal
+	utf8_string
 )
 

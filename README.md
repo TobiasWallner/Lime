@@ -15,6 +15,16 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 
 ## Usage
 
+### download releases
+
+[Download Releases from here.](https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject/releases)
+
+### download source
+
+```
+git clone --recurse-submodules https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject
+```
+
 ### Complilation on Windows
 
 **with MSVC:**
@@ -82,7 +92,20 @@ cmake -S . -B build_gcc -G "Ninja Multi-Config"
 cmake --build build_gcc --config Release --target lime
 ```
 
+### Testing
 
+This Project supports CMake tests using `ctest`.
+In order to run the tests build the project with the flag `--target all`.
+For example:
+```
+cmake --build build_clang --config Release --target all
+```
+
+then go into the build directory like for example with `cd build_clang` and run the command `ctest`.
+CMake will then run all tests of this project. 
+Test of external projects will be turned off and not executed.
+
+Note that MSVC does not have a `--target all`. There if you just remove the `--target ...` command as a whole Visual Studio will build all test executables.
 
 ### Compiled output
 
