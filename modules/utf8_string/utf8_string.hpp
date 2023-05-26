@@ -33,6 +33,7 @@ public:
 	using const_iterator = typename base_class::const_iterator;
 	using reference = typename base_class::reference;
 	using const_reference = typename base_class::const_reference;
+	using allocator = Allocator;
 	
 	/// 1) default constuctor
 	inline BaseString( ) = default;
