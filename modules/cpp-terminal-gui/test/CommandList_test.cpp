@@ -32,30 +32,30 @@ static void consturct_empty_CommandList_is_empty(){
 }
 
 static void consturct_a_ForegroundColor_Command(){
-	TermGui::ForegroundColor forgroundColor(10, 50, 80);
+	TermGui::FgColor forgroundColor(10, 50, 80);
 }
 
 static void consturct_a_BackgroundColor_Command(){
-	TermGui::BackgroundColor backgroundColor(90, 60, 20);
+	TermGui::BgColor backgroundColor(90, 60, 20);
 }
 
 static void insert_a_foreground_color_into_the_command_list(){
 	TermGui::CommandList commandList;
-	TermGui::ForegroundColor forgroundColor(10, 50, 80);
+	TermGui::FgColor forgroundColor(10, 50, 80);
 	const int index = 11;
 	commandList.insert(forgroundColor, index);
 }
 
 static void insert_a_background_color_into_the_command_list(){
 	TermGui::CommandList commandList;
-	TermGui::BackgroundColor backgroundColor(90, 60, 20);
+	TermGui::BgColor backgroundColor(90, 60, 20);
 	const int index = 11;
 	commandList.insert(backgroundColor, index);
 }
 
 static void  insert_into_makes_list_not_empty(){
 	TermGui::CommandList commandList;
-	TermGui::ForegroundColor forgroundColor(10, 50, 80);
+	TermGui::FgColor forgroundColor(10, 50, 80);
 	const int index = 11;
 	commandList.insert(forgroundColor, index);
 	assert(commandList.empty() == false, "command list should not be empty");
@@ -65,7 +65,7 @@ static void  insert_into_makes_list_not_empty(){
 
 static void  insert_3_makes_size_3(){
 	TermGui::CommandList commandList;
-	TermGui::ForegroundColor forgroundColor(10, 50, 80);
+	TermGui::FgColor forgroundColor(10, 50, 80);
 	commandList.insert(forgroundColor, 1);
 	commandList.insert(forgroundColor, 2);
 	commandList.insert(forgroundColor, 3);
@@ -76,8 +76,8 @@ static void  insert_3_makes_size_3(){
 
 static void insert_two_different_commands_into_the_same_index(){
 	TermGui::CommandList commandList;
-	TermGui::ForegroundColor forgroundColor(10, 50, 80);
-	TermGui::BackgroundColor backgroundColor(90, 60, 20);
+	TermGui::FgColor forgroundColor(10, 50, 80);
+	TermGui::BgColor backgroundColor(90, 60, 20);
 	
 	const bool result1 = commandList.insert(forgroundColor, 1);
 	const bool result2 = commandList.insert(backgroundColor, 1);
@@ -92,8 +92,8 @@ static void insert_two_different_commands_into_the_same_index(){
 
 static void insert_two_different_commands_into_the_same_index_v2(){
 	TermGui::CommandList commandList;
-	TermGui::ForegroundColor forgroundColor(10, 50, 80);
-	TermGui::BackgroundColor backgroundColor(90, 60, 20);
+	TermGui::FgColor forgroundColor(10, 50, 80);
+	TermGui::BgColor backgroundColor(90, 60, 20);
 	
 	const bool result1 = commandList.insert(backgroundColor, 1);
 	const bool result2 = commandList.insert(forgroundColor, 1);
@@ -108,8 +108,8 @@ static void insert_two_different_commands_into_the_same_index_v2(){
 
 static void insert_two_similar_commands_into_the_same_index(){
 	TermGui::CommandList commandList;
-	TermGui::ForegroundColor forgroundColor1(10, 50, 80);
-	TermGui::ForegroundColor forgroundColor2(90, 60, 20);
+	TermGui::FgColor forgroundColor1(10, 50, 80);
+	TermGui::FgColor forgroundColor2(90, 60, 20);
 	
 	const bool result1 = commandList.insert(forgroundColor1, 1);
 	const bool result2 = commandList.insert(forgroundColor2, 1);
