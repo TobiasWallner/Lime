@@ -109,7 +109,9 @@ target_compile_options(lime PUBLIC
 
 
 target_link_libraries(lime PUBLIC
-	cpp-terminal
 	utf8_string
+	cpp-terminal
+	cpp-terminal-gui
+	
 )
 
