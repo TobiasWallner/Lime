@@ -4,6 +4,7 @@ add_library(cpp-terminal-gui
 	cpp-terminal-gui/RenderTrait.hpp
 	cpp-terminal-gui/Command.hpp
 	cpp-terminal-gui/CommandList.cpp	cpp-terminal-gui/CommandList.hpp
+	cpp-terminal-gui/ColoredString.cpp	cpp-terminal-gui/ColoredString.hpp
 	cpp-terminal-gui/Label.cpp			cpp-terminal-gui/Label.hpp
 	
 	
