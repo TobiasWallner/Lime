@@ -33,6 +33,7 @@ public:
 	using const_iterator = typename base_class::const_iterator;
 	using reference = typename base_class::reference;
 	using const_reference = typename base_class::const_reference;
+	using allocator = Allocator;
 	
 	/// 1) default constuctor
 	inline BaseString( ) = default;
@@ -84,7 +85,7 @@ public:
 	
 	/// 5.1) assigns a null terminated c-string to the BaseString class
 	/// **throws** an exception if the provided BaseString is not utf8 compliant
-	explicit inline BaseString(const char* c_str, const Allocator& alloc = Allocator()) : BaseString(c_str, c_str + std::strlen(c_str), alloc) /*throws*/ {}
+	explicit inline BaseString(const char* c_str, const Allocator& alloc = Allocator()) : BaseString(c_str, c_str + std::strlen(c_str), alloc) {}
 	
 	/// 6) Constructs the BaseString with the contents of the range [first, last). 
 	template<class InputIt>
@@ -100,22 +101,10 @@ public:
 	}
 	
 	/// 9) Constructs the BaseString with the contents of the initializer list ilist
-	BaseString(std::initializer_list<CharT> ilist, const Allocator& alloc = Allocator()) : base_class(ilist, alloc){}
+	inline BaseString(std::initializer_list<CharT> ilist, const Allocator& alloc = Allocator()) : base_class(ilist, alloc){}
 	
 	/// 9.1) Constructs the BaseString with the contents of the initializer list ilist
-	BaseString(std::initializer_list<char> ilist, const Allocator& alloc = Allocator()) : BaseString(alloc){this->append(ilist);}
-	
-	/// 10) Implicitly converts t to a BaseString view sv as if by std::basic_string_view<CharT, Traits> sv = t;, 
-	/// then initializes the BaseString with the contents of sv, as if by basic_string(sv.data(), sv.size(), alloc). 
-	/// This overload participates in overload resolution only if 
-	/// std::is_convertible_v<const StringViewLike&, std::basic_string_view<CharT, Traits>> 
-	/// is true and std::is_convertible_v<const StringViewLike&, const CharT*> is false
-	template <class StringViewLike>
-	explicit inline BaseString(const StringViewLike& t, const Allocator& alloc = Allocator()) : base_class(t, alloc){}
-	
-	/// 10.1) Construct from a std::basic_string_view<utf8::Char, ...>
-	template<class _Traits = std::char_traits<CharT>>
-	explicit inline BaseString(std::basic_string_view<CharT, _Traits> strv, const Allocator& alloc = Allocator()) : BaseString(strv.cbegin(), strv.cend(), alloc){}
+	inline BaseString(std::initializer_list<char> ilist, const Allocator& alloc = Allocator()) : BaseString() {this->append(ilist);}
 	
 	/// 10.2) Construct from a std::string_view
 	explicit inline BaseString(std::string_view strv, const Allocator& alloc = Allocator()) : BaseString(strv.cbegin(), strv.cend(), alloc){}
@@ -157,7 +146,7 @@ public:
 	}
 	
 	template<class CharItr>
-	 BaseString& append(CharItr first, CharItr last){return this->_append(first, last);}
+	BaseString& append(CharItr first, CharItr last){return this->_append(first, last);}
 	
 	/// appends the provided ranged c-string to this BaseString
 	inline BaseString& append(const BaseString& str){this->base_class::append(str); return *this;}
@@ -208,6 +197,7 @@ public:
 	
 	
 	/// appends one given character or BaseString to this BaseString
+	inline BaseString& operator+=(Char c){return this->append(c);}
 	inline BaseString& operator+=(const BaseString& str){return this->append(str);}
 	inline BaseString& operator+=(char c){return this->append(c);}
 	inline BaseString& operator+=(const char* first){return this->append(first);}
@@ -228,6 +218,7 @@ public:
 	inline BaseString& assign(const BaseString& str){this->operator=(str); return *this;}
 	inline BaseString& assign(BaseString&& str){this->operator=(std::move(str)); return *this;}
 	inline BaseString& assign(char c){this->clear(); return this->append(c);}
+	inline BaseString& assign(Char c){this->clear(); return this->append(c);}
 	inline BaseString& assign(const char* str){this->clear(); return this->append(str);}
 	inline BaseString& assign(const char* first, const char* last){this->clear(); return this->append(first, last);}
 	inline BaseString& assign(const char* first, size_type n){this->clear(); return this->append(first, n);}

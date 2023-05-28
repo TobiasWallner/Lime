@@ -2,9 +2,13 @@
 
 // C++ std
 #include <string>
+#include <memory>
 
 // Project
 #include "RenderTrait.hpp"
+
+//cpp-terminal
+#include <cpp-terminal\color.hpp>
 
 namespace TermGui{
 
@@ -14,7 +18,8 @@ namespace TermGui{
 	the following class 'Command'.
 */
 enum class CommandType{
-	ForgroundColour,
+	forgroundColor,
+	backgroundColor,
 };
 
 /**
@@ -27,23 +32,62 @@ enum class CommandType{
 	
 */
 class Command : public RenderTrait{
-private:
-	const CommandType _type;
 public:
 
-	/// The default constructor of this class is deleted - cannot default construct this class
-	CommandType() = delete;
+	/// default constructable
+	Command() = default;
 	
 	virtual ~Command(){}
 	
-	/// One may only construct an instance of this class by telling it its Command type
-	explicit constexpr inline CommandType(CommandType type) : _type(type) {}
-	
 	/// The derived call has to specifiy how the specific Command gets rendered to a string command for the terminal
-	virtual render(std::string& outputString) = 0;
+	virtual void render(std::string& outputString) const override = 0;
+	
+	virtual std::unique_ptr<Command> make_unique_copy() const = 0;
 	
 	/// returns the command type (enum)
-	constexpr inline CommandType type(){ return this->_type;}
+	virtual CommandType type() const = 0;
+};
+
+
+//
+// +++++++++++++++++++ Below is the list of basic commands ++++++++++++++++++++
+//
+
+/// The forground color is a command that can be put in a command list and will then be executed by the list
+class FgColor : public Command{
+private:
+	Term::Color _color;
+	
+public:
+	inline FgColor(Term::Color color) : _color(color){}
+	inline FgColor(Term::Color::Name colorName) : _color(colorName){}
+	inline FgColor(std::uint8_t value) :  _color(value){}
+	inline FgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, blue, green){}
+	
+	inline void render(std::string& outputString) const override {outputString.append(Term::color_fg(this->_color));}
+	inline CommandType type() const override {return CommandType::forgroundColor;}
+	
+	virtual inline std::unique_ptr<Command> make_unique_copy() const override {
+		return std::make_unique<FgColor>(*this);
+	}
+};
+
+class BgColor : public Command{
+private:
+	Term::Color _color;
+	
+public:
+	inline BgColor(Term::Color color) : _color(color){}
+	inline BgColor(Term::Color::Name colorName) : _color(colorName){}
+	inline BgColor(std::uint8_t value) : _color(value){}
+	inline BgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, blue, green){}
+	
+	inline void render(std::string& outputString) const override {outputString.append(Term::color_bg(this->_color));}
+	inline CommandType type() const override {return CommandType::backgroundColor;}
+	
+	virtual inline std::unique_ptr<Command> make_unique_copy() const override {
+		return std::make_unique<BgColor>(*this);
+	}
 };
 
 }

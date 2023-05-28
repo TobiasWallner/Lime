@@ -60,6 +60,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		$<$<CONFIG:Debug>:
 			-O0	# disable optimisations
 			-g	# enable debug information
+			-ggdb # extra flag for the debugger
 		>
 		
 		# set compiler flags for release
@@ -108,7 +109,9 @@ target_compile_options(lime PUBLIC
 
 
 target_link_libraries(lime PUBLIC
-	cpp-terminal
 	utf8_string
+	cpp-terminal
+	cpp-terminal-gui
+	
 )
 
