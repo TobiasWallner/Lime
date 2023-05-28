@@ -28,7 +28,7 @@ class RenderTrait{
 		
 		The offset positions the label on the screen
 	*/
-	virtual void render(std::string& output_string) const = 0;
+	virtual void render(std::string& outputString) const = 0;
 
 };
 
