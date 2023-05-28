@@ -127,7 +127,7 @@ public:
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first, CharItr last){
 		const auto identifier = identify(*first);
-		if(identifier == Identifier::Unsupported | identifier == Identifier::NotFirst){
+		if((identifier == Identifier::Unsupported) | (identifier == Identifier::NotFirst)){
 			return first;
 		}else{
 			const auto length = static_cast<size_type>(identifier);
@@ -143,7 +143,7 @@ public:
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first){
 		const auto identifier = identify(*first);
-		if(identifier == Identifier::Unsupported | identifier == Identifier::NotFirst){
+		if((identifier == Identifier::Unsupported) | (identifier == Identifier::NotFirst)){
 			return first;
 		}else{
 			const auto length = static_cast<size_type>(identifier);

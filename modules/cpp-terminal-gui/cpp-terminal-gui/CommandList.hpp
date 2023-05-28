@@ -50,17 +50,29 @@ public:
 		// change if the string that it is connected to changes in lenght
 		size_type index; 		// the index at which the command should be executed
 		
+		/// The command list is copy constructable
+		inline CommandPoint(const CommandPoint& other){
+			this->index = other.index;
+			for(auto itr = other.cbegin(); itr != other.cend(); ++itr) this->commands.push_back((*itr)->make_unique_copy());
+		}
+		
+		/// The command list is move constructable
+		explicit inline CommandPoint(CommandPoint&& other) = default;
+		
 		/// constructs a command point from a Command and the given index
 		CommandPoint(std::unique_ptr<Command>&& pCommand, size_type index);
 		
-		/// The command list is copy constructable
-		CommandPoint(const CommandPoint& other) = default;
-		
-		/// The command list is move constructable
-		CommandPoint(CommandPoint&& other) = default;
+		CommandPoint(const list_type& list, size_type index);
+		inline CommandPoint(list_type&& list, size_type index) : commands(std::move(list)), index(index){}
 		
 		/// The command list is copy constructable
-		CommandPoint& operator=(const CommandPoint& other) = default;
+		inline CommandPoint& operator=(const CommandPoint& other){
+			if(this != &other){
+				this->index = other.index;
+				this->assign(other.cbegin(), other.cend());
+			}
+			return *this;
+		}
 		
 		/// The command list is move assignment constructable
 		CommandPoint& operator=(CommandPoint&& other) = default;
@@ -96,6 +108,11 @@ public:
 		inline const_reverse_iterator rend() const {return this->commands.rend();}
 		inline const_reverse_iterator rcend() const {return this->commands.crend();}
 		
+		inline void assign(const_iterator first, const_iterator last){ 
+			this->commands.clear(); 
+			for(; first != last; ++first) this->commands.push_back((*first)->make_unique_copy());
+		}
+		
 		/// make an ordered/sorted insert of the command at the given position into the list.
 		/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 		/// note that the simple insert will not override existing commands and would return false in that case
@@ -103,20 +120,22 @@ public:
 		
 		/// returns true if this list has changed due to this insertions
 		/// returns false if this list has changed unchanged
-		bool insert(const list_type& listOfCommands)
+		bool insert(const list_type& listOfCommands);
+		bool insert(list_type&& listOfCommands);
 	
 		/// make an ordered/sorted insert of the command at the given position into the list.
 		/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 		/// note that this command will override an existing command and would return true in that case
+		bool insert_override(const Command& pCommand);
 		bool insert_override(std::unique_ptr<Command>&& pCommand);
 		
 		/// returns 'true' if a command with the same type already exists within this list. 
 		/// returns 'false' otherwise.
 		bool contains(CommandType type);
 		
-		friend inline greater_equal(const CommandPoint& lhs, const CommandPoint& rhs){ return lhs.index >= rhs.index;}
+		friend inline bool greater_equal(const CommandPoint& lhs, const CommandPoint& rhs){ return lhs.index >= rhs.index;}
 		
-		inline void render(std::string& outputString) const override { for(const auto& elem : this->commands) elem.render(outputString);}
+		inline void render(std::string& outputString) const override { for(const auto& elem : this->commands) elem->render(outputString);}
 		
 	private:
 		/// returns the first found iterator to an object that has an index that is smaller or equal.
@@ -150,13 +169,13 @@ public:
 	/// default construction of an empty list
 	CommandList() = default;
 	
-	/// The command list is copy constructable
+	/// The command list is not copy constructable
 	CommandList(const CommandList& other) = default;
 	
 	/// The command list is move constructable
 	CommandList(CommandList&& other) = default;
 	
-	/// The command list is copy constructable
+	/// The command list is copy not constructable
 	CommandList& operator=(const CommandList& other) = default;
 	
 	/// The command list is move assignment constructable
@@ -171,6 +190,8 @@ public:
 	
 	/// returns the number of different indizes 
 	inline size_type size() const {return this->commands.size();}
+	
+	inline void clear() {this->commands.clear();}
 	
 	/// returns an iterator to the beginning of the list aka the first element
 	inline iterator begin(){return this->commands.begin();}
@@ -202,10 +223,30 @@ public:
 	inline reference back(){return this->commands.back();}
 	inline const_reference back() const {return this->commands.back();}
 	
+	inline void assign(std::unique_ptr<Command>&& pCommand){
+		this->commands.clear(); 
+		this->commands.push_back(CommandPoint(std::move(pCommand), 0));
+	}
+	
+	inline void assign(const Command& command){this->assign(command.make_unique_copy());}
+	
+	template<class C>
+	inline void assign(std::unique_ptr<C>&& pCommand){
+		return this->assign(static_cast<std::unique_ptr<Command>>(std::move(pCommand)));
+	}
+	
+	template<class Type>
+	inline void assign(Type&& Object){
+		using RawType = typename std::remove_reference<Type>::type;
+		return this->assign(std::make_unique<RawType>(std::forward<Type>(Object)));
+	}
+	
 	/// make an ordered/sorted insert of the command at the given position into the list.
 	/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 	/// note that the simple insert will not override existing commands and would return false in that case
 	bool insert(std::unique_ptr<Command>&& pCommand, size_type index);
+	
+	inline void insert(const Command& command, size_type index){this->insert(command.make_unique_copy(), index);}
 	
 	/// wrapper for derived classes
 	template<class C>
@@ -221,8 +262,8 @@ public:
 		return this->insert(std::make_unique<RawType>(std::forward<Type>(Object)), index);
 	}
 	
-	bool insert(const CommandPoint::list_type& listOfCommands, index);
-	bool insert(CommandPoint::list_type&& listOfCommands, index);
+	bool insert(const CommandPoint::list_type& listOfCommands, size_type index);
+	bool insert(CommandPoint::list_type&& listOfCommands, size_type index);
 	
 	/// make an ordered/sorted insert of the command at the given position into the list.
 	/// returns true if the operation was successfull, returns false if the new command could not be inserted.
