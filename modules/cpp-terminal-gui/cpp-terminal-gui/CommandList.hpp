@@ -27,7 +27,7 @@ public:
 	/// Each CommandPoint can only ever have one of each command types. 
 	/// Commands will be stored in ascending order according to the enum of the command types.
 	/// Commands will be executed in ascending order according to their enum.
-	class CommandPoint{
+	class CommandPoint : RenderTrait{
 	public:
 		using list_type =  std::list<std::unique_ptr<Command>>;
 		using size_type = list_type::size_type;
@@ -116,7 +116,7 @@ public:
 		
 		friend inline greater_equal(const CommandPoint& lhs, const CommandPoint& rhs){ return lhs.index >= rhs.index;}
 		
-		
+		inline void render(std::string& outputString) const override { for(const auto& elem : this->commands) elem.render(outputString);}
 		
 	private:
 		/// returns the first found iterator to an object that has an index that is smaller or equal.
