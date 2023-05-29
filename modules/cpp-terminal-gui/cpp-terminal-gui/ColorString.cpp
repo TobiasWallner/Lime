@@ -47,3 +47,21 @@ void TermGui::ColorString::render(std::string& outputString) const {
 		outputString += stringItr->to_std_string_view();
 	}
 }
+
+TermGui::ColorString& TermGui::ColorString::insert(size_type index, utf8::Char c){
+	this->_string.insert(index, c);
+	
+	auto itr = this->_commands.begin();
+	const auto end = this->_commands.end();
+	for(; itr != end; ++itr){
+		if(itr->index >= index){
+			break;	
+		}
+	}
+	
+	for(; itr != end; ++itr){
+		++itr->index;
+	}
+	
+	return *this;
+}
