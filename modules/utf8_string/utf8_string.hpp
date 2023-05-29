@@ -246,7 +246,7 @@ public:
 	friend inline BaseString operator+(BaseString&& lhs, const BaseString& rhs){lhs += rhs; return std::move(lhs);}
 	
 	/// concattenate two BaseStrings and use the memory of the rhs
-	friend inline BaseString operator+(const BaseString& lhs, BaseString&& rhs){rhs.insert(rhs.begin(), lhs.cbegin(), lhs.cend()); return std::move(rhs);}
+	friend inline BaseString operator+(const BaseString& lhs, BaseString&& rhs){rhs.base_class::insert(rhs.begin(), lhs.cbegin(), lhs.cend()); return std::move(rhs);}
 	
 	/// concattenate two BaseStrings and use the memory of the lhs
 	friend inline BaseString operator+(BaseString&& lhs, BaseString&& rhs){lhs += rhs; return std::move(lhs);}
@@ -277,6 +277,9 @@ public:
 		}
 		return stream;
 	}
+	
+	inline BaseString& insert(size_type index, Char c){this->base_class::insert(index, 1, c); return *this;}
+	inline BaseString& insert(size_type index, char c){this->base_class::insert(index, 1, Char(c)); return *this;}
 
 };
 
