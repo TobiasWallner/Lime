@@ -112,6 +112,10 @@ public:
 	ColorString& append(const ColorString& other);
 	ColorString& append(ColorString&& other);
 	
+	/// moves the content from the other string in range [pos, n + pos) to this string
+	/// not that the other strings content in that range will be erased
+	ColorString& move_append(ColorString& other, size_type pos, size_type n);
+	
 	
 	/// append to the ColorString as you would append to the underlying string type
 	template<class CharItr>

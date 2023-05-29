@@ -20,6 +20,32 @@ TermGui::ColorString& TermGui::ColorString::append(TermGui::ColorString&& other)
 	return *this;
 }
 
+TermGui::ColorString& TermGui::ColorString::move_append(TermGui::ColorString& other, TermGui::ColorString::size_type pos, TermGui::ColorString::size_type n){
+	const auto thisOldSize = this->size();
+	this->_string.append(other._string, pos, n);
+	other._string.erase(pos, n);
+	
+	auto commandItr = this->_commands.begin();
+	const auto commandEnd = this->_commands.end();
+	for(; commandItr != commandEnd; ++commandItr){
+		if(commandItr->index >= pos){
+			break;
+		}
+	}
+	
+	const auto moveStart = commandItr;
+	for(; commandItr != commandEnd; ++commandItr){
+		if(commandItr->index >= (pos + n)){
+			break;
+		}
+		this->_commands.insert(std::move(commandItr->commands), commandItr->index - pos + thisOldSize);
+	}
+	
+	this->_commands.erase(moveStart, commandItr);
+	
+	return *this;
+}
+
 void TermGui::ColorString::render(std::string& outputString) const {
 	auto commandItr = this->_commands.cbegin(); // start of the commands
 	const auto commandEnd = this->_commands.cend(); // end of the commands
