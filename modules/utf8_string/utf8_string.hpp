@@ -150,6 +150,7 @@ public:
 	
 	/// appends the provided ranged c-string to this BaseString
 	inline BaseString& append(const BaseString& str){this->base_class::append(str); return *this;}
+	inline BaseString& append(const BaseString& str, size_type pos, size_type n){this->base_class::append(str, pos, n); return *this;}
 	inline BaseString& append(Char c){this->base_class::push_back(c); return *this;}
 	inline BaseString& append(char c){this->base_class::push_back(Char(c)); return *this;}
 	inline BaseString& append(const char* first){return this->_append(first, first + std::strlen(first));}
