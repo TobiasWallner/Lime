@@ -11,6 +11,7 @@
 #include <utf8_string.hpp>
 
 #include "ColorString.hpp"
+#include "RenderTrait.hpp"
 
 namespace TermGui{
 	
@@ -74,6 +75,20 @@ public:
 	const_reverse_iterator rend() const {return this->_text.crend();}
 	const_reverse_iterator crend() const {return this->_text.crend();}
 	
+	inline reference front(){return this->_text.front();}
+	inline const_reference front() const {return this->_text.front();}
+	inline const_reference cfront() const {return this->_text.front();}
+	
+	inline reference back(){return this->_text.back();}
+	inline const_reference back() const {return this->_text.back();}
+	inline const_reference cback() const {return this->_text.back();}
+	
+	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
+	inline size_type number_of_lines(){return this->_text.size();}
+	
+	/// returns the size of the current line
+	inline size_type line_size(){return this->lineItr()->size();}
+	
 	/// inserts a character at the current cursor position into the string
 	void insert(utf8::Char c);
 	
@@ -84,26 +99,87 @@ public:
 	/// returns true is the string could be read as utf8, returns false otherwise
 	bool insert(const char*);
 	
+	/// inserts a new line after the current cursor position
+	inline void insert_line_after(){
+		auto itr = this->lineItr();
+		++itr;
+		this->_text.insert(itr, Line());
+	}
+	
+	/// inserts a new line after the current one and moves the cursor to the beginning
+	/// of the inserted line
+	inline void insert_move_line_after(){
+		this->insert_line_after();
+		++this->_cursor.lineNumber;
+		++this->_cursor.lineIterator;
+		this->_cursor.columnNumber = 0;
+	}
+	
+	/// inserts a new line before the current cursor position
+	inline void insert_line_before(){this->_text.insert(this->lineItr(), Line());}
+	
 	
 	/// returns the line position of the cursor
-	inline size_type get_line() const {return this->_cursor.lineNumber;}
+	inline size_type line_number() const {return this->_cursor.lineNumber;}
 	
 	/// returns the column position of the cursor in the line
-	inline size_type get_column() const {return this->_cursor.columnNumber;}
+	inline size_type column_number() const {return this->_cursor.columnNumber;}
 	
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
-	void move_right();
-
-	inline bool is_start_of_line() const {return this->get_column() == 0;}
-
-	inline bool is_end_of_line() const {return this->get_column() == this->lineItr()->size();}
+	void move_forward();
 	
+	/// moves forward n times
+	inline void move_forward(size_type n){for(size_type i = 0; i < n; ++i) move_forward();}
+	
+	/// moves the cursor to the left, aka. decreases the column by one.
+	/// if the cursot is at the beginning of the file -> moves the cursor to the end of the previous line
+	void move_back();
+	
+	/// moves backward n times
+	inline void move_back(size_type n){for(size_type i = 0; i < n; ++i) move_back();}
+	
+	/// moves the cursor up one line, aka. decreases the line number and iterator
+	/// if at the beginning of the file-> does nothing
+	/// if at the first line -> moves to the beginning of the file
+	/// if the column is larger than the line size of the line above -> places cursor at the end of the line
+	void move_up();
+	
+	/// moves up n times
+	inline void move_up(size_type n){for(size_type i = 0; i < n; ++i) move_up();}
+	
+	/// moves the cursor down a line, aka. advances the line number and line iterator by one
+	/// if the cursor is already at the last line -> moves the cursor to the end of the line / end of file
+	/// if the column is greater than the column of the next line -> moves the cursor to the end of that line
+	void move_down();
+	
+	/// moves down n times
+	inline void move_down(size_type n){for(size_type i = 0; i < n; ++i) move_down();}
+	
+	/// moves the cursor to the start of the line
+	inline void move_to_start_of_line(){this->_cursor.columnNumber = 0;}
+	
+	/// moves the cursor to the end of the line;
+	inline void move_to_end_of_line(){this->_cursor.columnNumber = this->lineItr()->size();}
+	
+	/// returns true if the cursor is at the start of the current line and false otherwise
+	inline bool is_start_of_line() const {return this->column_number() == 0;}
+	
+	/// returns true if the cusor is located somewhere in the first line and false otherwise
+	inline bool is_first_line() const {return this->line_number() == 0;}
+	
+	/// returs true if the cursor is located at the very start of the file before the first caracter
+	inline bool is_start_of_file() const {return this->is_first_line() && this->is_start_of_line();}
+
+	/// returns true if the cursor is located at the very end of the current line
+	inline bool is_end_of_line() const {return this->column_number() == this->lineItr()->size();}
+	
+	/// return true if the cursor is located somewhere in the last line
 	inline bool is_last_line() const {return this->lineItr() == this->last();}
-
-	inline bool is_end_of_file() const { return this->is_last_line() && this->is_end_of_line(); }
 	
+	/// returns true if the cursor is located at the very end of the last line 
+	inline bool is_end_of_file() const { return this->is_last_line() && this->is_end_of_line(); }
 	
 private:
 
