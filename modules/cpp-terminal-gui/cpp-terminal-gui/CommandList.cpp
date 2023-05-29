@@ -128,6 +128,35 @@ TermGui::CommandList::CommandList(const TermGui::CommandList& other,
 	this->commands.assign(first, last);
 }
 
+void TermGui::CommandList::erase(TermGui::CommandList::size_type index){
+	auto itr = this->begin();
+	const auto end = this->end();
+	for(; itr != this->end(); ++itr){
+		if(itr->index == index){
+			this->commands.erase(itr);
+			return;
+		}
+	}
+}
+
+void TermGui::CommandList::erase(TermGui::CommandList::size_type index_from, TermGui::CommandList::size_type index_to){
+	auto itr = this->begin();
+	for(; itr != this->end(); ++itr){
+		if(itr->index >= index_from){
+			break;
+		}
+	}
+	
+	for(; itr != this->end(); ++itr){
+		if(itr->index >= index_to){
+			break;
+		}else{
+			auto copy = itr;
+			--itr;
+			this->commands.erase(copy);
+		}
+	}
+}
 
 bool TermGui::CommandList::insert(std::unique_ptr<Command>&& pCommand, size_type index){
 	if(this->commands.empty()){
