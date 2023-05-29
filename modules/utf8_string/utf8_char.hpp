@@ -140,6 +140,7 @@ public:
 	
 	/// reads the first utf8 character and stores it in the character
 	/// returns the iterator to the next character after that.
+	/// returns the same iterator if the character is not a valid utf8 character
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first){
 		const auto identifier = identify(static_cast<char>(*first));
