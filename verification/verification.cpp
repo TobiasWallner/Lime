@@ -17,6 +17,18 @@ int writeToFile(std::filesystem::path& path, const std::string& filename, std::s
     return 0;
 }
 
+std::string_view readFile(std::filesystem::path& path, const std::string& filename){
+    std::ifstream file;
+    std::string file_content;
+    file.open(path / filename);
+    if(file.is_open()){
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        file_content = buffer.str();
+    }
+    file.close();
+    return file_content;
+}
 
 
 struct Folders{
@@ -145,15 +157,7 @@ int testFunction(const std::string& filename, std::string_view content){
     }
     
 
-    std::ifstream file;
-    std::string file_content;
-    file.open(f.verified / filename);
-    if(file.is_open()){
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        file_content = buffer.str();
-    }
-    file.close();
+    std::string_view file_content = readFile(f.verified, filename);
 
     bool result = isEqual(file_content, content);
 
@@ -166,7 +170,7 @@ int testFunction(const std::string& filename, std::string_view content){
         return 0;
     }
 
-    std::cout << "File: " << filename << " in verified is to input" << std::endl;
+    std::cout << "File: " << filename << " in verified is equal to input" << std::endl;
     return 0;
 }
 
@@ -175,10 +179,27 @@ int testFunction(const std::string& filename, std::string_view content){
 int main(int argc, char *argv[]){
 
 
-    testFunction("testing.txt", "Content1234");
+    std::string filename =  "test";
+    std::string content = "ContentTest1234";
+
+    //See if the required number of arguments is given and that the file for the arguments is used. 
+
+    std::cout << argc << std::endl;
+    if(argc == 3){
+        
+        std::filesystem::path currPath = std::filesystem::current_path();
+        std::cout << currPath / argv[2] << std::endl;
+
+        if(checkIfFileInFolder(currPath / argv[2])){
+            std::cout << argv[1] << std::endl << argv[2] <<std::endl;
+            filename = argv[1];
+            content = readFile(currPath, argv[2]);
+        }
+    }
+    std::cout << content << std::endl;
+    testFunction(filename, content);
 
     return 0;
-
 
 }
 
