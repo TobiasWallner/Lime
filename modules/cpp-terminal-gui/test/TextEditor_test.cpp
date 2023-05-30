@@ -19,11 +19,11 @@
 									
 #define assert_expected(variable_under_test, expected_value) \
 			if(!((variable_under_test) == (expected_value))){ \
-				std::cout << "test failed in file: " << __FILE__ << std::endl; \
-				std::cout << "in function: " << __FUNCTION__ << std::endl; \
-				std::cout << "at line: " << __LINE__ << std::endl; \
-				std::cout << "failed: " << #variable_under_test << " == " << #expected_value << std::endl;\
-				std::cout << "expected: " << #variable_under_test << " == " << (expected_value) << ", but got: " << #variable_under_test " = " << (variable_under_test) << std::endl;	\
+				std::cout << "test failed in file: " << __FILE__ << '\n'; \
+				std::cout << "in function: " << __FUNCTION__ << '\n'; \
+				std::cout << "at line: " << __LINE__ << '\n'; \
+				std::cout << "failed: " << #variable_under_test << " == " << #expected_value << '\n';\
+				std::cout << "expected: " << #variable_under_test << " == " << (expected_value) << ", but got: " << #variable_under_test " = " << (variable_under_test) << '\n' << std::endl;	\
 				exit(EXIT_FAILURE); \
 			}
 									
