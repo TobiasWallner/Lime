@@ -22,6 +22,9 @@
 #include <cpp-terminal/tty.hpp>
 #include <cpp-terminal/event.hpp>
 
+// cpp-terminal-gui
+#include <cpp-terminal-gui/ColorString.hpp>
+
 
 int Lime::run(){
 	
@@ -42,7 +45,18 @@ int Lime::run(){
 			Term::Option::Raw			// get the raw and unprozessed io data from the console buffers
 	);
 	
+	
+	
 	// Entering the Program loop: get inputs -> prozess inputs -> display/save changes
+	
+	TermGui::ColorString colorString("This ");
+		colorString << TermGui::FgColor(255, 0, 0) << "is " << TermGui::FgColor(0, 255, 0) << "the " << TermGui::BgColor(255, 0, 255) << " Lime" << TermGui::FgColor(255, 255, 255) << TermGui::BgColor(0, 0, 0) << "Editor";
+	
+	std::string outputString;
+	colorString.render(outputString);
+	
+	std::cout << outputString << std::endl;
+	
 	this->run_main_loop();
 	
 	return EXIT_SUCCESS;
