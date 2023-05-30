@@ -2,3 +2,7 @@ build*
 Testing/
 test_all.bat
 .vscode*
+
+Verification/*
+!Verification/verification.cpp
+!Verification/readme.md

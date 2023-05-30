@@ -27,7 +27,21 @@ struct Folders{
     Folders(std::filesystem::path currPath) {
         std::vector<std::string> folders{"Verified", "Error", "New"};
  
-        for (const auto& dirEntry : std::filesystem::directory_iterator(currPath)){
+
+        if(this->verified.empty()){
+            std::cout << "Verified folder does not exist creating folder" <<std::endl;
+            std::filesystem::create_directory(currPath / "Verified");
+        }
+        if(this->error.empty()){
+            std::cout << "Error folder does not exist, creating folder" << std::endl;
+            std::filesystem::create_directory(currPath / "Error");
+        }
+        if(this->n.empty()){
+            std::cout << "New folder does not exist, creating folder" << std::endl;
+            std::filesystem::create_directory(currPath / "New");
+        }
+
+         for (const auto& dirEntry : std::filesystem::directory_iterator(currPath)){
             if(currPath / folders[0] == dirEntry.path()){
                 this->verified = dirEntry.path();
                 continue;
@@ -40,18 +54,8 @@ struct Folders{
             }
         }
 
-        if(this->verified.empty()){
-            std::cout << "Verified folder does not exist creating folder" <<std::endl;
-            std::filesystem::create_directory(currPath / "Verified");
-        }
-        if(this->error.empty()){
-            std::cout << "Error folder does not exist, creating folder" << std::endl;
-            std::filesystem::create_directory(currPath / "Error");
-        }
-        if(this->n.empty()){
-            std::cout << "Error folder does not exist, creating folder" << std::endl;
-            std::filesystem::create_directory(currPath / "New");
-        }
+
+
     }
 
     bool folderEmpty(std::filesystem::path folder){
@@ -121,6 +125,8 @@ int testFunction(const std::string& filename, std::string_view content){
    
     std::filesystem::path currPath = std::filesystem::current_path();
     Folders f(currPath);
+
+
     // Check if folders exist in current folder
     if(f.folderEmpty(f.verified)){
         std::cout << "Folder vertified do not exist or is empty, new file generated." << std::endl;
