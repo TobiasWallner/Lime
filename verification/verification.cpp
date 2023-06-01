@@ -1,205 +1,165 @@
 
-#include <iostream>
-#include <string_view>
-#include <fstream>
-#include <Windows.h>
-#include <regex>
-#include <string>
-#include <filesystem>
+// TODO (Sondre): make a header file for this source file
+#include "verification.hpp"
 
-int writeToFile(std::filesystem::path& path, const std::string& filename, std::string_view content){
-    std::ofstream file(path / filename);
 
-    file << std::string(content);
 
-    file.close();
+Folders::Folders(const std::filesystem::path& currPath) : verified(currPath / "Verified"), error(currPath / "Error"), new_output(currPath / "New") {
+    
+    if(this->verified.empty()){
+        std::cout << "Verified folder does not exist creating folder" <<std::endl;
+        std::filesystem::create_directory(currPath / "Verified"); // Why did you not use the variable folders here if you created it extra? (leave this as it is)
+    }
+    if(this->error.empty()){
+        std::cout << "Error folder does not exist, creating folder" << std::endl;
+        std::filesystem::create_directory(currPath / "Error");
+    }
+    if(this->new_output.empty()){
+        std::cout << "New folder does not exist, creating folder" << std::endl;
+        std::filesystem::create_directory(currPath / "New");
+    }
 
-    return 0;
 }
 
-std::string_view readFile(std::filesystem::path& path, const std::string& filename){
+// TODO(Sondre): add descriptions
+// TODO(Sondre): this function does not change any state -> make this function 'const'
+const bool folderEmpty(std::filesystem::path folder){
+    return std::filesystem::is_empty(folder);
+}
+
+
+const bool Folders::verifiedEmpty(){return std::filesystem::is_empty(this->verified);}
+const bool Folders::errorEmpty(){return std::filesystem::is_empty(this->error);}
+const bool Folders::newEmpty(){return std::filesystem::is_empty(this->new_output);}
+const bool Folders::doesFileInVerifiedExist(const std::string& filename){return doesFileExist(this->verified / filename);}
+const bool Folders::doesFileInErrorExist(const std::string& filename){return doesFileExist(this->error / filename);}
+const bool Folders::doesFileInNewExist(const std::string& filename){return doesFileExist(this->new_output / filename);}
+
+
+const bool Folders::removeErrorFile(const std::string& filename){return std::filesystem::remove(this->error / filename);}
+
+
+std::stringstream Folders::getContentOfVerifiedFile(const std::string& filename){
     std::ifstream file;
-    std::string file_content;
-    file.open(path / filename);
+    std::stringstream file_content; // TODO (Sondre): replace this with the std::stringstream
+    file.open(this->verified / filename);
     if(file.is_open()){
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        file_content = buffer.str();
+        file_content << file.rdbuf();
     }
     file.close();
     return file_content;
 }
 
-
-struct Folders{
-    std::filesystem::path verified;
-    std::filesystem::path error;
-    std::filesystem::path n;
-
-    Folders(std::filesystem::path currPath) {
-        std::vector<std::string> folders{"Verified", "Error", "New"};
- 
-
-        if(this->verified.empty()){
-            std::cout << "Verified folder does not exist creating folder" <<std::endl;
-            std::filesystem::create_directory(currPath / "Verified");
-        }
-        if(this->error.empty()){
-            std::cout << "Error folder does not exist, creating folder" << std::endl;
-            std::filesystem::create_directory(currPath / "Error");
-        }
-        if(this->n.empty()){
-            std::cout << "New folder does not exist, creating folder" << std::endl;
-            std::filesystem::create_directory(currPath / "New");
-        }
-
-         for (const auto& dirEntry : std::filesystem::directory_iterator(currPath)){
-            if(currPath / folders[0] == dirEntry.path()){
-                this->verified = dirEntry.path();
-                continue;
-            }else if(currPath / folders[1] == dirEntry.path()){
-                this->error = dirEntry.path();
-                continue;
-            }else if(currPath / folders[2] == dirEntry.path()){
-                this->n = dirEntry.path();
-                continue;
-            }
-        }
-
-
-
-    }
-
-    bool folderEmpty(std::filesystem::path folder){
-        return std::filesystem::is_empty(folder);
-    }
-
-    int writeNew(const std::string& filename, std::string_view content){
-        return writeToFile(this->n, filename, content);
-        
-    }
-
-    int writeError(const std::string& filename, std::string_view content){
-        return writeToFile(this->error, filename, content);
-    }
-
-    bool all(){
-        if(this->verified.empty() || this->error.empty() || this->n.empty()){
-            return false;
-        }else{
-            return true;
-        }
-    }
-
-    std::vector<std::string> empty(){
-        std::vector<std::string> out;
-
-        if(this->verified.empty())
-            out.push_back("Verified");
-        if(this->error.empty())
-            out.push_back("Error");
-        if(this->n.empty())
-            out.push_back("New");
-
-        return out;
-    }
-
-
-} ;
-
-
-
-void listFiles(std::string &path){
-    for(const auto & entry : std::filesystem::directory_iterator(path)){
-        std::cout << entry.path() << std::endl;
-    }
+// TODO(Sondre): add descriptions
+void Folders::writeNew(const std::string& filename, std::string_view content){
+    return writeToFile(this->new_output, filename, content);
 }
 
-bool checkIfFileInFolder(const std::filesystem::path& path){
-    return std::filesystem::is_regular_file(std::filesystem::status(path));
+// TODO(Sondre): add descriptions
+void Folders::writeError(const std::string& filename, std::string_view content){
+    return writeToFile(this->error, filename, content);
 }
 
-
-
-bool isEqual(std::string_view file_content, std::string_view verification_content){
-
-    if (file_content == verification_content){
+// TODO(Sondre): add descriptions + rename the function to something that is more
+// descriptive of what is does. Just the name 'all' does not tell me anything.
+const bool Folders::allEmpty(){
+    if(this->verified.empty() || this->error.empty() || this->new_output.empty()){
+        return false;
+    }else{
         return true;
     }
+}
 
-    return false;
+// TODO(Sondre): If you look at the standard library, you may notice that all containers like 'list' and 'vector'
+// have a method called empty(). empty is usually a function that checks if the container is empty() and returns a bool.
+// This function does not follow that convention.
+// Therefore, please rename it.
+// + this function does not change any state -> make it a 'const' member function
+const std::array<bool, 3>& Folders::emptyFolders(){
+    std::array<bool, 3> out = {false, false, false};
+    if(this->verified.empty())
+        out[0] = true;
+    if(this->error.empty())
+        out[1] = true;
+    if(this->new_output.empty())
+        out[2] = true;
+
+    return out;
 }
 
 
 
-int testFunction(const std::string& filename, std::string_view content){
-
-   
-    std::filesystem::path currPath = std::filesystem::current_path();
-    Folders f(currPath);
 
 
-    // Check if folders exist in current folder
-    if(f.folderEmpty(f.verified)){
-        std::cout << "Folder vertified do not exist or is empty, new file generated." << std::endl;
-
-        f.writeNew(filename, content);
-        //create and write to file
-        return 0;
-    }
-    // the "/" appends a file or folder to a path.
-    if(!checkIfFileInFolder(f.verified / filename)){
-         std::cout << "File does not exist in verified, new file generated in new." << std::endl;
-
-        //create and write to file
-        f.writeNew(filename, content);
-        return 0;
-    }
-    
-
-    std::string_view file_content = readFile(f.verified, filename);
-
-    bool result = isEqual(file_content, content);
+// TODO (Sondre): make a folder called test and a new file called verification_test.cpp and put the following main function inside that file.
 
 
-    if(!result){
+/* TODO (Sondre): make a CMakeLists.txt and turn your verification into a library. 
 
-        std::cout << "File " << filename << " in verified is NOT equal input!" << std::endl;
+	you can do it like I did it in with utf8_string:
+	
+	---------- utf8_string CMakeLists ------------
+	
+	add_library(utf8_string INTERFACE
+		utf8_char.hpp
+		utf8_string.hpp
+	)
 
-        f.writeError(filename, "Files are not equal");
-        return 0;
-    }
+	target_include_directories(utf8_string INTERFACE 
+		${CMAKE_CURRENT_SOURCE_DIR}
+	)
+	
+	add_subdirectory(test)
+	
+	---------------- END -----------------
+	
+	However after **add_library(** you will enter the name of this library maybe:
+	
+		add_library(verification
 
-    std::cout << "File: " << filename << " in verified is equal to input" << std::endl;
-    return 0;
-}
+
+	Since this library will contain .cpp files and .hpp files it will be a 'static' library.
+	My utf8_string only contains header files and no source files, that is why it has to use the INTERFACE command
+	So use the STATIC instead.
+	
+	Then list all files that your library contains in in the brackets.
+	
+	just copy the target_include_directories and replace the library name.
+	
+	then add the subdirectory for the tests.
+	
+	in your test folder also create CMake lists that adds your test function with the main to the CMake test environment.
+	
+	Therefore just copy paste the CMakeLists.txt file from GroupIProject\modules\utf8_string\test and rename all executables and targets.
+	
+	---------- utf8_string/test CMakeLists ------------
+	
+	# ------------ Char ----------------
+	add_executable(utf8_char_test
+		test_utf8_char.cpp
+	)
+
+	target_link_libraries(utf8_char_test utf8_string)
+
+	add_test(utf8_char_ctest utf8_char_test)
 
 
+	# ------------- String ----------------
 
-int main(int argc, char *argv[]){
+	add_executable(utf8_string_test
+		test_utf8_string.cpp
+	)
 
+	target_link_libraries(utf8_string_test utf8_string)
 
-    std::string filename =  "test";
-    std::string content = "ContentTest1234";
+	add_test(utf8_string_ctest utf8_string_test)
+	
+	---------------- END -----------------
 
-    //See if the required number of arguments is given and that the file for the arguments is used. 
+	If you have any questions do not hesitate, I am happy to help.
+	
+	I know that this was much, but I think you did great work useing all those functions from the std::filesystem.
+	I even learned a little bit from you, because I did not know that the function std::filesystem::is_regular_file() existed.
+	I would have used std::filesystem::exists() but yours is the better choice. 
 
-    std::cout << argc << std::endl;
-    if(argc == 3){
-        
-        std::filesystem::path currPath = std::filesystem::current_path();
-        std::cout << currPath / argv[2] << std::endl;
-
-        if(checkIfFileInFolder(currPath / argv[2])){
-            std::cout << argv[1] << std::endl << argv[2] <<std::endl;
-            filename = argv[1];
-            content = readFile(currPath, argv[2]);
-        }
-    }
-    std::cout << content << std::endl;
-    testFunction(filename, content);
-
-    return 0;
-
-}
-
+*/
