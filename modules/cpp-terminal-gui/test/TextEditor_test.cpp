@@ -108,6 +108,18 @@ static void insert_text_movve_back_twice_insert_line_break_move_up(){
 	assert_expected(editor.back().size(), 2);
 }
 
+static void insert_after_new_line(){
+	TermGui::TextEditor editor;
+	editor.insert("123456");
+	editor.insert('\n');
+	editor.insert("123");
+	assert_expected(editor.line_number(), 1);
+	assert_expected(editor.column_number(), 3);
+	assert_expected(editor.number_of_lines(), 2);
+	assert_expected(editor.front().size(), 6);
+	assert_expected(editor.back().size(), 3);
+}
+
 int main(){
 	
 	construct_empty_text_editor();
@@ -118,5 +130,6 @@ int main(){
 	insert_text_and_move_back_twice();
 	insert_text_movve_back_twice_insert_line_break();
 	insert_text_movve_back_twice_insert_line_break_move_up();
+	insert_after_new_line();
 	
 }
