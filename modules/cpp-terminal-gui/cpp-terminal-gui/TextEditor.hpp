@@ -15,7 +15,7 @@
 
 namespace TermGui{
 	
-class TextEditor{
+class TextEditor : public RenderTrait{
 private:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
 	using Text = std::list<Line>;	// list of lines
@@ -50,6 +50,9 @@ public:
 
 	/// constructs a text with one empty line + sets the cursor position and iterators
 	TextEditor();
+	
+	/// returns true if there are no lines in the text or if there is one and it is empty
+	bool empty() const;
 	
 	iterator begin(){return this->_text.begin();}
 	const_iterator begin() const {return this->_text.cbegin();}
@@ -108,7 +111,7 @@ public:
 	
 	/// inserts a new line after the current one and moves the cursor to the beginning
 	/// of the inserted line
-	inline void insert_move_line_after(){
+	inline void insert_new_line(){
 		this->insert_line_after();
 		++this->_cursor.lineNumber;
 		++this->_cursor.lineIterator;
@@ -180,6 +183,9 @@ public:
 	
 	/// returns true if the cursor is located at the very end of the last line 
 	inline bool is_end_of_file() const { return this->is_last_line() && this->is_end_of_line(); }
+	
+	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
+	void render(std::string& outputString) const override;
 	
 private:
 

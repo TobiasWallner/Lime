@@ -13,10 +13,25 @@ TermGui::TextEditor::TextEditor(){
 	this->_cursor.lineIterator = this->_text.begin();
 }
 
+bool TermGui::TextEditor::empty() const{
+	if(this->_text.empty()){
+		return true;
+	}else{
+		const_reference front = this->front();
+		const_reference back = this->back();
+		const auto* pfront = &front;
+		const auto* pback = &back;
+		const bool is_only_one_line = pfront == pback; // equality by pointer comparison
+		const bool is_line_empty = front.empty();
+		const bool result = is_only_one_line && is_line_empty;
+		return result;
+	}
+}
+
 void TermGui::TextEditor::insert(utf8::Char c){
 	if(c == '\n'){
 		auto prevCursor = this->_cursor;
-		this->insert_move_line_after();
+		this->insert_new_line();
 		this->lineItr()->move_append(*(prevCursor.lineIterator), prevCursor.columnNumber, prevCursor.lineIterator->size() - prevCursor.columnNumber);
 	}else{
 		auto& line = *this->_cursor.lineIterator;
@@ -104,3 +119,23 @@ void TermGui::TextEditor::move_down(){
 		this->_cursor.columnNumber = std::min(this->_cursor.columnNumber, this->_cursor.lineIterator->size());
 	}
 }
+
+void TermGui::TextEditor::render(std::string& outputString) const {
+	if(this->empty()){
+		return;
+	}
+	auto itr = this->begin();
+	const auto end = this->end();
+	
+	// do first iteration without newline outside of loop
+	
+	itr->render(outputString);
+	++itr;
+	for(; itr != end; ++itr){
+		outputString += '\n';
+		itr->render(outputString);
+	}
+}
+	
+
+		
