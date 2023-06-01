@@ -1,16 +1,23 @@
 
+// cpp-terminal
 #include <cpp-terminal/event.hpp>
+
+// cpp-terminal-gui
+#include <cpp-terminal-gui/ColorString.hpp>
+#include <cpp-terminal-gui/TextEditor.hpp>
 
 
 class Lime{
 	
+	TermGui::ColorString topMessageBar;
+	TermGui::TextEditor textEditor;
+	TermGui::ColorString infoText;
+	
 	bool main_loop_continue = true;
-	
-	
 	
 public:
 	
-	constexpr Lime() = default;
+	Lime();
 	
 	/**
 		The Copy consturctor of the class Lime is deleted, because the 
@@ -98,5 +105,11 @@ private:
 		with further information about the event type.
 	*/
 	void prozess_unhandeled_event(Term::Event&& event);
+	
+	/// renders the whole displayed content of the editor into a string that can be printed to the screen
+	void render(std::string& outputString) const;
+	
+	/// clears the screen and draws the output string onto the screen
+	void draw(const std::string& outputString) const;
 		
 };
