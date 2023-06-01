@@ -2,7 +2,7 @@ build*
 Testing/
 test_all.bat
 .vscode*
-.vs
+.vs/*
 
 Verification/*
 !Verification/verification.cpp
