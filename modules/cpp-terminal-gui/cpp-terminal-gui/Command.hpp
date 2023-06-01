@@ -62,7 +62,7 @@ public:
 	inline FgColor(Term::Color color) : _color(color){}
 	inline FgColor(Term::Color::Name colorName) : _color(colorName){}
 	inline FgColor(std::uint8_t value) :  _color(value){}
-	inline FgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, blue, green){}
+	inline FgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, green, blue){}
 	
 	inline void render(std::string& outputString) const override {outputString.append(Term::color_fg(this->_color));}
 	inline CommandType type() const override {return CommandType::forgroundColor;}
@@ -80,7 +80,7 @@ public:
 	inline BgColor(Term::Color color) : _color(color){}
 	inline BgColor(Term::Color::Name colorName) : _color(colorName){}
 	inline BgColor(std::uint8_t value) : _color(value){}
-	inline BgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, blue, green){}
+	inline BgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, green, blue){}
 	
 	inline void render(std::string& outputString) const override {outputString.append(Term::color_bg(this->_color));}
 	inline CommandType type() const override {return CommandType::backgroundColor;}
