@@ -1,4 +1,4 @@
-
+#pragma once
 // c++ std
 #include <utility>
 
