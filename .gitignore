@@ -4,6 +4,8 @@ test_all.bat
 .vscode*
 .vs/*
 
+make.txt
+
 Verification/*
 !Verification/verification.cpp
 !Verification/readme.md
