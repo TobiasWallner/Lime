@@ -167,8 +167,7 @@ void Lime::render(std::string& outputString) const{
 }
 
 void Lime::draw(const std::string& outputString) const{
-	// reset screen
-	std::cout << Term::clear_screen() << Term::cursor_move(0, 0) << std::flush;
-	// draw new output
-	std::cout << outputString << std::flush;
+	std::cout 	<< Term::clear_screen() 
+				<< Term::cursor_move(0, 0) 
+				<< outputString << std::flush;
 }
