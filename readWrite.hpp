@@ -10,9 +10,12 @@ use something like:
 #include <iostream>
 #include <list>
 
-
+// TODO(Helena): never, ever write the following line in a header file!
 using namespace std;
 
+/*	TODO(Helena): the functions you wrote is better now but will produce linker errors
+	either do one of the following: mark them as 'inline' or put them in a .cpp file.
+*/
 //Writes a file into a list, each line is a string
 void readFile(std::list<std::string> &list){
     ifstream file ("data.txt");
@@ -23,6 +26,7 @@ void readFile(std::list<std::string> &list){
     }
 }
 
+// TODO(Helena): make the output file name a parameter of the function 
 //Writes a doubly linked list into a file
 void writeFile(std::list<std::string> &list){
     ofstream file ("data.txt");
