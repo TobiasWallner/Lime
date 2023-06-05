@@ -126,13 +126,13 @@ public:
 	/// returns the same first iterator if the provided character is not the first byte of an utf8 encoded character
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first, CharItr last){
-		const auto identifier = identify(*first);
+		const auto identifier = identify(static_cast<char>(*first));
 		if((identifier == Identifier::Unsupported) | (identifier == Identifier::NotFirst)){
 			return first;
 		}else{
 			const auto length = static_cast<size_type>(identifier);
-			for(int i = 0; i != length && first != last; ++i, (void)(++first)){
-				this->utf8[i] = *first;
+			for(int i = 0; i != length && first != last && i < 4; ++i, (void)(++first)){
+				this->utf8[i] = static_cast<char>(*first);
 			}
 			return first;
 		}		
@@ -140,15 +140,16 @@ public:
 	
 	/// reads the first utf8 character and stores it in the character
 	/// returns the iterator to the next character after that.
+	/// returns the same iterator if the character is not a valid utf8 character
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first){
-		const auto identifier = identify(*first);
+		const auto identifier = identify(static_cast<char>(*first));
 		if((identifier == Identifier::Unsupported) | (identifier == Identifier::NotFirst)){
 			return first;
 		}else{
 			const auto length = static_cast<size_type>(identifier);
-			for(int i = 0; i != length; ++i, (void)(++first)){
-				this->utf8[i] = *first;
+			for(int i = 0; i != length && i < 4; ++i, (void)(++first)){
+				this->utf8[i] = static_cast<char>(*first);
 			}
 			return first;
 		}	

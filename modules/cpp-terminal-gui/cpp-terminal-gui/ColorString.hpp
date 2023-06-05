@@ -1,4 +1,4 @@
-
+#pragma once
 // c++ std
 #include <utility>
 
@@ -101,7 +101,7 @@ public:
 	inline bool empty() const {return this->_string.empty();}
 	
 	/// returns the number of utf8 characters in the string
-	inline bool size() const {return this->_string.size();}
+	inline size_type size() const {return this->_string.size();}
 	
 	inline void clear(){
 		this->_string.clear();
@@ -111,6 +111,10 @@ public:
 	/// appends a line and its formats (aka. command list)
 	ColorString& append(const ColorString& other);
 	ColorString& append(ColorString&& other);
+	
+	/// moves the content from the other string in range [pos, n + pos) to this string
+	/// not that the other strings content in that range will be erased
+	ColorString& move_append(ColorString& other, size_type pos, size_type n);
 	
 	
 	/// append to the ColorString as you would append to the underlying string type
@@ -191,7 +195,9 @@ public:
 	
 	void render(std::string& outputString) const override;
 	
-	
+	/// inserts a character at the given position
+	ColorString& insert(size_type index, utf8::Char c);
+	inline ColorString& insert(size_type index, char c){this->insert(index, utf8::Char(c)); return *this;}
 
 };
 

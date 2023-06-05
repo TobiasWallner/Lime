@@ -24,7 +24,11 @@
 
 // cpp-terminal-gui
 #include <cpp-terminal-gui/ColorString.hpp>
+#include <cpp-terminal-gui/TextEditor.hpp>
 
+Lime::Lime(){
+	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
+}
 
 int Lime::run(){
 	
@@ -71,9 +75,14 @@ void Lime::quit(){
 }
 
 void Lime::run_main_loop(){
+	std::string outputString; 	//reuse string memory
+	outputString.reserve(1024 * 2); // reserve 2kB of memory in advance
 	while(this->main_loop_continue){
 		auto event = Term::read_event();
 		this->prozess_event(std::move(event));
+		outputString.clear();
+		this->render(outputString);
+		this->draw(outputString);
 	}
 }
 
@@ -103,37 +112,62 @@ void Lime::prozess_event(Term::Event&& event){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
-	// for now just print the key if it is printable to the console
-	const auto c = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
-	//(Tobias): aparently you have to add the NUL type I found no other way of doing typeconversions
-	if(std::isprint(c)){
-		std::cout << static_cast<char>(c) << std::flush; 
-		//c++ std library cannot really print utf-8 or char32_t characters so I leave it at char types for now
-	}else{
-		this->quit();
+	if(keyEvent == Term::Key::ENTER){
+		this->textEditor.insert_new_line();
 	}
+	if(keyEvent.is_CTRL()){
+		const auto ctrlPlusKey = keyEvent - Term::Key::CTRL;
+		if(ctrlPlusKey == Term::Key::Q){
+			this->quit();
+		}else{
+			const auto ascii = static_cast<char>(ctrlPlusKey + Term::Key::NUL); 
+			this->topMessageBar.assign("Internal Error: Unhandeled Key press: Ctrl + ").append(ascii);
+		}
+	}else if(keyEvent.is_ASCII()){
+		const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
+		this->textEditor.insert(ascii);	
+	}else{
+		const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
+		this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+	}
+	
 }
   
   
 void Lime::prozess_empty_event(){
-	std::cout << "Internal Error: Unhandeled Event type 'Empty' " << std::endl;
+	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Empty' ");
 }
 
 void Lime::prozess_screen_event(){
-	std::cout << "Internal Error: Unhandeled Event type 'Screen' " << std::endl;
+	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Screen' ");
 }
 
 void Lime::prozess_cursour_event(){
-	std::cout << "Internal Error: Unhandeled Event type 'Cursor' " << std::endl;
+	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Cursor' ");
 }
 
 void Lime::prozess_copy_paste_event(){
-	std::cout << "Internal Error: Unhandeled Event type 'CopyPaste' " << std::endl;
+	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'CopyPaste' ");
 }
 
 void Lime::prozess_unhandeled_event(Term::Event&& event){
 	/*TODO: a way to display error messages that do not disturb the writeing prozess
 		For example by message windows or at a special place at the bottom of the screen
 	*/
-	std::cout << "Internal Error: Unhandeled Event type ID: " << static_cast<int>(event.type()) << std::endl;
+	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
+	
+}
+
+void Lime::render(std::string& outputString) const{
+	this->topMessageBar.render(outputString);
+	outputString += '\n';
+	this->textEditor.render(outputString);
+	outputString += '\n';
+	this->infoText.render(outputString);
+}
+
+void Lime::draw(const std::string& outputString) const{
+	std::cout 	<< Term::clear_screen() 
+				<< Term::cursor_move(0, 0) 
+				<< outputString << std::flush;
 }

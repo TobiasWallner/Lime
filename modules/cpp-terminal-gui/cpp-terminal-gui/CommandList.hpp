@@ -193,6 +193,11 @@ public:
 	
 	inline void clear() {this->commands.clear();}
 	
+	inline void erase(const_iterator itr){this->commands.erase(itr);}
+	inline void erase(const_iterator first, const_iterator last){this->commands.erase(first, last);}
+	void erase(size_type index);
+	void erase(size_type index_from, size_type index_to);
+	
 	/// returns an iterator to the beginning of the list aka the first element
 	inline iterator begin(){return this->commands.begin();}
 	inline const_iterator begin() const {return this->commands.begin();}
