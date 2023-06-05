@@ -20,6 +20,7 @@ add_subdirectory("${MODULES_PATH}/cpp-terminal")
 enable_testing() # enable testing for internal libraries
 add_subdirectory("${MODULES_PATH}/utf8_string")
 add_subdirectory("${MODULES_PATH}/cpp-terminal-gui")
+add_subdirectory("${MODULES_PATH}/verification")
 
 # project building process: 
 add_executable(lime
@@ -112,6 +113,6 @@ target_link_libraries(lime PUBLIC
 	utf8_string
 	cpp-terminal
 	cpp-terminal-gui
-	
+	verification
 )
 
