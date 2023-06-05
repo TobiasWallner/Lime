@@ -113,6 +113,5 @@ target_link_libraries(lime PUBLIC
 	utf8_string
 	cpp-terminal
 	cpp-terminal-gui
-	verification
 )
 
