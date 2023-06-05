@@ -2,6 +2,7 @@
 
 // C++ std
 #include <cstddef>
+#include <filesystem>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
@@ -186,6 +187,24 @@ public:
 	
 	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
 	void render(std::string& outputString) const override;
+	
+	bool read_file(const std::filesystem::path& path);
+	bool read_file(std::ifstream& stream);
+	
+	bool write_file(const std::filesystem::path& path);
+	bool write_file(std::ifstream& stream);
+	
+	template<class Stream>
+	friend Stream& operator << (Stream& stream, TextEditor& self){
+		self.write_file(stream);
+		return stream;
+	}
+	
+	template<class Stream>
+	friend Stream& operator >> (Stream& stream, TextEditor& self){
+		self.read_file(stream);
+		return stream;
+	}
 	
 private:
 

@@ -138,4 +138,12 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 }
 	
 
-		
+bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
+	//TODO(Helena):
+	return false;
+}
+
+bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
+	//TODO(Helena):
+	return false;
+}
