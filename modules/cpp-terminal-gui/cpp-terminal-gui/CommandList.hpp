@@ -296,8 +296,8 @@ public:
 		return this->add_override(std::make_unique<RawType>(std::forward<Type>(Object)), index);
 	}
 	
-	void offset_index_after(iterator itr, size_type offset);
-	void offset_index_after(size_type index, size_type offset);
+	void offset_index_after(iterator itr, long offset); // long instead of size_type to also have negative numbers
+	void offset_index_after(size_type index, long offset);
 	
 	// merges all commands within the range useing add_override going from first to last
 	void merge(iterator first, iterator last);

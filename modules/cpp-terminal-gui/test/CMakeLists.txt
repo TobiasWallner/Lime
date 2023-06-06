@@ -12,7 +12,7 @@ add_test(cpp_terminal_gui_command_list_ctest cpp_terminal_gui_command_list_test)
 
 # ------------------- ColoredString Tests ----------------------
 
-add_executable(cpp_terminal_gui_colored_string_test CommandList_test.cpp)
+add_executable(cpp_terminal_gui_colored_string_test ColoredString_test.cpp)
 
 target_link_libraries(cpp_terminal_gui_colored_string_test
 	cpp-terminal-gui

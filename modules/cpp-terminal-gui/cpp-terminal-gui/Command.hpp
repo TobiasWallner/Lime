@@ -68,6 +68,14 @@ public:
 	inline FgColor(const FgColor&) = default;
 	inline FgColor& operator=(const FgColor&) = default;
 	
+	friend inline bool operator==(FgColor lhs, FgColor rhs){
+		return lhs._color == rhs._color;
+	}
+	
+	friend inline bool operator!=(FgColor lhs, FgColor rhs){
+		return !(lhs == rhs);
+	}
+	
 	inline void render(std::string& outputString) const override {outputString.append(Term::color_fg(this->_color));}
 	inline CommandType type() const override {return CommandType::forgroundColor;}
 	
@@ -88,6 +96,14 @@ public:
 	
 	inline BgColor(const BgColor&) = default;
 	inline BgColor& operator=(const BgColor&) = default;
+	
+	friend inline bool operator==(BgColor lhs, BgColor rhs){
+		return lhs._color == rhs._color;
+	}
+	
+	friend inline bool operator!=(BgColor lhs, BgColor rhs){
+		return !(lhs == rhs);
+	}
 	
 	inline void render(std::string& outputString) const override {outputString.append(Term::color_bg(this->_color));}
 	inline CommandType type() const override {return CommandType::backgroundColor;}

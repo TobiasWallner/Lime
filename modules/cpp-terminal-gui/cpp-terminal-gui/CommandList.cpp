@@ -394,26 +394,23 @@ TermGui::CommandList::reverse_iterator TermGui::CommandList::find_first_smaller_
 }
 
 
-void TermGui::CommandList::offset_index_after(TermGui::CommandList::iterator itr, TermGui::CommandList::size_type offset){
-	if(itr == this->end()){
-		return;
-	}
-	++itr;
-	for(; itr != this->end(); ++itr){
-		itr->index += offset;
-	}
-}
 
-void TermGui::CommandList::offset_index_after(TermGui::CommandList::size_type index, TermGui::CommandList::size_type offset){
-	auto itr = this->begin();
-	const auto end = this->end();
+
+void TermGui::CommandList::offset_index_after(TermGui::CommandList::size_type index, long offset){
+	auto itr = this->rbegin();
+	const auto end = this->rend();
 	// find itr with the same or larger index
 	for(; itr != end; ++itr){
-		if(itr->index >= index){
+		if(itr->index > index){
+			itr->index += offset;
+		}else{
 			break;
 		}
 	}
-	this->offset_index_after(itr, offset);
+}
+
+void TermGui::CommandList::offset_index_after(TermGui::CommandList::iterator itr, long offset){
+	this->offset_index_after(itr->index, offset);
 }
 
 void TermGui::CommandList::merge(iterator first, iterator last){
@@ -427,20 +424,14 @@ void TermGui::CommandList::merge(iterator first, iterator last){
 
 void TermGui::CommandList::merge(size_type first_index, size_type last_index){
 	auto itr = this->begin();
-	auto first = itr;
-	for(; itr != this->end(); ++itr){
-		if(itr->index >= first_index){
-			first = itr;
-			break;
-		}
-	}
 	for(; itr != this->end(); ++itr){
 		if(itr->index >= last_index){
-			break;
+			return;
+		}else if(itr->index > first_index){
+			this->add_override(std::move(itr->commands), first_index);
+			auto erase_itr = itr;
+			--itr;
+			this->commands.erase(erase_itr);
 		}
-		first->add_override(itr->commands);
-		auto erase_itr = itr;
-		--itr;
-		this->commands.erase(erase_itr);
 	}
 }
