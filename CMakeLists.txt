@@ -21,9 +21,15 @@ enable_testing() # enable testing for internal libraries
 add_subdirectory("${MODULES_PATH}/utf8_string")
 add_subdirectory("${MODULES_PATH}/cpp-terminal-gui")
 
-# ---------- linux specific libraries ------------
+# ---------- unix specific libraries ------------
 
-find_package(X11 REQUIRED)
+set(UNIX_LIBRARIES "")
+
+if (UNIX)
+	find_package(X11 REQUIRED)
+	set(UNIX_LIBRARIES "X11")
+endif()
+
 
 # -------------------------------------------------
 
@@ -120,6 +126,6 @@ target_link_libraries(lime PUBLIC
 	cpp-terminal-gui
 	
 	# ----- linux specific libraries -----
-	X11
+	${UNIX_LIBRARIES}
 )
 
