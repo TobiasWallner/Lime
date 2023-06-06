@@ -6,7 +6,7 @@ TermGui::ColorString& TermGui::ColorString::append(const TermGui::ColorString& o
 	const auto string_size = this->_string.size();
 	this->_string.append(other._string);
 	for(const auto& elem : other._commands){
-		this->_commands.insert(elem.commands, string_size + elem.index);
+		this->_commands.add_override(elem.commands, string_size + elem.index);
 	}
 	return *this;
 }
@@ -15,7 +15,7 @@ TermGui::ColorString& TermGui::ColorString::append(TermGui::ColorString&& other)
 	const auto string_size = this->_string.size();
 	this->_string.append(other._string);
 	for(auto& elem : other._commands){
-		this->_commands.insert(std::move(elem.commands), string_size + elem.index);
+		this->_commands.add_override(std::move(elem.commands), string_size + elem.index);
 	}
 	return *this;
 }
@@ -38,7 +38,7 @@ TermGui::ColorString& TermGui::ColorString::move_append(TermGui::ColorString& ot
 		if(commandItr->index >= (pos + n)){
 			break;
 		}
-		this->_commands.insert(std::move(commandItr->commands), commandItr->index - pos + thisOldSize);
+		this->_commands.add_override(std::move(commandItr->commands), commandItr->index - pos + thisOldSize);
 	}
 	
 	this->_commands.erase(moveStart, commandItr);
@@ -76,18 +76,21 @@ void TermGui::ColorString::render(std::string& outputString) const {
 
 TermGui::ColorString& TermGui::ColorString::insert(size_type index, utf8::Char c){
 	this->_string.insert(index, c);
+	this->_commands.offset_index_after(index, 1);
 	
-	auto itr = this->_commands.begin();
-	const auto end = this->_commands.end();
-	for(; itr != end; ++itr){
-		if(itr->index >= index){
-			break;	
-		}
-	}
-	
-	for(; itr != end; ++itr){
-		++itr->index;
-	}
-	
+	return *this;
+}
+
+TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index){
+	this->_string.erase(index);
+	this->_commands.merge(index, index+2);
+	this->_commands.offset_index_after(index, -1);
+	return *this;
+}
+
+TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index_from, TermGui::ColorString::size_type index_to){
+	this->_string.erase(index_from, index_to);
+	this->_commands.merge(index_from, index_to);
+	this->_commands.offset_index_after(index_from, index_to - index_from);
 	return *this;
 }

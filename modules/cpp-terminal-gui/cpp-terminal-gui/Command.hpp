@@ -59,10 +59,14 @@ private:
 	Term::Color _color;
 	
 public:
+
 	inline FgColor(Term::Color color) : _color(color){}
 	inline FgColor(Term::Color::Name colorName) : _color(colorName){}
 	inline FgColor(std::uint8_t value) :  _color(value){}
 	inline FgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, green, blue){}
+	
+	inline FgColor(const FgColor&) = default;
+	inline FgColor& operator=(const FgColor&) = default;
 	
 	inline void render(std::string& outputString) const override {outputString.append(Term::color_fg(this->_color));}
 	inline CommandType type() const override {return CommandType::forgroundColor;}
@@ -81,6 +85,9 @@ public:
 	inline BgColor(Term::Color::Name colorName) : _color(colorName){}
 	inline BgColor(std::uint8_t value) : _color(value){}
 	inline BgColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) : _color(red, green, blue){}
+	
+	inline BgColor(const BgColor&) = default;
+	inline BgColor& operator=(const BgColor&) = default;
 	
 	inline void render(std::string& outputString) const override {outputString.append(Term::color_bg(this->_color));}
 	inline CommandType type() const override {return CommandType::backgroundColor;}

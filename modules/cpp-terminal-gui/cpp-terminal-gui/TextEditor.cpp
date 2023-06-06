@@ -28,30 +28,42 @@ bool TermGui::TextEditor::empty() const{
 	}
 }
 
-void TermGui::TextEditor::insert(utf8::Char c){
+TermGui::TextEditor& TermGui::TextEditor::insert_naive(utf8::Char character){
+	this->_cursor.lineIterator->insert(this->_cursor.columnNumber, character);
+	this->move_forward();
+	return *this;
+}
+
+TermGui::TextEditor& TermGui::TextEditor::insert_new_line(){
+	auto prevCursor = this->_cursor;
+	this->insert_line_after();
+	++this->_cursor.lineNumber;
+	++this->_cursor.lineIterator;
+	this->_cursor.columnNumber = 0;
+	this->lineItr()->move_append(*(prevCursor.lineIterator), prevCursor.columnNumber, prevCursor.lineIterator->size() - prevCursor.columnNumber);
+	return *this;
+}
+
+TermGui::TextEditor& TermGui::TextEditor::insert(utf8::Char c){
 	if(c == '\n'){
-		auto prevCursor = this->_cursor;
-		this->insert_new_line();
-		this->lineItr()->move_append(*(prevCursor.lineIterator), prevCursor.columnNumber, prevCursor.lineIterator->size() - prevCursor.columnNumber);
+		return this->insert_new_line();
+	}else if(c == '\b'){
+		return this->erase();
 	}else{
-		auto& line = *this->_cursor.lineIterator;
-		const auto& index = this->_cursor.columnNumber;
-		line.insert(index, c);
-		this->move_forward();	
+		return this->insert_naive(c);
 	}	
 }
 
 bool TermGui::TextEditor::insert(const char* str){
-	utf8::Char c;
 	while(*str != '\0'){
-		auto next_str = c.assign(str);
-		if(str == next_str){
-			//error: encountered a non-utf8 character 
+		utf8::Char c;
+		const char* next = c.assign(str);
+		if(next == str){
+			// no characters have been read -> error
 			return false;
-		}else{
-			this->insert(c);
-			str = next_str;
 		}
+		this->insert(c);
+		str = next;
 	}
 	return true;
 }
@@ -138,4 +150,31 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 }
 	
 
-		
+bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
+	//TODO(Helena):
+	return false;
+}
+
+bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
+	//TODO(Helena):
+	return false;
+}
+
+TermGui::TextEditor& TermGui::TextEditor::erase(){
+	if(this->is_start_of_file()){
+		// nothing to do
+	}else if(this->is_start_of_line()){
+		// remove the line break
+		this->move_up();
+		this->move_to_end_of_line();
+		auto nextLineIterator = this->_cursor.lineIterator;
+		++nextLineIterator;
+		this->_cursor.lineIterator->append(*nextLineIterator);
+		this->_text.erase(nextLineIterator);
+	}else{
+		// erase element inside string
+		this->move_back();
+		this->_cursor.lineIterator->erase(this->_cursor.columnNumber);
+	}
+	return *this;
+}
