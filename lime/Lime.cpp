@@ -114,8 +114,7 @@ void Lime::prozess_event(Term::Event&& event){
 void Lime::prozess_key_event(Term::Key keyEvent){
 	if(keyEvent == Term::Key::ENTER){
 		this->textEditor.insert_new_line();
-	}
-	if(keyEvent.is_CTRL()){
+	}else if(keyEvent.is_CTRL()){
 		const auto ctrlPlusKey = keyEvent - Term::Key::CTRL;
 		if(ctrlPlusKey == Term::Key::Q){
 			this->quit();
