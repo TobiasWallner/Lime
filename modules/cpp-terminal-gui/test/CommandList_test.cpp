@@ -1,5 +1,5 @@
 
-#include <cpp-terminal-gui\CommandList.hpp>
+#include <cpp-terminal-gui/CommandList.hpp>
 
 // C std
 #include <stdlib.h>
