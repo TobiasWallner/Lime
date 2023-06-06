@@ -26,8 +26,14 @@
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
 
-// lime 
+// lime (pasting both for windows and unix) 
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <X11/Xlib.h>
+#include <cstring>
+#endif
+
 
 Lime::Lime(){
 	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
@@ -127,15 +133,23 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 			this->topMessageBar.assign("Clipboard text has been copied successfully");
 
 			std::string clipboardText;
-
-			if (RetrieveClipboardText(clipboardText))
+			#ifdef _WIN32
+			if (RetrieveClipboardTextWindows(clipboardText))
 			{
 				this->textEditor.insert(clipboardText.c_str());
 			}
+			#else
+			if (RetrieveClipboardTextUnix(clipboardText))
+			{
+				this->textEditor.insert(clipboardText.c_str());
+			}
+			#endif
 			else {
 				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
 				this->textEditor.insert("");
 			}
+			
+			
 		
 		}
 		else {
@@ -191,7 +205,8 @@ void Lime::draw(const std::string& outputString) const{
 				<< outputString << std::flush;
 }
 
-bool Lime::RetrieveClipboardText(std::string& clipboardText) const{
+#ifdef _WIN32
+bool Lime::RetrieveClipboardTextWindows(std::string& clipboardText) const{
 	
 	// Open the clipboard
 	if (!OpenClipboard(NULL))
@@ -224,3 +239,61 @@ bool Lime::RetrieveClipboardText(std::string& clipboardText) const{
 
 	return true;
 }
+#else
+
+bool Lime::RetrieveClipboardTextUnix(std::string& clipboardText) const {
+	
+	Display* display = XOpenDisplay(NULL);
+	if (display == NULL)
+	{
+		return false;
+	}
+
+	Atom clipboardAtom = XInternAtom(display, "CLIPBOARD", False);
+	if (clipboardAtom == None)
+	{
+		XCloseDisplay(display);
+		return false;
+	}
+
+	XConvertSelection(display, clipboardAtom, XA_STRING, clipboardAtom, None, CurrentTime);
+	XFlush(display);
+
+	XEvent event;
+	while (true)
+	{
+		XNextEvent(display, &event);
+
+		if (event.type == SelectionNotify)
+		{
+			Atom selectionAtom = event.xselection.property;
+			if (selectionAtom == None)
+			{
+				XCloseDisplay(display);
+				return false;
+			}
+
+			Atom targetAtom;
+			int actualFormat;
+			unsigned long itemCount, bytesAfter;
+			unsigned char* clipboardData = nullptr;
+
+			XGetWindowProperty(display, event.xselection.requestor, selectionAtom, 0, LONG_MAX,
+				False, AnyPropertyType, &targetAtom, &actualFormat, &itemCount,
+				&bytesAfter, &clipboardData);
+
+			if (clipboardData != nullptr)
+			{
+				clipboardText = reinterpret_cast<char*>(clipboardData);
+				XFree(clipboardData);
+			}
+
+			break;
+		}
+	}
+
+	XCloseDisplay(display);
+	return true;
+}
+
+#endif
