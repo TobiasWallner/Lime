@@ -108,6 +108,9 @@ public:
 		this->_commands.clear();
 	}
 	
+	/// returns a const reference pointer to ther command list
+	inline const auto& commands() const {return this->_commands;}
+	
 	/// appends a line and its formats (aka. command list)
 	ColorString& append(const ColorString& other);
 	ColorString& append(ColorString&& other);
@@ -143,13 +146,13 @@ public:
 	/// appends the given command to the line which will then format all string elements inserted after wards
 	inline ColorString& append(std::unique_ptr<Command>&& pCommand){
 		//TODO: change to inser_override -> therefore implement insert_override
-		this->_commands.insert(std::move(pCommand), this->_string.size());
+		this->_commands.add_override(std::move(pCommand), this->_string.size());
 		return *this;
 	}
 	
 	inline ColorString& append(const Command& pCommand){
 		//TODO: change to inser_override -> therefore implement insert_override
-		this->_commands.insert(pCommand.make_unique_copy(), this->_string.size());
+		this->_commands.add_override(pCommand.make_unique_copy(), this->_string.size());
 		return *this;
 	}
 	
@@ -198,6 +201,15 @@ public:
 	/// inserts a character at the given position
 	ColorString& insert(size_type index, utf8::Char c);
 	inline ColorString& insert(size_type index, char c){this->insert(index, utf8::Char(c)); return *this;}
+	
+	// removes the character at the index position from the string.
+	// commands that are at or before the erased index stay unchanged.
+	// commands that are after the index will be moved one index to the front.
+	// commands that are thus moved to and existing command list will override that list.
+	ColorString& erase(size_type index);
+	
+	// as erase with one index but removes the inizes from the closed open range [index_from, index_to)
+	ColorString& erase(size_type index_from, size_type index_to);
 
 };
 
