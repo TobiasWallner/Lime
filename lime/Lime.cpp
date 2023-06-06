@@ -123,26 +123,23 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		}
 		if (ctrlPlusKey == Term::Key::V) {
 			this->topMessageBar.assign("Clipboard text has been copied successfully");
-
 			std::string clipboardText;
 			#ifdef _WIN32
-			if (RetrieveClipboardTextWindows(clipboardText))
-			{
+			if (RetrieveClipboardTextWindows(clipboardText)){
 				this->textEditor.insert(clipboardText.c_str());
-			}
-			#else
-			if (RetrieveClipboardTextUnix(clipboardText))
-			{
-				this->textEditor.insert(clipboardText.c_str());
-			}
-			#endif
-			else {
+			}else {
 				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
 				this->textEditor.insert("");
 			}
+			#else
+			if (RetrieveClipboardTextUnix(clipboardText)){
+				this->textEditor.insert(clipboardText.c_str());
+			}else {
+				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
+				this->textEditor.insert("");
+			}
+			#endif
 			
-			
-		
 		}
 		else {
 			const auto ascii = static_cast<char>(ctrlPlusKey + Term::Key::NUL); 
@@ -201,23 +198,20 @@ void Lime::draw(const std::string& outputString) const{
 bool Lime::RetrieveClipboardTextWindows(std::string& clipboardText) const{
 	
 	// Open the clipboard
-	if (!OpenClipboard(NULL))
-	{
+	if (!OpenClipboard(NULL)){
 		return false;
 	}
 
 	// Get the clipboard data
 	HANDLE handle = GetClipboardData(CF_TEXT);
-	if (handle == NULL)
-	{
+	if (handle == NULL){
 		CloseClipboard();
 		return false;
 	}
 
 	// Lock the memory and retrieve the text
 	char* text = static_cast<char*>(GlobalLock(handle));
-	if (text == NULL)
-	{
+	if (text == NULL){
 		CloseClipboard();
 		return false;
 	}
@@ -233,65 +227,55 @@ bool Lime::RetrieveClipboardTextWindows(std::string& clipboardText) const{
 }
 #else
 
-bool Lime::RetrieveClipboardTextUnix(std::string& clipboardText) const {
-	
-	Display* display = XOpenDisplay(NULL);
-	if (display == NULL)
-	{
-		return false;
-	}
-	
-	
-	Atom clipboardAtom = XInternAtom(display, "CLIPBOARD", False);
-	Atom fmtid = XInternAtom(display, "PRIMARY", False); // from Stack Overflow user x11user
-	Atom propid = XInternAtom(display, "XSEL_DATA", False); // from Stack Overflow user x11user
-	Atom incrid = XInternAtom(display, "INCR", False); // from Stack Overflow user x11user
-	
-	if (clipboardAtom == None)
-	{
-		XCloseDisplay(display);
-		return false;
-	}
+// the unix implementation for copiing from the clipboard has been copied from:
+// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+// and modified accordingly
 
-	XConvertSelection(display, clipboardAtom, fmtid, propid, None, CurrentTime);
-	XFlush(display);
-
+char * XPasteType(const Atom& atom, Display*& display, const Window& window, const Atom& UTF8, const int& XA_STRING) {
 	XEvent event;
-	while (true)
-	{
-		XNextEvent(display, &event);
-
-		if (event.type == SelectionNotify)
-		{
-			Atom selectionAtom = event.xselection.property;
-			if (selectionAtom == None)
-			{
-				XCloseDisplay(display);
-				return false;
+	int format;
+	unsigned long N, size;
+	char * data, * s = 0;
+	Atom target,
+		CLIPBOARD = XInternAtom(display, "CLIPBOARD", 0),
+		XSEL_DATA = XInternAtom(display, "XSEL_DATA", 0);
+	XConvertSelection(display, CLIPBOARD, atom, XSEL_DATA, window, CurrentTime);
+	XSync(display, 0);
+	XNextEvent(display, &event);
+	
+	switch(event.type) {
+		case SelectionNotify:
+		if(event.xselection.selection != CLIPBOARD) break;
+		if(event.xselection.property) {
+			XGetWindowProperty(event.xselection.display, event.xselection.requestor,
+				event.xselection.property, 0L,(~0L), 0, AnyPropertyType, &target,
+				&format, &size, &N,(unsigned char**)&data);
+			if(target == UTF8 || target == XA_STRING) {
+				s = strndup(data, size);
+				XFree(data);
 			}
-
-			int actualFormat;
-			unsigned long itemCount, bytesAfter;
-			unsigned char* clipboardData = nullptr;
-
-			XGetWindowProperty(display, event.xselection.requestor, selectionAtom, 0, LONG_MAX/4,
-				False, AnyPropertyType, &fmtid, &actualFormat, &itemCount,
-				&bytesAfter, &clipboardData);
-
-			if (fmtid == incrid){ // from Stack Overflow user x11user
-				// buffer is too large and INCR reading is not implemented yet
-				XCloseDisplay(display);
-				return false;
-			}else if (clipboardData != nullptr){
-				clipboardText = reinterpret_cast<char*>(clipboardData);
-				XFree(clipboardData);
-			}
-
-			break;
+			XDeleteProperty(event.xselection.display, event.xselection.requestor, event.xselection.property);
 		}
 	}
+  return s;
+}
 
-	XCloseDisplay(display);
+char *XPaste() {
+	const int XA_STRING = 31;
+	static Display * display = XOpenDisplay(0);
+	static Atom UTF8 = XInternAtom(display, "UTF8_STRING", True); 
+	const int N = DefaultScreen(display);
+	static Window window = XCreateSimpleWindow(display, RootWindow(display, N), 0, 0, 1, 1, 0,
+		BlackPixel(display, N), WhitePixel(display, N)
+	);	
+	char * c = 0;
+	if(UTF8 != None) c = XPasteType(UTF8, display, window, UTF8, XA_STRING);
+	if(!c) c = XPasteType(XA_STRING, display, window, UTF8, XA_STRING);
+	return c;
+}
+
+bool Lime::RetrieveClipboardTextUnix(std::string& clipboardText) const {
+	clipboardText = XPaste();
 	return true;
 }
 
