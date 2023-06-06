@@ -113,21 +113,24 @@ public:
 			for(; first != last; ++first) this->commands.push_back((*first)->make_unique_copy());
 		}
 		
-		/// make an ordered/sorted insert of the command at the given position into the list.
+		/// make an ordered/sorted add of the command at the given position into the list.
 		/// returns true if the operation was successfull, returns false if the new command could not be inserted.
-		/// note that the simple insert will not override existing commands and would return false in that case
-		bool insert(std::unique_ptr<Command>&& pCommand);
+		/// note that the simple add will not override existing commands and would return false in that case
+		bool add(std::unique_ptr<Command>&& pCommand);
+		bool add(const Command& command);
 		
 		/// returns true if this list has changed due to this insertions
 		/// returns false if this list has changed unchanged
-		bool insert(const list_type& listOfCommands);
-		bool insert(list_type&& listOfCommands);
+		bool add(const list_type& listOfCommands);
+		bool add(list_type&& listOfCommands);
 	
-		/// make an ordered/sorted insert of the command at the given position into the list.
+		/// make an ordered/sorted add of the command at the given position into the list.
 		/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 		/// note that this command will override an existing command and would return true in that case
-		bool insert_override(const Command& pCommand);
-		bool insert_override(std::unique_ptr<Command>&& pCommand);
+		bool add_override(std::unique_ptr<Command>&& pCommand);
+		bool add_override(const Command& command);
+		bool add_override(const list_type& listOfCommands);
+		bool add_override(list_type&& listOfCommands);
 		
 		/// returns 'true' if a command with the same type already exists within this list. 
 		/// returns 'false' otherwise.
@@ -246,48 +249,59 @@ public:
 		return this->assign(std::make_unique<RawType>(std::forward<Type>(Object)));
 	}
 	
-	/// make an ordered/sorted insert of the command at the given position into the list.
+	/// make an ordered/sorted add of the command at the given position into the list.
 	/// returns true if the operation was successfull, returns false if the new command could not be inserted.
-	/// note that the simple insert will not override existing commands and would return false in that case
-	bool insert(std::unique_ptr<Command>&& pCommand, size_type index);
-	
-	inline void insert(const Command& command, size_type index){this->insert(command.make_unique_copy(), index);}
+	/// note that the simple add will not override existing commands and would return false in that case
+	bool add(std::unique_ptr<Command>&& pCommand, size_type index);
+	bool add(const Command& command, size_type index);
 	
 	/// wrapper for derived classes
 	template<class C>
-	inline bool insert(std::unique_ptr<C>&& pCommand, size_type index){
-		return this->insert(static_cast<std::unique_ptr<Command>>(std::move(pCommand)), index);
+	inline bool add(std::unique_ptr<C>&& pCommand, size_type index){
+		return this->add(static_cast<std::unique_ptr<Command>>(std::move(pCommand)), index);
 	}
 	
 	/// wrapper for classes that are not a unique pointer yet and are moved
 	/// the passed object will be 'forewareded' into the datastructure using 'std::forward'
+	
 	template<class Type>
-	inline bool insert(Type&& Object, size_type index){
+	inline bool add(Type&& Object, size_type index){
 		using RawType = typename std::remove_reference<Type>::type;
-		return this->insert(std::make_unique<RawType>(std::forward<Type>(Object)), index);
+		return this->add(std::make_unique<RawType>(std::forward<Type>(Object)), index);
 	}
 	
-	bool insert(const CommandPoint::list_type& listOfCommands, size_type index);
-	bool insert(CommandPoint::list_type&& listOfCommands, size_type index);
+	bool add(const CommandPoint::list_type& listOfCommands, size_type index);
+	bool add(CommandPoint::list_type&& listOfCommands, size_type index);
 	
-	/// make an ordered/sorted insert of the command at the given position into the list.
+	/// make an ordered/sorted add of the command at the given position into the list.
 	/// returns true if the operation was successfull, returns false if the new command could not be inserted.
 	/// note that this command will override an existing command and would return true in that case
-	bool insert_override(std::unique_ptr<Command>&& pCommand, size_type index);
+	bool add_override(std::unique_ptr<Command>&& pCommand, size_type index);
+	bool add_override(const Command& command, size_type index);
+	
+	bool add_override(const CommandPoint::list_type& listOfCommands, size_type index);
+	bool add_override(CommandPoint::list_type&& listOfCommands, size_type index);
 	
 	/// wrapper for derived classes
 	template<class C>
-	inline bool insert_override(std::unique_ptr<C>&& pCommand, size_type index){
-		return this->insert_override(static_cast<std::unique_ptr<Command>>(std::move(pCommand)), index);
+	inline bool add_override(std::unique_ptr<C>&& pCommand, size_type index){
+		return this->add_override(static_cast<std::unique_ptr<Command>>(std::move(pCommand)), index);
 	}
 	
 	/// wrapper for classes that are not a unique pointer yet and are moved
 	/// the passed object will be 'forewareded' into the datastructure using 'std::forward'
 	template<class Type>
-	inline bool insert_override(Type&& Object, size_type index){
+	inline bool add_override(Type&& Object, size_type index){
 		using RawType = typename std::remove_reference<Type>::type;
-		return this->insert_override(std::make_unique<RawType>(std::forward<Type>(Object)), index);
+		return this->add_override(std::make_unique<RawType>(std::forward<Type>(Object)), index);
 	}
+	
+	void offset_index_after(iterator itr, size_type offset);
+	void offset_index_after(size_type index, size_type offset);
+	
+	// merges all commands within the range useing add_override going from first to last
+	void merge(iterator first, iterator last);
+	void merge(size_type first, size_type last);
 	
 private:
 

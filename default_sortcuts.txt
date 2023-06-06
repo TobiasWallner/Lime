@@ -1,0 +1,54 @@
+
+
+Basics
+------
+Ctrl-q			:	quit the editor
+Ctrl-tab		:	cycle trough open tabs/files
+
+
+Cursor movement <cm>
+----------------
+Ctrl-j			:	move cursor left
+Ctrl-i			:	move cursor up
+Ctrl-l			:	move cursor right
+Ctrl-k			:	move cursor down
+
+Ctrl-t			:	move cursor to the top of the file
+Ctrl-b			:	move cursor to the bottom of the file
+(alternative: Ctrl-e			:	move cursor to the end of the file)
+
+Alt-j			:	move one word left
+Alt-i			:	move one paragraph/codeblock up
+Alt-l			:	move one word right
+Alt-k			:	move one paragraph/codeblock down
+
+Alt-u			:	move to the beginning of the line
+Alt-o			:	move to the end of the line
+
+
+
+Editing
+-------
+Ctrl-c			:	copy selection to clipboard
+Ctrl-x			:	cut selection to clipboard
+Ctrl-v			:	paste from clipboard / replace selected from clipboard
+Ctrl-z			:	undo the last edit
+Ctrl-shift-z	:	redo the last undo
+
+
+Selection
+---------
+Ctrl-shift		:	start/end selection
+Ctrl-A			:	select all content from file
+
+
+Search
+------
+Ctrl-f			:	enter search mode
+
+
+File I/O
+--------
+Ctrl-s			:	save file
+Ctrl-o			: 	open file
+Ctrl-n			:	open new empty file in new tab
