@@ -1,4 +1,5 @@
 #include "../utf8_string.hpp"
+#include "../verification/verification.hpp"
 
 #include <iostream>
 #include <string_view>
@@ -169,6 +170,12 @@ int main(){
 		auto expected = input1 + input2;
 		auto result = utf8_1.to_std_string();
 		assert(result == expected, "error result should be: '" << expected << "' but is '" << result << "'.");
+	}
+	{// testing writing and reading from file
+		utf8::string input("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nNulla facilisi nullam vehicula ipsum. Rhoncus mattis rhoncus urna neque viverra justo nec ultrices.\nNulla aliquet porttitor lacus luctus. Est ultricies integer quis auctor elit sed. Faucibus pulvinar elementum integer enim neque volutpat ac tincidunt.\nTortor at auctor urna nunc. Nunc aliquet bibendum enim facilisis. Dui id ornare arcu odio ut. Dictumst quisque sagittis purus sit amet volutpat.\nCondimentum lacinia quis vel eros donec. Sociis natoque penatibus et magnis dis parturient montes. Nibh praesent tristique magna sit amet purus gravida quis. Eu scelerisque felis imperdiet proin. Habitant morbi tristique senectus et netus et malesuada fames.\n");
+
+		fileVerify(std::filesystem::current_path(), "utf8_string_paragraph", input.to_std_string());		
+		
 	}
 	
 	std::cout << "finished tests" << std::endl;
