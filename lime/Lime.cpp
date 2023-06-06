@@ -114,7 +114,7 @@ void Lime::prozess_event(Term::Event&& event){
 }
 
 #ifdef _WIN32
-static bool read_clipboard_windows(std::string& clipboardText) const{
+static bool read_clipboard_windows(std::string& clipboardText){
 	// Open the clipboard
 	if (!OpenClipboard(NULL)){
 		return false;
@@ -192,7 +192,7 @@ static char *x11_paste() {
 	return c;
 }
 
-static bool read_clipboard_unix(std::string& clipboardText) const {
+static bool read_clipboard_unix(std::string& clipboardText){
 	clipboardText = x11_paste();
 	return true;
 }
@@ -200,8 +200,6 @@ static bool read_clipboard_unix(std::string& clipboardText) const {
 #endif
 
 static bool read_clipboard(std::string& clipboardText){
-	this->topMessageBar.assign("Clipboard text has been copied successfully");
-	std::string clipboardText;
 	#ifdef _WIN32
 	return read_clipboard_windows(clipboardText);
 	#else
@@ -210,6 +208,7 @@ static bool read_clipboard(std::string& clipboardText){
 }
 
 void Lime::insert_from_clipboard(){
+	std::string clipboardBuffer;
 	const bool successfulRead = read_clipboard(clipboardBuffer);
 	if(successfulRead){
 		this->textEditor.insert(clipboardBuffer.c_str());
@@ -219,8 +218,7 @@ void Lime::insert_from_clipboard(){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
-	std::string clipboardBuffer;
-	switch(keyEvent){
+	switch(keyEvent + Term::Key::NUL){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
 		
@@ -247,7 +245,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
 		
 		// ----- special inserts -----
-		case Term::Key::ENTER : this->textEditor.move_down(); break; 
+		case Term::Key::ENTER : this->textEditor.insert_new_line(); break; 
 		
 		// ------- editing -------
 		case Term::Key::CTRL + Term::Key::V : this->insert_from_clipboard(); break;
@@ -256,7 +254,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		
 		default:{
 			// ------- key insertions ----------
-			else if(keyEvent.is_ASCII()){
+			if(keyEvent.is_ASCII()){
 				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
 				this->textEditor.insert(ascii);	
 			}else{
