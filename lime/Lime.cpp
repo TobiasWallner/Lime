@@ -104,24 +104,52 @@ void Lime::prozess_event(Term::Event&& event){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
-	if(keyEvent == Term::Key::ENTER){
-		this->textEditor.insert_new_line();
-	}else if(keyEvent.is_CTRL()){
-		const auto ctrlPlusKey = keyEvent - Term::Key::CTRL;
-		if(ctrlPlusKey == Term::Key::Q){
-			this->quit();
-		}else{
-			const auto ascii = static_cast<char>(ctrlPlusKey + Term::Key::NUL); 
-			this->topMessageBar.assign("Internal Error: Unhandeled Key press: Ctrl + ").append(ascii);
-		}
-	}else if(keyEvent.is_ASCII()){
-		const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
-		this->textEditor.insert(ascii);	
-	}else{
-		const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
-		this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+	switch(keyEvent){
+		//---- basics -----
+		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
+		
+		//----- navigation and cursor movement -----
+		case Term::Key::CTRL + Term::Key::J : this->textEditor.move_back(); break;
+		case Term::Key::CTRL + Term::Key::I : this->textEditor.move_up(); break;
+		case Term::Key::CTRL + Term::Key::L : this->textEditor.move_forward(); break; 
+		case Term::Key::CTRL + Term::Key::K : this->textEditor.move_down(); break;
+		
+		case Term::Key::ARROW_LEFT 	: this->textEditor.move_back(); break;
+		case Term::Key::ARROW_UP 	: this->textEditor.move_up(); break;
+		case Term::Key::ARROW_RIGHT : this->textEditor.move_forward(); break; 
+		case Term::Key::ARROW_DOWN 	: this->textEditor.move_down(); break; 
+		
+		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();
+		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();
+		
+		case Term::Key::ALT + Term::Key::J : /*TODO: move one word left*/; break;
+		case Term::Key::ALT + Term::Key::I : /*move one paragraph/codeblock up*/; break;
+		case Term::Key::ALT + Term::Key::L : /*TODO: move one word right*/; break; 
+		case Term::Key::ALT + Term::Key::K : /*TODO: move one paragraph/codeblock down*/; break;
+		Ctrl-b			:	move cursor to the bottom of the file
+		(alternative: Ctrl-e			:	move cursor to the end of the file)
+
+		Alt-j			:	move one word left
+		Alt-i			:	move one paragraph/codeblock up
+		Alt-l			:	move one word right
+		Alt-k			:	move one paragraph/codeblock down
+
+		Alt-u			:	move to the beginning of the line
+		Alt-o			:	move to the end of the line
+		
+		// ----- special inserts -----
+		case Term::Key::ENTER : this->textEditor.move_down(); break; 
+		
+		default:{
+			else if(keyEvent.is_ASCII()){
+				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
+				this->textEditor.insert(ascii);	
+			}else{
+				const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
+				this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+			}
+		}break;	
 	}
-	
 }
   
   
