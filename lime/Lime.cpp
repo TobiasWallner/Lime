@@ -240,15 +240,20 @@ bool Lime::RetrieveClipboardTextUnix(std::string& clipboardText) const {
 	{
 		return false;
 	}
-
+	
+	
 	Atom clipboardAtom = XInternAtom(display, "CLIPBOARD", False);
+	Atom fmtid = XInternAtom(display, "PRIMARY", False); // from Stack Overflow user x11user
+	Atom propid = XInternAtom(display, "XSEL_DATA", False); // from Stack Overflow user x11user
+	Atom incrid = XInternAtom(display, "INCR", False); // from Stack Overflow user x11user
+	
 	if (clipboardAtom == None)
 	{
 		XCloseDisplay(display);
 		return false;
 	}
 
-	XConvertSelection(display, clipboardAtom, XA_STRING, clipboardAtom, None, CurrentTime);
+	XConvertSelection(display, clipboardAtom, fmtid, propid, None, CurrentTime);
 	XFlush(display);
 
 	XEvent event;
@@ -265,17 +270,19 @@ bool Lime::RetrieveClipboardTextUnix(std::string& clipboardText) const {
 				return false;
 			}
 
-			Atom targetAtom;
 			int actualFormat;
 			unsigned long itemCount, bytesAfter;
 			unsigned char* clipboardData = nullptr;
 
-			XGetWindowProperty(display, event.xselection.requestor, selectionAtom, 0, LONG_MAX,
-				False, AnyPropertyType, &targetAtom, &actualFormat, &itemCount,
+			XGetWindowProperty(display, event.xselection.requestor, selectionAtom, 0, LONG_MAX/4,
+				False, AnyPropertyType, &fmtid, &actualFormat, &itemCount,
 				&bytesAfter, &clipboardData);
 
-			if (clipboardData != nullptr)
-			{
+			if (fmtid == incrid){ // from Stack Overflow user x11user
+				// buffer is too large and INCR reading is not implemented yet
+				XCloseDisplay(display);
+				return false;
+			}else if (clipboardData != nullptr){
 				clipboardText = reinterpret_cast<char*>(clipboardData);
 				XFree(clipboardData);
 			}
