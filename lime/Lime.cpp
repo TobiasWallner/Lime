@@ -26,6 +26,16 @@
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
 
+// lime (pasting both for windows and unix) 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <X11/Xlib.h>
+#include <climits>
+#include <cstring>
+#endif
+
+
 Lime::Lime(){
 	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
 }
@@ -110,7 +120,28 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		const auto ctrlPlusKey = keyEvent - Term::Key::CTRL;
 		if(ctrlPlusKey == Term::Key::Q){
 			this->quit();
-		}else{
+		}
+		if (ctrlPlusKey == Term::Key::V) {
+			this->topMessageBar.assign("Clipboard text has been copied successfully");
+			std::string clipboardText;
+			#ifdef _WIN32
+			if (RetrieveClipboardTextWindows(clipboardText)){
+				this->textEditor.insert(clipboardText.c_str());
+			}else {
+				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
+				this->textEditor.insert("");
+			}
+			#else
+			if (RetrieveClipboardTextUnix(clipboardText)){
+				this->textEditor.insert(clipboardText.c_str());
+			}else {
+				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
+				this->textEditor.insert("");
+			}
+			#endif
+			
+		}
+		else {
 			const auto ascii = static_cast<char>(ctrlPlusKey + Term::Key::NUL); 
 			this->topMessageBar.assign("Internal Error: Unhandeled Key press: Ctrl + ").append(ascii);
 		}
@@ -162,3 +193,90 @@ void Lime::draw(const std::string& outputString) const{
 				<< Term::cursor_move(0, 0) 
 				<< outputString << std::flush;
 }
+
+#ifdef _WIN32
+bool Lime::RetrieveClipboardTextWindows(std::string& clipboardText) const{
+	
+	// Open the clipboard
+	if (!OpenClipboard(NULL)){
+		return false;
+	}
+
+	// Get the clipboard data
+	HANDLE handle = GetClipboardData(CF_TEXT);
+	if (handle == NULL){
+		CloseClipboard();
+		return false;
+	}
+
+	// Lock the memory and retrieve the text
+	char* text = static_cast<char*>(GlobalLock(handle));
+	if (text == NULL){
+		CloseClipboard();
+		return false;
+	}
+
+	// Assign the retrieved text to the output parameter
+	clipboardText = text;
+
+	// Release the memory and close the clipboard
+	GlobalUnlock(handle);
+	CloseClipboard();
+
+	return true;
+}
+#else
+
+// the unix implementation for copiing from the clipboard has been copied from:
+// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+// and modified accordingly
+
+char * XPasteType(const Atom& atom, Display*& display, const Window& window, const Atom& UTF8, const int& XA_STRING) {
+	XEvent event;
+	int format;
+	unsigned long N, size;
+	char * data, * s = 0;
+	Atom target,
+		CLIPBOARD = XInternAtom(display, "CLIPBOARD", 0),
+		XSEL_DATA = XInternAtom(display, "XSEL_DATA", 0);
+	XConvertSelection(display, CLIPBOARD, atom, XSEL_DATA, window, CurrentTime);
+	XSync(display, 0);
+	XNextEvent(display, &event);
+	
+	switch(event.type) {
+		case SelectionNotify:
+		if(event.xselection.selection != CLIPBOARD) break;
+		if(event.xselection.property) {
+			XGetWindowProperty(event.xselection.display, event.xselection.requestor,
+				event.xselection.property, 0L,(~0L), 0, AnyPropertyType, &target,
+				&format, &size, &N,(unsigned char**)&data);
+			if(target == UTF8 || target == XA_STRING) {
+				s = strndup(data, size);
+				XFree(data);
+			}
+			XDeleteProperty(event.xselection.display, event.xselection.requestor, event.xselection.property);
+		}
+	}
+  return s;
+}
+
+char *XPaste() {
+	const int XA_STRING = 31;
+	static Display * display = XOpenDisplay(0);
+	static Atom UTF8 = XInternAtom(display, "UTF8_STRING", True); 
+	const int N = DefaultScreen(display);
+	static Window window = XCreateSimpleWindow(display, RootWindow(display, N), 0, 0, 1, 1, 0,
+		BlackPixel(display, N), WhitePixel(display, N)
+	);	
+	char * c = 0;
+	if(UTF8 != None) c = XPasteType(UTF8, display, window, UTF8, XA_STRING);
+	if(!c) c = XPasteType(XA_STRING, display, window, UTF8, XA_STRING);
+	return c;
+}
+
+bool Lime::RetrieveClipboardTextUnix(std::string& clipboardText) const {
+	clipboardText = XPaste();
+	return true;
+}
+
+#endif
