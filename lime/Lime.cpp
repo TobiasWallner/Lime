@@ -26,6 +26,16 @@
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
 
+// lime (pasting both for windows and unix) 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <X11/Xlib.h>
+#include <climits>
+#include <cstring>
+#endif
+
+
 Lime::Lime(){
 	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
 }
@@ -103,7 +113,113 @@ void Lime::prozess_event(Term::Event&& event){
 	}
 }
 
+#ifdef _WIN32
+static bool read_clipboard_windows(std::string& clipboardText) const{
+	// Open the clipboard
+	if (!OpenClipboard(NULL)){
+		return false;
+	}
+
+	// Get the clipboard data
+	HANDLE handle = GetClipboardData(CF_TEXT);
+	if (handle == NULL){
+		CloseClipboard();
+		return false;
+	}
+
+	// Lock the memory and retrieve the text
+	char* text = static_cast<char*>(GlobalLock(handle));
+	if (text == NULL){
+		CloseClipboard();
+		return false;
+	}
+
+	// Assign the retrieved text to the output parameter
+	clipboardText = text;
+
+	// Release the memory and close the clipboard
+	GlobalUnlock(handle);
+	CloseClipboard();
+
+	return true;
+}
+#else
+
+// the unix implementation for copiing from the clipboard has been copied from:
+// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+// and modified accordingly
+
+static char * x11_paste_type(const Atom& atom, Display*& display, const Window& window, const Atom& UTF8, const int& XA_STRING) {
+	XEvent event;
+	int format;
+	unsigned long N, size;
+	char * data, * s = 0;
+	Atom target,
+		CLIPBOARD = XInternAtom(display, "CLIPBOARD", 0),
+		XSEL_DATA = XInternAtom(display, "XSEL_DATA", 0);
+	XConvertSelection(display, CLIPBOARD, atom, XSEL_DATA, window, CurrentTime);
+	XSync(display, 0);
+	XNextEvent(display, &event);
+	
+	switch(event.type) {
+		case SelectionNotify:
+		if(event.xselection.selection != CLIPBOARD) break;
+		if(event.xselection.property) {
+			XGetWindowProperty(event.xselection.display, event.xselection.requestor,
+				event.xselection.property, 0L,(~0L), 0, AnyPropertyType, &target,
+				&format, &size, &N,(unsigned char**)&data);
+			if(target == UTF8 || target == XA_STRING) {
+				s = strndup(data, size);
+				XFree(data);
+			}
+			XDeleteProperty(event.xselection.display, event.xselection.requestor, event.xselection.property);
+		}
+	}
+  return s;
+}
+
+static char *x11_paste() {
+	const int XA_STRING = 31;
+	static Display * display = XOpenDisplay(0);
+	static Atom UTF8 = XInternAtom(display, "UTF8_STRING", True); 
+	const int N = DefaultScreen(display);
+	static Window window = XCreateSimpleWindow(display, RootWindow(display, N), 0, 0, 1, 1, 0,
+		BlackPixel(display, N), WhitePixel(display, N)
+	);	
+	char * c = 0;
+	if(UTF8 != None) c = x11_paste_type(UTF8, display, window, UTF8, XA_STRING);
+	if(!c) c = x11_paste_type(XA_STRING, display, window, UTF8, XA_STRING);
+	return c;
+}
+
+static bool read_clipboard_unix(std::string& clipboardText) const {
+	clipboardText = x11_paste();
+	return true;
+}
+
+#endif
+
+static bool read_clipboard(std::string& clipboardText){
+	this->topMessageBar.assign("Clipboard text has been copied successfully");
+	std::string clipboardText;
+	#ifdef _WIN32
+	return read_clipboard_windows(clipboardText);
+	#else
+	return read_clipboard_unix(clipboardText);
+	#endif
+}
+
+void Lime::insert_from_clipboard(){
+	const bool successfulRead = read_clipboard(clipboardBuffer);
+	if(successfulRead){
+		this->textEditor.insert(clipboardBuffer.c_str());
+	}else{
+		this->topMessageBar.assign("Bad Copy Paste Event");
+	}
+}
+
 void Lime::prozess_key_event(Term::Key keyEvent){
+	std::string clipboardBuffer;
 	switch(keyEvent){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
@@ -122,25 +238,24 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();
 		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();
 		
-		case Term::Key::ALT + Term::Key::J : /*TODO: move one word left*/; break;
-		case Term::Key::ALT + Term::Key::I : /*move one paragraph/codeblock up*/; break;
-		case Term::Key::ALT + Term::Key::L : /*TODO: move one word right*/; break; 
-		case Term::Key::ALT + Term::Key::K : /*TODO: move one paragraph/codeblock down*/; break;
-		Ctrl-b			:	move cursor to the bottom of the file
-		(alternative: Ctrl-e			:	move cursor to the end of the file)
-
-		Alt-j			:	move one word left
-		Alt-i			:	move one paragraph/codeblock up
-		Alt-l			:	move one word right
-		Alt-k			:	move one paragraph/codeblock down
-
-		Alt-u			:	move to the beginning of the line
-		Alt-o			:	move to the end of the line
+		case Term::Key::ALT + Term::Key::U : this->textEditor.move_to_start_of_line(); break;
+		case Term::Key::ALT + Term::Key::O : this->textEditor.move_to_end_of_line(); break;
+		
+		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
+		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
+		case Term::Key::ALT + Term::Key::L : this->topMessageBar.assign("/*TODO: move one word right*/"); break; 
+		case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
 		
 		// ----- special inserts -----
 		case Term::Key::ENTER : this->textEditor.move_down(); break; 
 		
+		// ------- editing -------
+		case Term::Key::CTRL + Term::Key::V : this->insert_from_clipboard(); break;
+		case Term::Key::CTRL + Term::Key::C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
+		case Term::Key::CTRL + Term::Key::X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
+		
 		default:{
+			// ------- key insertions ----------
 			else if(keyEvent.is_ASCII()){
 				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
 				this->textEditor.insert(ascii);	
@@ -151,7 +266,6 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		}break;	
 	}
 }
-  
   
 void Lime::prozess_empty_event(){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Empty' ");
