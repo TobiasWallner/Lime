@@ -93,15 +93,13 @@ public:
 	/// returns the size of the current line
 	inline size_type line_size(){return this->lineItr()->size();}
 	
+	inline size_type cursor_line() const {return this->_cursor.lineNumber;}
+	inline size_type cursor_column() const {return this->_cursor.columnNumber;}
+	
 	/// inserts a character at the current cursor position into the string
-	void insert(utf8::Char c);
-	
-	/// converts the char into a utf8::Char and inserts it at the current cursor position and advances the cursor
-	inline void insert(char c){this->insert(utf8::Char(c));}
-	
-	/// inserts the null terminated string into the stream
-	/// returns true is the string could be read as utf8, returns false otherwise
-	bool insert(const char*);
+	TermGui::TextEditor& insert(utf8::Char c);
+	inline TermGui::TextEditor& insert(char c){return this->insert(utf8::Char(c));}
+	bool insert(const char* str);
 	
 	/// inserts a new line after the current cursor position
 	inline void insert_line_after(){
@@ -111,13 +109,13 @@ public:
 	}
 	
 	/// inserts a new line after the current one and moves the cursor to the beginning
-	/// of the inserted line
-	inline void insert_new_line(){
-		this->insert_line_after();
-		++this->_cursor.lineNumber;
-		++this->_cursor.lineIterator;
-		this->_cursor.columnNumber = 0;
-	}
+	/// of the inserted line. copies the remaining string to the beginning of the new line
+	TermGui::TextEditor& insert_new_line();
+	
+	/// expects that the character is a number, letter, bracket, operator, or the like.
+	/// character cannot be a special character like a line break or a backspace
+	/// simply inserts the character at the current cursor position without any prozessing.
+	TermGui::TextEditor& insert_naive(utf8::Char character);
 	
 	/// inserts a new line before the current cursor position
 	inline void insert_line_before(){this->_text.insert(this->lineItr(), Line());}
@@ -164,6 +162,8 @@ public:
 	/// moves the cursor to the start of the line
 	inline void move_to_start_of_line(){this->_cursor.columnNumber = 0;}
 	
+	inline void move_to_start_of_file(){this->_cursor.columnNumber = 0; this->_cursor.lineNumber = 0; this->_cursor.lineIterator = this->begin();}
+	
 	/// moves the cursor to the end of the line;
 	inline void move_to_end_of_line(){this->_cursor.columnNumber = this->lineItr()->size();}
 	
@@ -205,6 +205,9 @@ public:
 		self.read_file(stream);
 		return stream;
 	}
+	
+	/// erases the character at the index position
+	TextEditor& erase();
 	
 private:
 
