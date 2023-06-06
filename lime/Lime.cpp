@@ -49,18 +49,7 @@ int Lime::run(){
 			Term::Option::Raw			// get the raw and unprozessed io data from the console buffers
 	);
 	
-	
-	
 	// Entering the Program loop: get inputs -> prozess inputs -> display/save changes
-	
-	TermGui::ColorString colorString("This ");
-		colorString << TermGui::FgColor(255, 0, 0) << "is " << TermGui::FgColor(0, 255, 0) << "the " << TermGui::BgColor(255, 0, 255) << " Lime" << TermGui::FgColor(255, 255, 255) << TermGui::BgColor(0, 0, 0) << "Editor";
-	
-	std::string outputString;
-	colorString.render(outputString);
-	
-	std::cout << outputString << std::endl;
-	
 	this->run_main_loop();
 	
 	return EXIT_SUCCESS;
@@ -77,6 +66,9 @@ void Lime::quit(){
 void Lime::run_main_loop(){
 	std::string outputString; 	//reuse string memory
 	outputString.reserve(1024 * 2); // reserve 2kB of memory in advance
+	// initial render of the whole screen
+	this->render(outputString);
+	this->draw(outputString);
 	while(this->main_loop_continue){
 		auto event = Term::read_event();
 		this->prozess_event(std::move(event));

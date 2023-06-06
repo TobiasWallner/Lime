@@ -8,7 +8,7 @@
 #include "RenderTrait.hpp"
 
 //cpp-terminal
-#include <cpp-terminal\color.hpp>
+#include <cpp-terminal/color.hpp>
 
 namespace TermGui{
 

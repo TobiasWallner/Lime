@@ -1,6 +1,6 @@
 
 
-#include <cpp-terminal-gui\TextEditor.hpp>
+#include <cpp-terminal-gui/TextEditor.hpp>
 
 // C std
 #include <stdlib.h>

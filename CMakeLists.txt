@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.0)
+cmake_minimum_required(VERSION 3.18.0)
 
 project(lime)
 
@@ -27,7 +27,7 @@ add_executable(lime
 	main.cpp
 	
 	# lime
-	lime/lime.cpp				lime/lime.hpp
+	lime/Lime.cpp				lime/Lime.hpp
 )
 
 # Compiler Options for Clang:

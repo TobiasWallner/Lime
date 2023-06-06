@@ -1,6 +1,6 @@
 
 
-#include <cpp-terminal-gui\TextEditor.hpp>
+#include <cpp-terminal-gui/TextEditor.hpp>
 
 #include <../verification/verification.hpp>
 // C std
