@@ -43,21 +43,21 @@ static void insert_a_foreground_color_into_the_command_list(){
 	TermGui::CommandList commandList;
 	TermGui::FgColor forgroundColor(10, 50, 80);
 	const int index = 11;
-	commandList.insert(forgroundColor, index);
+	commandList.add(forgroundColor, index);
 }
 
 static void insert_a_background_color_into_the_command_list(){
 	TermGui::CommandList commandList;
 	TermGui::BgColor backgroundColor(90, 60, 20);
 	const int index = 11;
-	commandList.insert(backgroundColor, index);
+	commandList.add(backgroundColor, index);
 }
 
 static void  insert_into_makes_list_not_empty(){
 	TermGui::CommandList commandList;
 	TermGui::FgColor forgroundColor(10, 50, 80);
 	const int index = 11;
-	commandList.insert(forgroundColor, index);
+	commandList.add(forgroundColor, index);
 	assert(commandList.empty() == false, "command list should not be empty");
 	const auto expected_size = 1;
 	assert(commandList.size() == expected_size, "should have size " << expected_size << " but has size " << commandList.size());
@@ -66,9 +66,9 @@ static void  insert_into_makes_list_not_empty(){
 static void  insert_3_makes_size_3(){
 	TermGui::CommandList commandList;
 	TermGui::FgColor forgroundColor(10, 50, 80);
-	commandList.insert(forgroundColor, 1);
-	commandList.insert(forgroundColor, 2);
-	commandList.insert(forgroundColor, 3);
+	commandList.add(forgroundColor, 1);
+	commandList.add(forgroundColor, 2);
+	commandList.add(forgroundColor, 3);
 	const auto expected = 3;
 	assert(commandList.size() == expected, "command list should have size: " << expected << " but has size: " << commandList.size());
 	assert(std::is_sorted(commandList.begin(), commandList.end(), smaller), "the list is not sorted after 3 insertions");
@@ -79,8 +79,8 @@ static void insert_two_different_commands_into_the_same_index(){
 	TermGui::FgColor forgroundColor(10, 50, 80);
 	TermGui::BgColor backgroundColor(90, 60, 20);
 	
-	const bool result1 = commandList.insert(forgroundColor, 1);
-	const bool result2 = commandList.insert(backgroundColor, 1);
+	const bool result1 = commandList.add(forgroundColor, 1);
+	const bool result2 = commandList.add(backgroundColor, 1);
 	
 	assert(result1, ".insert() should return true");
 	assert(result2, ".insert() should return true");
@@ -95,8 +95,8 @@ static void insert_two_different_commands_into_the_same_index_v2(){
 	TermGui::FgColor forgroundColor(10, 50, 80);
 	TermGui::BgColor backgroundColor(90, 60, 20);
 	
-	const bool result1 = commandList.insert(backgroundColor, 1);
-	const bool result2 = commandList.insert(forgroundColor, 1);
+	const bool result1 = commandList.add(backgroundColor, 1);
+	const bool result2 = commandList.add(forgroundColor, 1);
 	
 	assert(result1, ".insert() should return true");
 	assert(result2, ".insert() should return true");
@@ -111,8 +111,8 @@ static void insert_two_similar_commands_into_the_same_index(){
 	TermGui::FgColor forgroundColor1(10, 50, 80);
 	TermGui::FgColor forgroundColor2(90, 60, 20);
 	
-	const bool result1 = commandList.insert(forgroundColor1, 1);
-	const bool result2 = commandList.insert(forgroundColor2, 1);
+	const bool result1 = commandList.add(forgroundColor1, 1);
+	const bool result2 = commandList.add(forgroundColor2, 1);
 	
 	assert(result1 == true, "could not insert element into empty list");
 	assert(result2 == false, "same element type should not be pushed back into the same index and insert should return false");
