@@ -31,6 +31,7 @@
 #include <Windows.h>
 #else
 #include <X11/Xlib.h>
+#include <climits>
 #include <cstring>
 #endif
 
