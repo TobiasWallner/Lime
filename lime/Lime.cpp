@@ -35,9 +35,20 @@
 #include <cstring>
 #endif
 
-
 Lime::Lime(){
-	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
+	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Paste: " << TermGui::FgColor(0, 200, 0) << "Ctrl + V" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   
+				   << "Move Left: " << TermGui::FgColor(0, 200, 0) << "Ctrl + J" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Up: " << TermGui::FgColor(0, 200, 0) << "Ctrl + I" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Right: " << TermGui::FgColor(0, 200, 0) << "Ctrl + L" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Down: " << TermGui::FgColor(0, 200, 0) << "Ctrl + K" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   
+				   << "Move to Line Start: " << TermGui::FgColor(0, 200, 0) << "Ctrl + U" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move to Line End: " << TermGui::FgColor(0, 200, 0) << "Ctrl + O" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   
+				   << "Move to File Start: " << TermGui::FgColor(0, 200, 0) << "Ctrl + T" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move to File End: " << TermGui::FgColor(0, 200, 0) << "Ctrl + E" << TermGui::FgColor(Term::Color::Name::Default) << "\t";
 }
 
 int Lime::run(){
