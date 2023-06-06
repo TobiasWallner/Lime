@@ -28,7 +28,6 @@
 
 // lime 
 #include <Windows.h>
-#include <iostream>
 
 Lime::Lime(){
 	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
@@ -127,17 +126,15 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		if (ctrlPlusKey == Term::Key::V) {
 			this->topMessageBar.assign("Clipboard text has been copied successfully");
 
-			char* clipboardText = nullptr;
+			std::string clipboardText;
 
 			if (RetrieveClipboardText(clipboardText))
 			{
-				this->textEditor.insert(clipboardText);
-
-				// Clean up the allocated memory
-				delete[] clipboardText;
+				this->textEditor.insert(clipboardText.c_str());
 			}
 			else {
 				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
+				this->textEditor.insert("");
 			}
 		
 		}
@@ -194,12 +191,11 @@ void Lime::draw(const std::string& outputString) const{
 				<< outputString << std::flush;
 }
 
-bool Lime:: RetrieveClipboardText(char*& clipboard) const {
-
+bool Lime::RetrieveClipboardText(std::string& clipboardText) const{
+	
 	// Open the clipboard
 	if (!OpenClipboard(NULL))
 	{
-		std::cout << "Failed to open clipboard!" << std::endl;
 		return false;
 	}
 
@@ -207,7 +203,6 @@ bool Lime:: RetrieveClipboardText(char*& clipboard) const {
 	HANDLE handle = GetClipboardData(CF_TEXT);
 	if (handle == NULL)
 	{
-		std::cout << "Failed to get clipboard data!" << std::endl;
 		CloseClipboard();
 		return false;
 	}
@@ -216,15 +211,12 @@ bool Lime:: RetrieveClipboardText(char*& clipboard) const {
 	char* text = static_cast<char*>(GlobalLock(handle));
 	if (text == NULL)
 	{
-		std::cout << "Failed to lock clipboard data!" << std::endl;
 		CloseClipboard();
 		return false;
 	}
 
-	// Copy the retrieved text to the clipboard char*
-	size_t textLength = strlen(text) + 1;
-	clipboard = new char[textLength];
-	strcpy_s(clipboard, textLength, text);
+	// Assign the retrieved text to the output parameter
+	clipboardText = text;
 
 	// Release the memory and close the clipboard
 	GlobalUnlock(handle);
