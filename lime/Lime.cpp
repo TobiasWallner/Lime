@@ -66,6 +66,9 @@ void Lime::quit(){
 void Lime::run_main_loop(){
 	std::string outputString; 	//reuse string memory
 	outputString.reserve(1024 * 2); // reserve 2kB of memory in advance
+	// initial render of the whole screen
+	this->render(outputString);
+	this->draw(outputString);
 	while(this->main_loop_continue){
 		auto event = Term::read_event();
 		this->prozess_event(std::move(event));
