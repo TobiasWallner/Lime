@@ -26,6 +26,10 @@
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
 
+// lime 
+#include <Windows.h>
+#include <iostream>
+
 Lime::Lime(){
 	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
 }
@@ -119,7 +123,25 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		const auto ctrlPlusKey = keyEvent - Term::Key::CTRL;
 		if(ctrlPlusKey == Term::Key::Q){
 			this->quit();
-		}else{
+		}
+		if (ctrlPlusKey == Term::Key::V) {
+			this->topMessageBar.assign("Clipboard text has been copied successfully");
+
+			char* clipboardText = nullptr;
+
+			if (RetrieveClipboardText(clipboardText))
+			{
+				this->textEditor.insert(clipboardText);
+
+				// Clean up the allocated memory
+				delete[] clipboardText;
+			}
+			else {
+				this->topMessageBar.assign("Internal Error: Bad input from Clipboard");
+			}
+		
+		}
+		else {
 			const auto ascii = static_cast<char>(ctrlPlusKey + Term::Key::NUL); 
 			this->topMessageBar.assign("Internal Error: Unhandeled Key press: Ctrl + ").append(ascii);
 		}
@@ -170,4 +192,43 @@ void Lime::draw(const std::string& outputString) const{
 	std::cout 	<< Term::clear_screen() 
 				<< Term::cursor_move(0, 0) 
 				<< outputString << std::flush;
+}
+
+bool Lime:: RetrieveClipboardText(char*& clipboard) const {
+
+	// Open the clipboard
+	if (!OpenClipboard(NULL))
+	{
+		std::cout << "Failed to open clipboard!" << std::endl;
+		return false;
+	}
+
+	// Get the clipboard data
+	HANDLE handle = GetClipboardData(CF_TEXT);
+	if (handle == NULL)
+	{
+		std::cout << "Failed to get clipboard data!" << std::endl;
+		CloseClipboard();
+		return false;
+	}
+
+	// Lock the memory and retrieve the text
+	char* text = static_cast<char*>(GlobalLock(handle));
+	if (text == NULL)
+	{
+		std::cout << "Failed to lock clipboard data!" << std::endl;
+		CloseClipboard();
+		return false;
+	}
+
+	// Copy the retrieved text to the clipboard char*
+	size_t textLength = strlen(text) + 1;
+	clipboard = new char[textLength];
+	strcpy_s(clipboard, textLength, text);
+
+	// Release the memory and close the clipboard
+	GlobalUnlock(handle);
+	CloseClipboard();
+
+	return true;
 }

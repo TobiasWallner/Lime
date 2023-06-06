@@ -111,5 +111,7 @@ private:
 	
 	/// clears the screen and draws the output string onto the screen
 	void draw(const std::string& outputString) const;
-		
+
+	/// copies the clipboard text into screen, attatch text at the end of main string
+	bool RetrieveClipboardText(char*& clipboard) const;
 };
