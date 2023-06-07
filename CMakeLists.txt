@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18.0)
 project(lime)
 
 # Basic compiler settings
-set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # ----------- dependencies ------------
@@ -21,6 +21,31 @@ enable_testing() # enable testing for internal libraries
 add_subdirectory("${MODULES_PATH}/utf8_string")
 add_subdirectory("${MODULES_PATH}/cpp-terminal-gui")
 add_subdirectory("${MODULES_PATH}/verification")
+
+
+# ---------- unix specific libraries ------------
+
+set(UNIX_LIBRARIES "")
+
+if (UNIX)
+	find_package(X11 REQUIRED)
+	set(UNIX_LIBRARIES "X11")
+endif()
+
+
+# -------------------------------------------------
+
+# ---------- unix specific libraries ------------
+
+set(UNIX_LIBRARIES "")
+
+if (UNIX)
+	find_package(X11 REQUIRED)
+	set(UNIX_LIBRARIES "X11")
+endif()
+
+
+# -------------------------------------------------
 
 # project building process: 
 add_executable(lime
@@ -113,5 +138,7 @@ target_link_libraries(lime PUBLIC
 	utf8_string
 	cpp-terminal
 	cpp-terminal-gui
+	# ----- linux specific libraries -----
+	${UNIX_LIBRARIES}
 )
 

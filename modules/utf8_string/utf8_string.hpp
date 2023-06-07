@@ -279,8 +279,15 @@ public:
 		return stream;
 	}
 	
+	/// inserts one element at the position given by the index
 	inline BaseString& insert(size_type index, Char c){this->base_class::insert(index, 1, c); return *this;}
 	inline BaseString& insert(size_type index, char c){this->base_class::insert(index, 1, Char(c)); return *this;}
+	
+	/// removes one element at the position given by the index
+	inline BaseString& erase(size_type index){this->base_class::erase(index, 1); return *this;}
+	
+	/// removes coint many elements or until the string-end at the position given by the index
+	inline BaseString& erase(size_type index, size_type count){this->base_class::erase(index, count); return *this;}
 
 };
 

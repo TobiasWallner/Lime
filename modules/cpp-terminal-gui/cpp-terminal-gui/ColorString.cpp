@@ -89,8 +89,9 @@ TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_typ
 }
 
 TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index_from, TermGui::ColorString::size_type index_to){
-	this->_string.erase(index_from, index_to);
+	const auto count = index_to - index_from;
+	this->_string.erase(index_from, count);
 	this->_commands.merge(index_from, index_to);
-	this->_commands.offset_index_after(index_from, index_to - index_from);
+	this->_commands.offset_index_after(index_from, count);
 	return *this;
 }

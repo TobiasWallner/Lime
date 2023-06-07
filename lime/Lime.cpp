@@ -26,8 +26,29 @@
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
 
+// lime (pasting both for windows and unix) 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <X11/Xlib.h>
+#include <climits>
+#include <cstring>
+#endif
+
 Lime::Lime(){
-	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default);
+	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Paste: " << TermGui::FgColor(0, 200, 0) << "Ctrl + V" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   
+				   << "Move Left: " << TermGui::FgColor(0, 200, 0) << "Ctrl + J" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Up: " << TermGui::FgColor(0, 200, 0) << "Ctrl + I" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Right: " << TermGui::FgColor(0, 200, 0) << "Ctrl + L" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Down: " << TermGui::FgColor(0, 200, 0) << "Ctrl + K" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   
+				   << "Move to Line Start: " << TermGui::FgColor(0, 200, 0) << "Ctrl + U" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move to Line End: " << TermGui::FgColor(0, 200, 0) << "Ctrl + O" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   
+				   << "Move to File Start: " << TermGui::FgColor(0, 200, 0) << "Ctrl + T" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move to File End: " << TermGui::FgColor(0, 200, 0) << "Ctrl + E" << TermGui::FgColor(Term::Color::Name::Default) << "\t";
 }
 
 int Lime::run(){
@@ -103,27 +124,157 @@ void Lime::prozess_event(Term::Event&& event){
 	}
 }
 
-void Lime::prozess_key_event(Term::Key keyEvent){
-	if(keyEvent == Term::Key::ENTER){
-		this->textEditor.insert_new_line();
-	}else if(keyEvent.is_CTRL()){
-		const auto ctrlPlusKey = keyEvent - Term::Key::CTRL;
-		if(ctrlPlusKey == Term::Key::Q){
-			this->quit();
-		}else{
-			const auto ascii = static_cast<char>(ctrlPlusKey + Term::Key::NUL); 
-			this->topMessageBar.assign("Internal Error: Unhandeled Key press: Ctrl + ").append(ascii);
-		}
-	}else if(keyEvent.is_ASCII()){
-		const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
-		this->textEditor.insert(ascii);	
-	}else{
-		const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
-		this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+#ifdef _WIN32
+static bool read_clipboard_windows(std::string& clipboardText){
+	// Open the clipboard
+	if (!OpenClipboard(NULL)){
+		return false;
 	}
-	
+
+	// Get the clipboard data
+	HANDLE handle = GetClipboardData(CF_TEXT);
+	if (handle == NULL){
+		CloseClipboard();
+		return false;
+	}
+
+	// Lock the memory and retrieve the text
+	char* text = static_cast<char*>(GlobalLock(handle));
+	if (text == NULL){
+		CloseClipboard();
+		return false;
+	}
+
+	// Assign the retrieved text to the output parameter
+	clipboardText = text;
+
+	// Release the memory and close the clipboard
+	GlobalUnlock(handle);
+	CloseClipboard();
+
+	return true;
 }
-  
+#else
+
+// the unix implementation for copiing from the clipboard has been copied from:
+// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+// and modified accordingly
+
+static char * x11_paste_type(const Atom& atom, Display*& display, const Window& window, const Atom& UTF8, const int& XA_STRING) {
+	XEvent event;
+	int format;
+	unsigned long N, size;
+	char * data, * s = 0;
+	Atom target,
+		CLIPBOARD = XInternAtom(display, "CLIPBOARD", 0),
+		XSEL_DATA = XInternAtom(display, "XSEL_DATA", 0);
+	XConvertSelection(display, CLIPBOARD, atom, XSEL_DATA, window, CurrentTime);
+	XSync(display, 0);
+	XNextEvent(display, &event);
+	
+	switch(event.type) {
+		case SelectionNotify:
+		if(event.xselection.selection != CLIPBOARD) break;
+		if(event.xselection.property) {
+			XGetWindowProperty(event.xselection.display, event.xselection.requestor,
+				event.xselection.property, 0L,(~0L), 0, AnyPropertyType, &target,
+				&format, &size, &N,(unsigned char**)&data);
+			if(target == UTF8 || target == XA_STRING) {
+				s = strndup(data, size);
+				XFree(data);
+			}
+			XDeleteProperty(event.xselection.display, event.xselection.requestor, event.xselection.property);
+		}
+	}
+  return s;
+}
+
+static char *x11_paste() {
+	const int XA_STRING = 31;
+	static Display * display = XOpenDisplay(0);
+	static Atom UTF8 = XInternAtom(display, "UTF8_STRING", True); 
+	const int N = DefaultScreen(display);
+	static Window window = XCreateSimpleWindow(display, RootWindow(display, N), 0, 0, 1, 1, 0,
+		BlackPixel(display, N), WhitePixel(display, N)
+	);	
+	char * c = 0;
+	if(UTF8 != None) c = x11_paste_type(UTF8, display, window, UTF8, XA_STRING);
+	if(!c) c = x11_paste_type(XA_STRING, display, window, UTF8, XA_STRING);
+	return c;
+}
+
+static bool read_clipboard_unix(std::string& clipboardText){
+	clipboardText = x11_paste();
+	return true;
+}
+
+#endif
+
+static bool read_clipboard(std::string& clipboardText){
+	#ifdef _WIN32
+	return read_clipboard_windows(clipboardText);
+	#else
+	return read_clipboard_unix(clipboardText);
+	#endif
+}
+
+void Lime::insert_from_clipboard(){
+	std::string clipboardBuffer;
+	const bool successfulRead = read_clipboard(clipboardBuffer);
+	if(successfulRead){
+		this->textEditor.insert(clipboardBuffer.c_str());
+	}else{
+		this->topMessageBar.assign("Bad Copy Paste Event");
+	}
+}
+
+void Lime::prozess_key_event(Term::Key keyEvent){
+	switch(keyEvent + Term::Key::NUL){
+		//---- basics -----
+		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
+		
+		//----- navigation and cursor movement -----
+		case Term::Key::CTRL + Term::Key::J : this->textEditor.move_back(); break;
+		case Term::Key::CTRL + Term::Key::I : this->textEditor.move_up(); break;
+		case Term::Key::CTRL + Term::Key::L : this->textEditor.move_forward(); break; 
+		case Term::Key::CTRL + Term::Key::K : this->textEditor.move_down(); break;
+		
+		case Term::Key::ARROW_LEFT 	: this->textEditor.move_back(); break;
+		case Term::Key::ARROW_UP 	: this->textEditor.move_up(); break;
+		case Term::Key::ARROW_RIGHT : this->textEditor.move_forward(); break; 
+		case Term::Key::ARROW_DOWN 	: this->textEditor.move_down(); break; 
+		
+		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();
+		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();
+		
+		case Term::Key::ALT + Term::Key::U : this->textEditor.move_to_start_of_line(); break;
+		case Term::Key::ALT + Term::Key::O : this->textEditor.move_to_end_of_line(); break;
+		
+		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
+		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
+		case Term::Key::ALT + Term::Key::L : this->topMessageBar.assign("/*TODO: move one word right*/"); break; 
+		case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
+		
+		// ----- special inserts -----
+		case Term::Key::ENTER : this->textEditor.insert_new_line(); break; 
+		
+		// ------- editing -------
+		case Term::Key::CTRL + Term::Key::V : this->insert_from_clipboard(); break;
+		case Term::Key::CTRL + Term::Key::C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
+		case Term::Key::CTRL + Term::Key::X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
+		
+		default:{
+			// ------- key insertions ----------
+			if(keyEvent.is_ASCII()){
+				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
+				this->textEditor.insert(ascii);	
+			}else{
+				const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
+				this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+			}
+		}break;	
+	}
+}
   
 void Lime::prozess_empty_event(){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Empty' ");

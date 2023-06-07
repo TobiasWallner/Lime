@@ -162,10 +162,20 @@ public:
 	/// moves the cursor to the start of the line
 	inline void move_to_start_of_line(){this->_cursor.columnNumber = 0;}
 	
-	inline void move_to_start_of_file(){this->_cursor.columnNumber = 0; this->_cursor.lineNumber = 0; this->_cursor.lineIterator = this->begin();}
+	inline void move_to_start_of_file(){
+		this->_cursor.columnNumber = 0; 
+		this->_cursor.lineNumber = 0; 
+		this->_cursor.lineIterator = this->begin();
+	}
 	
 	/// moves the cursor to the end of the line;
 	inline void move_to_end_of_line(){this->_cursor.columnNumber = this->lineItr()->size();}
+	
+	inline void move_to_end_of_file(){
+		this->_cursor.lineNumber = this->_text.size()-1;
+		this->_cursor.lineIterator = this->last();
+		this->_cursor.columnNumber = this->last()->size();
+	}
 	
 	/// returns true if the cursor is at the start of the current line and false otherwise
 	inline bool is_start_of_line() const {return this->column_number() == 0;}
