@@ -2,7 +2,8 @@
 
 #include <cpp-terminal-gui/ColorString.hpp>
 
-#include <../verification/verification.hpp>
+#include "../verification/verification.hpp"
+
 // C std
 #include <stdlib.h>
 
@@ -108,8 +109,8 @@ static void insert_into_static_string_and_erase_range(){
 }
 
 static void verify_string_in_file(){
-	TermGui::ColoredString string;
-	string << "I see skyes of " << TermGui::FgColor(0, 0, 255), " blue" << TermGui::FgColor(255, 255, 255);
+	TermGui::ColorString string;
+	string << "I see skyes of " << TermGui::FgColor(0, 0, 255) << " blue" << TermGui::FgColor(255, 255, 255);
 	string << " and clouds of " << TermGui::FgColor(0, 0, 0) << TermGui::BgColor(255, 255, 255) << " white\n";
 	string << TermGui::FgColor(255, 255, 0) << TermGui::BgColor(0, 0, 0) << "The bright blessed days, ";
 	string << TermGui::FgColor(255, 255, 255) << TermGui::BgColor(105,105,105) << "the dark sacred nights\n";
@@ -121,11 +122,12 @@ static void verify_string_in_file(){
   	string << TermGui::FgColor(0, 0, 255)  << "ful ";
   	string << TermGui::FgColor(75, 0, 130)  << "wor";
   	string << TermGui::FgColor(238, 130, 238)  << "ld\n";
-	
-	std::cout << string;
+	std::string out;
+	string.render(out);
+	std::cout << out;
 
 	std::filesystem::path currPath = std::filesystem::current_path();
-	verifyFile(currPath, "color_string", string);
+	fileVerify(currPath, "color_string", out);
 
 }
 
