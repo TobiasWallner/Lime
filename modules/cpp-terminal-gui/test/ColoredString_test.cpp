@@ -28,7 +28,7 @@
 			}
 									
 
-static void insert_into_static_string_and_erase_last(){
+static void insert_into_string_and_erase_last(){
 	TermGui::ColorString string;
 	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
@@ -44,7 +44,7 @@ static void insert_into_static_string_and_erase_last(){
 	assert_expected(string.styles().back().index, last_color_index-1);
 }
 
-static void insert_into_static_string_and_erase_between(){
+static void insert_into_string_and_erase_between(){
 	TermGui::ColorString string;
 	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
@@ -64,7 +64,7 @@ static void insert_into_static_string_and_erase_between(){
 	assert_expected(string.styles().back().index, last_color_index-1);
 }
 
-static void insert_into_static_string_and_erase_first(){
+static void insert_into_string_and_erase_first(){
 	TermGui::ColorString string;
 	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
@@ -80,7 +80,7 @@ static void insert_into_static_string_and_erase_first(){
 	assert_expected(string.styles().back().index, last_color_index-1);
 }
 
-static void insert_into_static_string_and_erase_range(){
+static void insert_into_string_and_erase_range(){
 	TermGui::ColorString string;
 	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
@@ -96,21 +96,38 @@ static void insert_into_static_string_and_erase_range(){
 	auto erased = erase_end - erase_begin - 1;
 	
 	assert_expected(string.size(), size - erased);
-	assert_expected(string.styles().size(), 1);
+	assert_expected(string.styles().size(), 2);
 	assert_expected(string.styles().front().index, first_color_index);
 	
-	auto expected = TermGui::fg_color(255, 255, 255);
-	auto got = string.styles().front().styles.front();
+	const auto expected = TermGui::fg_color(255, 255, 255);
+	const auto& got = string.styles().front().styles.front();
 	
 	assert(got == expected, "wrong color survived.");
 }
 
+static void erase_from_text_after_last_style() {
+	TermGui::ColorString string;
+	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255) << " this is red now";
+
+	const auto size = string.size();
+	const auto first_color_index = string.styles().front().index;
+	const auto last_color_index = string.styles().back().index;
+
+	string.erase(string.size() - 1);
+
+	assert_expected(string.size(), size - 1);
+	assert_expected(string.styles().size(), 2);
+	assert_expected(string.styles().front().index, first_color_index);
+	assert_expected(string.styles().back().index, last_color_index);
+}
+
 int main(){
 	
-	insert_into_static_string_and_erase_last();
-	insert_into_static_string_and_erase_between();
-	insert_into_static_string_and_erase_first();
-	insert_into_static_string_and_erase_range();
+	insert_into_string_and_erase_last();
+	insert_into_string_and_erase_between();
+	insert_into_string_and_erase_first();
+	insert_into_string_and_erase_range();
+	erase_from_text_after_last_style();
 	
 	return EXIT_SUCCESS;
 }
