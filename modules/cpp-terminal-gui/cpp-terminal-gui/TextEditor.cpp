@@ -72,17 +72,17 @@ bool TermGui::TextEditor::insert(const char* str){
 }
 
 bool TermGui::TextEditor::insert(const char* str, size_type size){
-	std::streamsize pos = 0;
+	size_type pos = 0;
 	while(pos != size){
 		utf8::Char c;
-		const char* next = c.assign(str);
+		const char* next = c.assign(str, size);
+		size -= std::distance(str, next);
 		if(next == str){
 			// no characters have been read -> error
 			return false;
 		}
 		this->insert(c);
 		str = next;
-		pos++;
 	}
 	return true;
 }
@@ -176,7 +176,7 @@ bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
 	if(file.is_open()){
 		while(!file.eof()){
 			file.read (buffer, 4*1024);
-			_text.insert(buffer, file.gcount());
+			this->insert(buffer, file.gcount());
 		}
 		file.close();
 		this->move_to_start_of_file();
@@ -190,7 +190,7 @@ bool TermGui::TextEditor::read_file(std::ifstream& stream){
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	if(!std::filesystem::is_regular_file(path)) {return false;}
+	/*if(!std::filesystem::is_regular_file(path)) {return false;}
 	std::ofstream file(path);
 
 	if(file.is_open()){
@@ -199,12 +199,13 @@ bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
         }
         file.close();
 		return true;
-    }
+    }*/
 	return false;
 }
 
 bool TermGui::TextEditor::write_file(std::ofstream& stream){
-	return write_file(stream);
+	///return write_file(stream);
+	return false;
 }
 
 TermGui::TextEditor& TermGui::TextEditor::erase(){
