@@ -139,10 +139,14 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	for(auto itr = this->begin(); itr != this->end(); ++itr){
 		if(itr != this->begin()){
 			outputString += '\n';	
-		}else if(itr == this->_cursor.lineIterator){
+		}
+		if(this->show_cursor && itr == this->_cursor.lineIterator){
 			TermGui::TextEditor::Line lineCopy = *itr;
-			//lineCopy.add_override(/*show cursor*/, );
-			//lineCopy.add_override(/*hide cursor*/, )
+			if(this->is_end_of_line()){
+				lineCopy += ' ';
+			}
+			lineCopy.add_override(TermGui::FontStyle::Reversed::ON, this->cursor_column());
+			lineCopy.add_override(TermGui::FontStyle::Reversed::OFF, this->cursor_column() + 1);
 			lineCopy.render(outputString);
 		}else{
 			itr->render(outputString);
