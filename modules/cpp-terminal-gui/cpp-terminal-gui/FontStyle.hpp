@@ -58,7 +58,7 @@ public:
 	
 	enum class Underline : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::UNDERLINE),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_UNDERLINED),
+		OFF = static_cast<std::uint8_t>(Term::Style::RESET_UNDERLINE),
 	};
 	
 	enum class Font : std::uint8_t{
