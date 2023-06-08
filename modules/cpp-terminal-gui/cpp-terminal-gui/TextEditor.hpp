@@ -198,9 +198,11 @@ public:
 	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
 	void render(std::string& outputString) const override;
 	
+	/// reads the content of a file into the Editor
 	bool read_file(const std::filesystem::path& path);
 	bool read_file(std::ifstream& stream);
 	
+	/// writes the content of the Editor into a file
 	bool write_file(const std::filesystem::path& path);
 	bool write_file(std::ifstream& stream);
 	

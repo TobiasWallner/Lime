@@ -154,17 +154,43 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	
 
 bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
-	if(std::filesystem::is_regular_file(path) == 0) {return false;}
-	std::ifstream file(path);
-	if(file.is_open()) {
-		while(file.good()){
-			Line line;
-			getline(file, line);
-			_text.push_back(std::move(line));
-    	}
+	std::streampos size;
+	char *buffer;
+
+	if(!std::filesystem::is_regular_file(path)) {return false;}
+	std::ifstream file(path, std::ios::in|std::ios::binary|std::ios::ate);
+
+	if(file.is_open()){
+		size = file.tellg();
+		buffer = new char[size];
+		file.seekg (0, std::ios::beg);
+    	file.read (buffer, size);
+		_text.insert(buffer);
+    	file.close();
+		this->move_to_start_of_file();
+		delete [] buffer;
 		return true;
 	}
-	else {return false;}
+	return false;
+}
+
+bool TermGui::TextEditor::read_file(std::ifstream& stream){
+	std::streampos size;
+	char *buffer;
+
+	if(stream.is_open()){
+		stream.seekg(0, std::ios::end);
+		size = stream.tellg();
+		buffer = new char[size];
+		stream.seekg (0, std::ios::beg);
+		stream.read (buffer, size);
+		_text.insert(buffer);
+		stream.close();
+		this->move_to_start_of_file();
+		delete [] buffer;
+		return true;
+	}
+	return false;
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
@@ -175,6 +201,17 @@ bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
             file << line << "\n";
         }
         file.close();
+		return true;
+    }
+	return false;
+}
+
+bool TermGui::TextEditor::write_file(std::ifstream& stream){
+	if(stream.is_open()){
+        for(Line line : _text){
+            stream << line << "\n";
+        }
+        stream.close();
 		return true;
     }
 	return false;
