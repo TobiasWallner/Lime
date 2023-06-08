@@ -133,9 +133,6 @@ void TermGui::TextEditor::move_down(){
 }
 
 void TermGui::TextEditor::render(std::string& outputString) const {
-	if(this->empty()){
-		return;
-	}
 	for(auto itr = this->begin(); itr != this->end(); ++itr){
 		if(itr != this->begin()){
 			outputString += '\n';	
