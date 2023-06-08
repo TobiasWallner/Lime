@@ -149,8 +149,8 @@ public:
 		this->_styles.add_override(fontStyle, this->_string.size());
 		return *this;
 	}
-	inline ColorString& operator << (const FontStyle& fontStyle){ return *this << fontStyle; }
-	inline ColorString& operator += (const FontStyle& fontStyle){ return *this += fontStyle; }
+	inline ColorString& operator << (const FontStyle& fontStyle){ return this->append(fontStyle); }
+	inline ColorString& operator += (const FontStyle& fontStyle){ return this->append(fontStyle); }
 	
 	/// push_back as you would to the underlying string 
 	inline void posh_back(char c){this->_string.push_back(c);}
