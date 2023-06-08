@@ -105,11 +105,12 @@ bool TermGui::iStylesList::add(const FontStyle& fontStyle, TermGui::iStylesList:
 		return true;
 	}else{
 		// make a sorted add:
-		// reverse search the element in which or after which will be inserted
-		// reverse because new elements will be pushed back during writeing so it is expected
 		// that the new insertion point is at the end of the list. 
 		auto itr = this->find_greater_equal(index);
-		if(itr->index == index){
+		if (itr == this->end()) {
+			this->iStyleList.push_back(iStyles(fontStyle, index));
+			return true;
+		}else if(itr->index == index){
 			// fontStyle point already exists -> try adding the new fontStyle
 			const bool result = itr->add(fontStyle);
 			return result;
@@ -127,7 +128,10 @@ bool TermGui::iStylesList::add(const iStylesList::iStyles::list_type& listOfFont
 		return true;
 	}else{
 		auto itr = this->find_greater_equal(index);
-		if(itr->index == index){
+		if (itr == this->end()) {
+			this->iStyleList.push_back(iStyles(listOfFontStyles, index));
+			return true;
+		}else if(itr->index == index){
 			// add into existing container with same index
 			const bool result = itr->add(listOfFontStyles);
 			return result;
@@ -145,7 +149,10 @@ bool TermGui::iStylesList::add(iStyles::list_type&& listOfFontStyles, TermGui::i
 		return true;
 	}else{
 		auto itr = this->find_greater_equal(index);
-		if(itr->index == index){
+		if (itr == this->end()) {
+			this->iStyleList.push_back(iStyles(std::move(listOfFontStyles), index));
+			return true;
+		}else if(itr->index == index){
 			// add into existing container with same index
 			const bool result = itr->add(listOfFontStyles);
 			return result;
@@ -164,11 +171,12 @@ bool TermGui::iStylesList::add_override(const FontStyle& fontStyle, size_type in
 		return true;
 	}else{
 		// make a sorted add:
-		// reverse search the element in which or after which will be inserted
-		// reverse because new elements will be pushed back during writeing so it is expected
 		// that the new insertion point is at the end of the list. 
 		auto itr = this->find_greater_equal(index);
-		if(itr->index == index){
+		if (itr == this->end()) {
+			this->iStyleList.push_back(iStyles(fontStyle, index));
+			return true;
+		}else if(itr->index == index){
 			// fontStyle point already exists -> try adding the new fontStyle
 			const bool result = itr->add_override(fontStyle);
 			return result;
@@ -186,7 +194,10 @@ bool TermGui::iStylesList::add_override(const iStylesList::iStyles::list_type& l
 		return true;
 	}else{
 		auto itr = this->find_greater_equal(index);
-		if(itr->index == index){
+		if (itr == this->iStyleList.end()) {
+			this->iStyleList.push_back(iStyles(listOfFontStyles, index));
+			return true;
+		}else if(itr->index == index){
 			// add into existing container with same index
 			const bool result = itr->add_override(listOfFontStyles);
 			return result;
@@ -204,7 +215,10 @@ bool TermGui::iStylesList::add_override(iStyles::list_type&& listOfFontStyles, T
 		return true;
 	}else{
 		auto itr = this->find_greater_equal(index);
-		if(itr->index == index){
+		if (itr == this->end()) {
+			this->iStyleList.push_back(iStyles(std::move(listOfFontStyles), index));
+			return true;
+		}else if(itr->index == index){
 			// add into existing container with same index
 			const bool result = itr->add_override(listOfFontStyles);
 			return result;
@@ -270,14 +284,36 @@ void TermGui::iStylesList::offset_index_after(TermGui::iStylesList::iterator itr
 }
 
 void TermGui::iStylesList::merge(iterator first, iterator last){
-	auto itr = first;
-	while(itr != last){
+	auto itr = first+1;
+	for (; itr != last; ++itr) {
 		first->add_override(itr->styles);
 	}
-	this->erase(first+1, last);
+	this->iStyleList.erase(first + 1, last);
 }
 
 void TermGui::iStylesList::merge(size_type first_index, size_type last_index){
 	auto first = this->find_greater_equal(first_index);
-	auto last = this->find_greater_equal(last_index);
+	if (first == this->end()) {
+		// return if there are no elements left to merge
+		return;
+	}else if (first->index >= last_index) {
+		// do not merge if the first is out of bounds
+		return;
+	}
+
+	if (first->index != first_index) {
+		first->index = first_index;  // quick move
+	}
+
+	auto mergeStartItr = first + 1;
+	auto itr = mergeStartItr;
+	for (; itr != this->end(); ++itr) {
+		if (itr->index < last_index) {
+			first->add_override(itr->styles);
+		}
+		else {
+			this->iStyleList.erase(mergeStartItr, itr);
+			break;
+		}
+	}
 }
