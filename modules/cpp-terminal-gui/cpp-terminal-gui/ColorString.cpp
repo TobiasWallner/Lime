@@ -83,7 +83,7 @@ TermGui::ColorString& TermGui::ColorString::insert(size_type index, utf8::Char c
 
 TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index){
 	this->_string.erase(index);
-	this->_styles.merge(index, index+2);
+	this->_styles.merge(index, index + 2);
 	this->_styles.offset_index_after(index, -1);
 	return *this;
 }
