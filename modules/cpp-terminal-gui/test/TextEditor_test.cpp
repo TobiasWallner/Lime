@@ -179,6 +179,13 @@ static void insert_then_erase_from_file_start(){
 	assert_expected(editor.number_of_lines(), 2);
 }
 
+static void read_file(){
+	TermGui::TextEditor editor;
+	editor.read_file("test.txt");
+	assert_expected(editor.is_start_of_file(), true);
+	assert_expected(editor.number_of_lines(), 5);
+}
+
 int main(){
 	
 	construct_empty_text_editor();
@@ -195,6 +202,8 @@ int main(){
 	insert_then_new_line_then_erase_the_new_line();
 	insert_then_erase();
 	insert_then_erase_from_file_start();
+
+	read_file();
 	
 	return EXIT_SUCCESS;
 	

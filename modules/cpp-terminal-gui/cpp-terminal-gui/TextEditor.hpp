@@ -100,6 +100,7 @@ public:
 	TermGui::TextEditor& insert(utf8::Char c);
 	inline TermGui::TextEditor& insert(char c){return this->insert(utf8::Char(c));}
 	bool insert(const char* str);
+	bool insert(const char* str, std::streamsize size);
 	
 	/// inserts a new line after the current cursor position
 	inline void insert_line_after(){

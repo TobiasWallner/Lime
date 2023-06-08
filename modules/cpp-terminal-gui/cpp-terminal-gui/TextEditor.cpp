@@ -71,6 +71,21 @@ bool TermGui::TextEditor::insert(const char* str){
 	return true;
 }
 
+bool TermGui::TextEditor::insert(const char* str, std::streamsize size){
+	std::streamsize pos = 0;
+	while(pos != size){
+		utf8::Char c;
+		const char* next = c.assign(str);
+		if(next == str){
+			// no characters have been read -> error
+			return false;
+		}
+		this->insert(c);
+		str = next;
+	}
+	return true;
+}
+
 TermGui::TextEditor::iterator TermGui::TextEditor::find_line(size_type line){
 	//TODO: possible optimisation: decide between going from the start, current position or the end
 	auto itr = this->_text.begin();
@@ -154,66 +169,59 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	
 
 bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
-	std::streampos size;
-	char *buffer;
-
 	if(!std::filesystem::is_regular_file(path)) {return false;}
-	std::ifstream file(path, std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream file(path);
+	char buffer[4*1024];
 
 	if(file.is_open()){
-		size = file.tellg();
-		buffer = new char[size];
-		file.seekg (0, std::ios::beg);
-    	file.read (buffer, size);
-		_text.insert(buffer);
-    	file.close();
+		while(!file.eof()){
+			file.read (buffer, 4*1024);
+			_text.insert(buffer, file.gcount());
+		}
+		file.close();
 		this->move_to_start_of_file();
-		delete [] buffer;
 		return true;
 	}
 	return false;
 }
 
 bool TermGui::TextEditor::read_file(std::ifstream& stream){
-	std::streampos size;
-	char *buffer;
+	char buffer[4*1024];
 
 	if(stream.is_open()){
-		stream.seekg(0, std::ios::end);
-		size = stream.tellg();
-		buffer = new char[size];
-		stream.seekg (0, std::ios::beg);
-		stream.read (buffer, size);
-		_text.insert(buffer);
+		while(!stream.eof()){
+			stream.read (buffer, 4*1024);
+			_text.insert(buffer, stream.gcount());
+		}
 		stream.close();
 		this->move_to_start_of_file();
-		delete [] buffer;
 		return true;
 	}
 	return false;
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	if(std::filesystem::is_regular_file(path) == 0) {return false;}
+	/*if(std::filesystem::is_regular_file(path) == 0) {return false;}
 	std::ofstream file(path);
+
 	if(file.is_open()){
         for(Line line : _text){
             file << line << "\n";
         }
         file.close();
 		return true;
-    }
+    }*/
 	return false;
 }
 
 bool TermGui::TextEditor::write_file(std::ifstream& stream){
-	if(stream.is_open()){
+	/*if(stream.is_open()){
         for(Line line : _text){
             stream << line << "\n";
         }
         stream.close();
 		return true;
-    }
+    }*/
 	return false;
 }
 
