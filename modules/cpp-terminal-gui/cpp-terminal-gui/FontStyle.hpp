@@ -132,7 +132,7 @@ public:
 private:
 	struct Reset_t{};
 public:
-	static constexpr Reset_t Reset; // empty type used as a token
+	static constexpr Reset_t Reset{}; // empty type used as a token
 	
 	enum class Type : std::uint8_t{
 		reset, 
