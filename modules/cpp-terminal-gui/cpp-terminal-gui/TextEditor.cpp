@@ -166,7 +166,6 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		itr->render(outputString);
 	}
 }
-	
 
 bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
 	if(!std::filesystem::is_regular_file(path)) {return false;}
