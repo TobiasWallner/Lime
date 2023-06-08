@@ -6,6 +6,9 @@
 
 #include "TextEditor.hpp"
 
+#include <fstream>
+#include <iostream>
+
 TermGui::TextEditor::TextEditor(){
 	this->_text.emplace_back();
 	this->_cursor.lineNumber = 0;
@@ -151,12 +154,29 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	
 
 bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
-	//TODO(Helena):
-	return false;
+	if(std::filesystem::is_regular_file(path) == 0) {return false;}
+	std::ifstream file(path);
+	if(file.is_open()) {
+		while(file.good()){
+			Line line;
+			getline(file, line);
+			_text.push_back(std::move(line));
+    	}
+		return true;
+	}
+	else {return false;}
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	//TODO(Helena):
+	if(std::filesystem::is_regular_file(path) == 0) {return false;}
+	std::ofstream file(path);
+	if(file.is_open()){
+        for(Line line : _text){
+            file << line << "\n";
+        }
+        file.close();
+		return true;
+    }
 	return false;
 }
 
