@@ -205,7 +205,7 @@ public:
 	
 	/// writes the content of the Editor into a file
 	bool write_file(const std::filesystem::path& path);
-	bool write_file(std::ifstream& stream);
+	bool write_file(std::ofstream& stream);
 	
 	template<class Stream>
 	friend Stream& operator << (Stream& stream, TextEditor& self){

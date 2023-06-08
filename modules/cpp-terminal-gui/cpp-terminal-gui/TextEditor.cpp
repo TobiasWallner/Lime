@@ -186,22 +186,11 @@ bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
 }
 
 bool TermGui::TextEditor::read_file(std::ifstream& stream){
-	char buffer[4*1024];
-
-	if(stream.is_open()){
-		while(!stream.eof()){
-			stream.read (buffer, 4*1024);
-			_text.insert(buffer, stream.gcount());
-		}
-		stream.close();
-		this->move_to_start_of_file();
-		return true;
-	}
-	return false;
+	return read_file(stream);
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	/*if(std::filesystem::is_regular_file(path) == 0) {return false;}
+	if(!std::filesystem::is_regular_file(path)) {return false;}
 	std::ofstream file(path);
 
 	if(file.is_open()){
@@ -210,19 +199,12 @@ bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
         }
         file.close();
 		return true;
-    }*/
+    }
 	return false;
 }
 
-bool TermGui::TextEditor::write_file(std::ifstream& stream){
-	/*if(stream.is_open()){
-        for(Line line : _text){
-            stream << line << "\n";
-        }
-        stream.close();
-		return true;
-    }*/
-	return false;
+bool TermGui::TextEditor::write_file(std::ofstream& stream){
+	return write_file(stream);
 }
 
 TermGui::TextEditor& TermGui::TextEditor::erase(){
