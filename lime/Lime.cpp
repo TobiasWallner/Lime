@@ -74,12 +74,6 @@ int Lime::run(){
 	
 	// Entering the Program loop: get inputs -> prozess inputs -> display/save changes
 	
-	
-	std::cout << "Text... " << Term::style(Term::Style::UNDERLINE) << "Underlined text " <<  Term::style(Term::Style::UNDERLINE) << "Stil underlined text? ";
-	
-	char c;
-	std::cin >> c;
-	
 	this->run_main_loop();
 	
 	return EXIT_SUCCESS;
