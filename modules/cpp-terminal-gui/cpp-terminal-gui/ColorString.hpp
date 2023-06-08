@@ -7,13 +7,13 @@
 
 // Project
 #include "RenderTrait.hpp"
-#include "Command.hpp"
-#include "CommandList.hpp"
+#include "FontStyle.hpp"
+#include "FontStyleList.hpp"
 
 
 /*
 	A line is the combination of an utf8 string and a list of 
-	commands that are used to format the string at specific locations
+	styles that are used to format the string at specific locations
 	in the string.
 	
 	The line is allocator aware
@@ -29,7 +29,7 @@ private:
 	using string_type = utf8::string;
 
 	string_type _string;
-	CommandList _commands;
+	iStylesList _styles;
 
 public:
 	
@@ -93,7 +93,7 @@ public:
 	/// Constructs the ColorString with a substring [pos, pos + count) of other. 
 	inline ColorString(const ColorString& other, size_type pos, size_type count) : 
 		_string (other._string, pos, count),
-		_commands(other._commands, pos, count){}
+		_styles(other._styles, pos, count){}
 		
 	/// returns true if there is nothing in the list, false otherwise
 	/// the List class has to ensure that if the string is empty 
@@ -105,11 +105,11 @@ public:
 	
 	inline void clear(){
 		this->_string.clear();
-		this->_commands.clear();
+		this->_styles.clear();
 	}
 	
 	/// returns a const reference pointer to ther command list
-	inline const auto& commands() const {return this->_commands;}
+	inline const auto& styles() const {return this->_styles;}
 	
 	/// appends a line and its formats (aka. command list)
 	ColorString& append(const ColorString& other);
@@ -143,23 +143,14 @@ public:
 	inline ColorString& operator<<(const std::string& str){return this->append(str);}
 	inline ColorString& operator<<(std::string_view str){return this->append(str);}
 	
-	/// appends the given command to the line which will then format all string elements inserted after wards
-	inline ColorString& append(std::unique_ptr<Command>&& pCommand){
+	/// appends the given command to the line which will then format all string elements inserted after wards	
+	inline ColorString& append(const FontStyle& fontStyle){
 		//TODO: change to inser_override -> therefore implement insert_override
-		this->_commands.add_override(std::move(pCommand), this->_string.size());
+		this->_styles.add_override(fontStyle, this->_string.size());
 		return *this;
 	}
-	
-	inline ColorString& append(const Command& pCommand){
-		//TODO: change to inser_override -> therefore implement insert_override
-		this->_commands.add_override(pCommand.make_unique_copy(), this->_string.size());
-		return *this;
-	}
-	
-	inline ColorString& operator << (std::unique_ptr<Command>&& pCommand){ return this->append(std::move(pCommand)); }
-	inline ColorString& operator << (const Command& pCommand){ return *this << pCommand.make_unique_copy(); }
-	inline ColorString& operator += (std::unique_ptr<Command>&& pCommand){return this->append(std::move(pCommand)); }
-	inline ColorString& operator += (const Command& pCommand){ return *this += pCommand.make_unique_copy(); }
+	inline ColorString& operator << (const FontStyle& fontStyle){ return *this << fontStyle; }
+	inline ColorString& operator += (const FontStyle& fontStyle){ return *this += fontStyle; }
 	
 	/// push_back as you would to the underlying string 
 	inline void posh_back(char c){this->_string.push_back(c);}
@@ -168,24 +159,22 @@ public:
 	template<class CharItr>
 	inline CharItr push_back(CharItr first, CharItr last){return this->_string.push_back(first, last);}
 	
-	/// assigning a new color or format to a string will only clear the previous stored commands and formats
+	/// assigning a new color or format to a string will only clear the previous stored styles and formats
 	/// the stored string stays untouched
-	inline ColorString& assign(const Command& command){this->_commands.assign(command); return *this;}
-	inline ColorString& assign(std::unique_ptr<Command>&& command){this->_commands.assign(std::move(command)); return *this;}
-	
-	inline ColorString& operator=(const Command& command){return this->assign(command);}
-	inline ColorString& operator=(std::unique_ptr<Command>&& command){return this->assign(std::move(command));}
+	inline ColorString& assign(const FontStyle& command){this->_styles.assign(command); return *this;}
+	inline ColorString& operator=(const FontStyle& command){return this->assign(command);}
+
 	
 	/// assigning any unformated and uncolored string to a string will clear the previous stored formats and colores
 	template<class CharItr>
-	inline ColorString& assign(CharItr first, CharItr last){this->_commands.clear(); return this->_string.assign(first, last);}
-	inline ColorString& assign(utf8::Char c){this->_commands.clear(); this->_string.assign(c); return *this;}
-	inline ColorString& assign(char c){this->_commands.clear(); this->_string.assign(c); return *this;}
-	inline ColorString& assign(const char* first){this->_commands.clear(); this->_string.assign(first); return *this;}
-	inline ColorString& assign(const char* first, size_type n){this->_commands.clear(); this->_string.assign(first, first + n); return *this;}
-	inline ColorString& assign(const std::string& str){this->_commands.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(std::string_view str){this->_commands.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(std::initializer_list<char> ilist){this->_commands.clear(); this->_string.assign(ilist); return *this;}
+	inline ColorString& assign(CharItr first, CharItr last){this->_styles.clear(); return this->_string.assign(first, last);}
+	inline ColorString& assign(utf8::Char c){this->_styles.clear(); this->_string.assign(c); return *this;}
+	inline ColorString& assign(char c){this->_styles.clear(); this->_string.assign(c); return *this;}
+	inline ColorString& assign(const char* first){this->_styles.clear(); this->_string.assign(first); return *this;}
+	inline ColorString& assign(const char* first, size_type n){this->_styles.clear(); this->_string.assign(first, first + n); return *this;}
+	inline ColorString& assign(const std::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(std::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(std::initializer_list<char> ilist){this->_styles.clear(); this->_string.assign(ilist); return *this;}
 	
 	inline ColorString& operator=(utf8::Char c){return this->assign(c);}
 	inline ColorString& operator=(char c){return this->assign(c);}
@@ -203,13 +192,14 @@ public:
 	inline ColorString& insert(size_type index, char c){this->insert(index, utf8::Char(c)); return *this;}
 	
 	// removes the character at the index position from the string.
-	// commands that are at or before the erased index stay unchanged.
-	// commands that are after the index will be moved one index to the front.
-	// commands that are thus moved to and existing command list will override that list.
+	// styles that are at or before the erased index stay unchanged.
+	// styles that are after the index will be moved one index to the front.
+	// styles that are thus moved to and existing command list will override that list.
 	ColorString& erase(size_type index);
 	
 	// as erase with one index but removes the inizes from the closed open range [index_from, index_to)
 	ColorString& erase(size_type index_from, size_type index_to);
+	inline bool add_override(const FontStyle& command, size_type index){return this->_styles.add_override(command, index);}
 
 };
 

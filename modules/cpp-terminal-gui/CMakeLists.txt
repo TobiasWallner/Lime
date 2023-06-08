@@ -3,8 +3,8 @@
 add_library(cpp-terminal-gui
 	cpp-terminal-gui/RenderTrait.hpp
 	
-	cpp-terminal-gui/Command.hpp
-	cpp-terminal-gui/CommandList.cpp	cpp-terminal-gui/CommandList.hpp
+	cpp-terminal-gui/FontStyle.hpp
+	cpp-terminal-gui/FontStyleList.cpp	cpp-terminal-gui/FontStyleList.hpp
 	
 	cpp-terminal-gui/ColorString.cpp	cpp-terminal-gui/ColorString.hpp
 	

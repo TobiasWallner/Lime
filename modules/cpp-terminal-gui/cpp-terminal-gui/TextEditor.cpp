@@ -136,16 +136,17 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	if(this->empty()){
 		return;
 	}
-	auto itr = this->begin();
-	const auto end = this->end();
-	
-	// do first iteration without newline outside of loop
-	
-	itr->render(outputString);
-	++itr;
-	for(; itr != end; ++itr){
-		outputString += '\n';
-		itr->render(outputString);
+	for(auto itr = this->begin(); itr != this->end(); ++itr){
+		if(itr != this->begin()){
+			outputString += '\n';	
+		}else if(itr == this->_cursor.lineIterator){
+			TermGui::TextEditor::Line lineCopy = *itr;
+			//lineCopy.add_override(/*show cursor*/, );
+			//lineCopy.add_override(/*hide cursor*/, )
+			lineCopy.render(outputString);
+		}else{
+			itr->render(outputString);
+		}
 	}
 }
 	

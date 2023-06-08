@@ -30,63 +30,63 @@
 
 static void insert_into_static_string_and_erase_last(){
 	TermGui::ColorString string;
-	string << "word1 " << TermGui::FgColor(255, 0, 0) << " red" << TermGui::FgColor(255, 255, 255);
+	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
 	const auto size = string.size();
-	const auto first_color_index = string.commands().front().index;
-	const auto last_color_index = string.commands().back().index;
+	const auto first_color_index = string.styles().front().index;
+	const auto last_color_index = string.styles().back().index;
 	
 	string.erase(string.size()-1);
 	
 	assert_expected(string.size(), size - 1);
-	assert_expected(string.commands().size(), 2);
-	assert_expected(string.commands().front().index, first_color_index);
-	assert_expected(string.commands().back().index, last_color_index-1);
+	assert_expected(string.styles().size(), 2);
+	assert_expected(string.styles().front().index, first_color_index);
+	assert_expected(string.styles().back().index, last_color_index-1);
 }
 
 static void insert_into_static_string_and_erase_between(){
 	TermGui::ColorString string;
-	string << "word1 " << TermGui::FgColor(255, 0, 0) << " red" << TermGui::FgColor(255, 255, 255);
+	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
 	const auto size = string.size();
 	assert_expected(size, 10);
 	
-	const auto first_color_index = string.commands().front().index;
-	const auto last_color_index = string.commands().back().index;
+	const auto first_color_index = string.styles().front().index;
+	const auto last_color_index = string.styles().back().index;
 	
-	assert_expected(string.commands().back().index, last_color_index);
+	assert_expected(string.styles().back().index, last_color_index);
 	
 	string.erase((first_color_index + last_color_index)/2);
 	
 	assert_expected(string.size(), size - 1);
-	assert_expected(string.commands().size(), 2);
-	assert_expected(string.commands().front().index, first_color_index);
-	assert_expected(string.commands().back().index, last_color_index-1);
+	assert_expected(string.styles().size(), 2);
+	assert_expected(string.styles().front().index, first_color_index);
+	assert_expected(string.styles().back().index, last_color_index-1);
 }
 
 static void insert_into_static_string_and_erase_first(){
 	TermGui::ColorString string;
-	string << "word1 " << TermGui::FgColor(255, 0, 0) << " red" << TermGui::FgColor(255, 255, 255);
+	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
 	auto size = string.size();
-	auto first_color_index = string.commands().front().index;
-	auto last_color_index = string.commands().back().index;
+	auto first_color_index = string.styles().front().index;
+	auto last_color_index = string.styles().back().index;
 	
 	string.erase(0);
 	
 	assert_expected(string.size(), size - 1);
-	assert_expected(string.commands().size(), 2);
-	assert_expected(string.commands().front().index, first_color_index-1);
-	assert_expected(string.commands().back().index, last_color_index-1);
+	assert_expected(string.styles().size(), 2);
+	assert_expected(string.styles().front().index, first_color_index-1);
+	assert_expected(string.styles().back().index, last_color_index-1);
 }
 
 static void insert_into_static_string_and_erase_range(){
 	TermGui::ColorString string;
-	string << "word1 " << TermGui::FgColor(255, 0, 0) << " red" << TermGui::FgColor(255, 255, 255);
+	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255);
 	
 	const auto size = string.size();
-	const auto first_color_index = string.commands().front().index;
-	const auto last_color_index = string.commands().back().index;
+	const auto first_color_index = string.styles().front().index;
+	const auto last_color_index = string.styles().back().index;
 	
 	const auto erase_begin = first_color_index;
 	const auto erase_end = last_color_index + 1;
@@ -96,11 +96,11 @@ static void insert_into_static_string_and_erase_range(){
 	auto erased = erase_end - erase_begin - 1;
 	
 	assert_expected(string.size(), size - erased);
-	assert_expected(string.commands().size(), 1);
-	assert_expected(string.commands().front().index, first_color_index);
+	assert_expected(string.styles().size(), 1);
+	assert_expected(string.styles().front().index, first_color_index);
 	
-	auto expected = TermGui::FgColor(255, 255, 255);
-	auto got = static_cast<const TermGui::FgColor&>(*(string.commands().front().commands.front()));
+	auto expected = TermGui::fg_color(255, 255, 255);
+	auto got = string.styles().front().styles.front();
 	
 	assert(got == expected, "wrong color survived.");
 }
