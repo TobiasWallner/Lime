@@ -34,6 +34,13 @@ static void construct_empty_text_editor(){
 	assert_expected(editor.line_number(), 0);
 	assert_expected(editor.column_number(), 0);
 	assert_expected(editor.number_of_lines(), 1);
+	assert_expected(editor.is_start_of_line(), true);
+	assert_expected(editor.is_end_of_line(), true);
+	assert_expected(editor.is_last_line(), true);
+	assert_expected(editor.is_first_line(), true);
+	assert_expected(editor.is_start_of_file(), true);
+	assert_expected(editor.is_end_of_file(), true);
+	
 }
 
 static void insert_character_advances_column(){
