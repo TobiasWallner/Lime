@@ -71,7 +71,7 @@ bool TermGui::TextEditor::insert(const char* str){
 	return true;
 }
 
-bool TermGui::TextEditor::insert(const char* str, std::streamsize size){
+bool TermGui::TextEditor::insert(const char* str, size_type size){
 	std::streamsize pos = 0;
 	while(pos != size){
 		utf8::Char c;
@@ -82,6 +82,7 @@ bool TermGui::TextEditor::insert(const char* str, std::streamsize size){
 		}
 		this->insert(c);
 		str = next;
+		pos++;
 	}
 	return true;
 }
