@@ -22,7 +22,11 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 	listOfArgumentStrings = listOfArgumentStrings + 1;
 	
 	if(numberOfArguments <= 0){
-		return Lime().run();
+		try{ // the cpp-terminal library may throw an error. Catch needed to successfully deconstruct all data
+			return Lime().run();
+		}catch(...){
+			return EXIT_FAILURE;
+		}
 	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--version") 
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-v")){
 		return version();
