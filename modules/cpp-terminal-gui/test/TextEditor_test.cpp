@@ -161,6 +161,48 @@ static void insert_then_new_line_then_erase_the_new_line(){
 	assert_expected(newSize, size1 + size2);
 }
 
+static void insert_move_to_start_of_line(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_line();
+	assert_expected(editor.cursor_line(), 1);
+	assert_expected(editor.cursor_column(), 0);
+}
+
+static void insert_move_to_start_of_line_then_end_of_line(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_line();
+	editor.move_to_end_of_line();
+	assert_expected(editor.cursor_line(), 1);
+	assert_expected(editor.cursor_column(), sizeof("some long text in the second line")-1);
+}
+
+static void insert_move_to_start_of_file(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_file();
+	assert_expected(editor.cursor_line(), 0);
+	assert_expected(editor.cursor_column(), 0);
+}
+
+static void insert_move_to_start_of_file_then_end_of_file(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_file();
+	editor.move_to_end_of_file();
+	assert_expected(editor.cursor_line(), 1);
+	assert_expected(editor.cursor_column(), sizeof("some long text in the second line")-1);
+}
+
 static void insert_then_erase_from_file_start(){
 	TermGui::TextEditor editor;
 	editor.insert("some long text in the first line");
@@ -186,6 +228,8 @@ static void insert_then_erase_from_file_start(){
 	assert_expected(editor.number_of_lines(), 2);
 }
 
+
+
 int main(){
 	
 	construct_empty_text_editor();
@@ -197,6 +241,11 @@ int main(){
 	insert_text_movve_back_twice_insert_line_break();
 	insert_text_movve_back_twice_insert_line_break_move_up();
 	insert_after_new_line();
+	
+	insert_move_to_start_of_line();
+	insert_move_to_start_of_line_then_end_of_line();
+	insert_move_to_start_of_file();
+	insert_move_to_start_of_file_then_end_of_file();
 	
 	insert_then_erase();
 	insert_then_new_line_then_erase_the_new_line();
