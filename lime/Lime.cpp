@@ -297,8 +297,11 @@ void Lime::prozess_cursour_event(){
 }
 
 void Lime::prozess_copy_paste_event(Term::Event&& event){
+	// This copy paste event will copy from a selection in the terminal
+	// for example in wnidows when you mark some text in the console with the left mouse
+	// the press the right mouse button twice
+	// TODO: BugFix: handle insertion of multiple selected lines
 	auto input = static_cast<std::string>(std::move(event));
-	this->topMessageBar.assign("Copy past from terminal: ").append(input.c_str());
 	this->textEditor.insert(input.c_str());
 }
 
