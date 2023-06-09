@@ -37,18 +37,18 @@
 
 Lime::Lime(){
 	this->infoText << "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
-				   << "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\t"
+				   << "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
 				   
 				   << "Move Left: " << TermGui::fg_color(0, 200, 0) << "Ctrl + J" << TermGui::default_fg_color() << "\t"
 				   << "Move Up: " << TermGui::fg_color(0, 200, 0) << "Ctrl + I" << TermGui::default_fg_color() << "\t"
 				   << "Move Right: " << TermGui::fg_color(0, 200, 0) << "Ctrl + L" << TermGui::default_fg_color() << "\t"
-				   << "Move Down: " << TermGui::fg_color(0, 200, 0) << "Ctrl + K" << TermGui::default_fg_color() << "\t"
+				   << "Move Down: " << TermGui::fg_color(0, 200, 0) << "Ctrl + K" << TermGui::default_fg_color() << "\n"
 				   
 				   << "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + U" << TermGui::default_fg_color() << "\t"
-				   << "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + O" << TermGui::default_fg_color() << "\t"
+				   << "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + O" << TermGui::default_fg_color() << "\n"
 				   
 				   << "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
-				   << "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\t";
+				   << "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n";
 }
 
 #include <cpp-terminal/style.hpp>
@@ -236,6 +236,9 @@ void Lime::insert_from_clipboard(){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
+	this->topMessageBar.assign("Key press: ")
+					   .append(std::to_string(keyEvent + Term::Key::NUL))
+					   .append(" ALT+U: ").append(std::to_string(Term::Key::ALT + Term::Key::U));
 	switch(keyEvent + Term::Key::NUL){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
@@ -254,8 +257,8 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();
 		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();
 		
-		case Term::Key::ALT + Term::Key::U : this->textEditor.move_to_start_of_line(); break;
-		case Term::Key::ALT + Term::Key::O : this->textEditor.move_to_end_of_line(); break;
+		case Term::Key::ALT + Term::Key::u : this->textEditor.move_to_start_of_line(); break;
+		case Term::Key::ALT + Term::Key::o : this->textEditor.move_to_end_of_line(); break;
 		
 		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
 		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
@@ -276,8 +279,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
 				this->textEditor.insert(ascii);	
 			}else{
-				const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
-				this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+				// TODO:
 			}
 		}break;	
 	}
