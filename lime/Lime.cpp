@@ -159,11 +159,12 @@ static bool read_clipboard_windows(std::string& clipboardText){
 }
 #else
 
-// the unix implementation for copiing from the clipboard has been copied from:
-// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
-// and modified accordingly
+
 
 static char * x11_paste_type(const Atom& atom, Display*& display, const Window& window, const Atom& UTF8, const int& XA_STRING) {
+	// the unix implementation for copiing from the clipboard has been copied from:
+	// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+	// and modified accordingly
 	XEvent event;
 	int format;
 	unsigned long N, size;
@@ -193,6 +194,9 @@ static char * x11_paste_type(const Atom& atom, Display*& display, const Window& 
 }
 
 static char *x11_paste() {
+	// the unix implementation for copiing from the clipboard has been copied from:
+	// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+	// and modified accordingly
 	const int XA_STRING = 31;
 	static Display * display = XOpenDisplay(0);
 	static Atom UTF8 = XInternAtom(display, "UTF8_STRING", True); 
