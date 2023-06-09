@@ -236,13 +236,23 @@ void Lime::insert_from_clipboard(){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
+	// get analyse input
 	const auto character_32 = static_cast<int32_t>(keyEvent);
 	const auto character_8 = static_cast<char>(character_32);
-	this->input_buffer[this->input_buffer_count++] = character_8
 	const auto utf8_id = utf8::identify(character_8);
-	const auto expected_utf8_bytes = static_cast<int>utf8::identify(this->input_buffer[0]);
-	
+	// print status message: mostly for debugging
 	this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
+	
+	// insert event into the input buffer
+	if(this->input_buffer_count < this->input_buffer_len){
+		this->input_buffer[this->input_buffer_count++] = character_8;
+	}else{
+		this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
+		this->input_buffer_count = 0;
+		return;
+	}
+
+	const auto expected_utf8_bytes = static_cast<int>(utf8::identify(this->input_buffer[0]));
 	
 	switch(character_32){
 		//---- basics -----
@@ -280,45 +290,41 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		
 		default:{
 			// ------- key insertions ----------
-			if(keyEvent.is_extended_ASCII()){
-				if(this->input_buffer_count == 1){
-					if(utf8_id == Identifier::Bytes1){
-						this->textEditor.insert(character_8);
-					}else if(utf8_id == Identifier::NotFirst){
-						this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
-						this->input_buffer_count = 0;
-					}else if(utf8_id == Identifier::Unsupported){
-						this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
-						this->input_buffer_count = 0;
-					}else{
-						// continue do nothing
-					}
-				}else if(this->input_buffer_count < expected_utf8_bytes){
-					if(utf8_id == Identifier::NotFirst){
-						this->topMessageBar.append(" Error: utf8 character ended prematurelly");
-						this->input_buffer_count = 0;
-					}else{
-						// continue do nothing
-					}
-				}else if(this->input_buffer_count == expected_utf8_bytes){
-					if(utf8_id == Identifier::NotFirst){
-						auto first = this->input_buffer;
-						auto last = this->input_buffer + this->input_buffer_count;
-						utf8::Char c(first, last);
-						this->input_buffer_count = 0;
-						this->textEditor.insert(c);
-					}else{
-						this->topMessageBar.append(" Error: utf8 character ended prematurelly");
-						this->input_buffer_count = 0;
-					}
-					
+			if(this->input_buffer_count == 1){
+				if(utf8_id == utf8::Identifier::Bytes1){
+					this->textEditor.insert(character_8);
+					this->input_buffer_count = 0;
+				}else if(utf8_id == utf8::Identifier::NotFirst){
+					this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
+					this->input_buffer_count = 0;
+				}else if(utf8_id == utf8::Identifier::Unsupported){
+					this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
+					this->input_buffer_count = 0;
 				}else{
-					this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
-						this->input_buffer_count = 0;
+					// wait for more characters in the input buffer
 				}
+			}else if(this->input_buffer_count < expected_utf8_bytes){
+				if(utf8_id == utf8::Identifier::NotFirst){
+					// wait for more characters in the input buffer
+				}else{
+					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->input_buffer_count = 0;
+				}
+			}else if(this->input_buffer_count == expected_utf8_bytes){
+				if(utf8_id == utf8::Identifier::NotFirst){
+					auto first = this->input_buffer;
+					auto last = this->input_buffer + this->input_buffer_count;
+					utf8::Char c(first, last);
+					this->input_buffer_count = 0;
+					this->textEditor.insert(c);
+				}else{
+					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->input_buffer_count = 0;
+				}
+					
 			}else{
-				// TODO: unhandeled key events
-				this->topMessageBar.append(" Warning: unhandeled key event");
+				this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
+				this->input_buffer_count = 0;
 			}
 		}break;	
 	}

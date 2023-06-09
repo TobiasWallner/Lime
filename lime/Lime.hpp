@@ -13,9 +13,9 @@ class Lime{
 	TermGui::TextEditor textEditor;
 	TermGui::ColorString infoText;
 	
-	static constexpr input_buffer_len = 4;
+	static constexpr unsigned int input_buffer_len = 4;
 	char input_buffer[input_buffer_len] = {'\0'};
-	int input_buffer_count = 0;
+	unsigned int input_buffer_count = 0;
 	bool main_loop_continue = true;
 	
 public:
