@@ -254,8 +254,8 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ARROW_RIGHT : this->textEditor.move_forward(); break; 
 		case Term::Key::ARROW_DOWN 	: this->textEditor.move_down(); break; 
 		
-		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();
-		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();
+		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();break;
+		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();break;
 		
 		case Term::Key::ALT + Term::Key::u : this->textEditor.move_to_start_of_line(); break;
 		case Term::Key::ALT + Term::Key::o : this->textEditor.move_to_end_of_line(); break;
