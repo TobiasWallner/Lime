@@ -236,9 +236,15 @@ void Lime::insert_from_clipboard(){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
-	this->topMessageBar.assign("Key press: ")
-					   .append(std::to_string(static_cast<std::uint32_t>(keyEvent)));
-	switch(keyEvent + Term::Key::NUL){
+	const auto character_32 = static_cast<int32_t>(keyEvent);
+	const auto character_8 = static_cast<char>(character_32);
+	this->input_buffer[this->input_buffer_count++] = character_8
+	const auto utf8_id = utf8::identify(character_8);
+	const auto expected_utf8_bytes = static_cast<int>utf8::identify(this->input_buffer[0]);
+	
+	this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
+	
+	switch(character_32){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
 		
@@ -274,11 +280,45 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		
 		default:{
 			// ------- key insertions ----------
-			if(keyEvent.is_ASCII()){
-				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
-				this->textEditor.insert(ascii);	
+			if(keyEvent.is_extended_ASCII()){
+				if(this->input_buffer_count == 1){
+					if(utf8_id == Identifier::Bytes1){
+						this->textEditor.insert(character_8);
+					}else if(utf8_id == Identifier::NotFirst){
+						this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
+						this->input_buffer_count = 0;
+					}else if(utf8_id == Identifier::Unsupported){
+						this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
+						this->input_buffer_count = 0;
+					}else{
+						// continue do nothing
+					}
+				}else if(this->input_buffer_count < expected_utf8_bytes){
+					if(utf8_id == Identifier::NotFirst){
+						this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+						this->input_buffer_count = 0;
+					}else{
+						// continue do nothing
+					}
+				}else if(this->input_buffer_count == expected_utf8_bytes){
+					if(utf8_id == Identifier::NotFirst){
+						auto first = this->input_buffer;
+						auto last = this->input_buffer + this->input_buffer_count;
+						utf8::Char c(first, last);
+						this->input_buffer_count = 0;
+						this->textEditor.insert(c);
+					}else{
+						this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+						this->input_buffer_count = 0;
+					}
+					
+				}else{
+					this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
+						this->input_buffer_count = 0;
+				}
 			}else{
-				// TODO:
+				// TODO: unhandeled key events
+				this->topMessageBar.append(" Warning: unhandeled key event");
 			}
 		}break;	
 	}
@@ -310,7 +350,6 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 		For example by message windows or at a special place at the bottom of the screen
 	*/
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
-	
 }
 
 void Lime::render(std::string& outputString) const{
