@@ -200,6 +200,12 @@ public:
 	// as erase with one index but removes the inizes from the closed open range [index_from, index_to)
 	ColorString& erase(size_type index_from, size_type index_to);
 	inline bool add_override(const FontStyle& command, size_type index){return this->_styles.add_override(command, index);}
+	
+	template<class CharT, class Traits = std::char_traits<CharT>>
+	inline friend std::basic_ostream<CharT, Traits>& operator << (std::basic_ostream<CharT, Traits>& stream, const ColorString& string){
+		stream << string._string;
+		return stream;
+	}
 
 };
 
