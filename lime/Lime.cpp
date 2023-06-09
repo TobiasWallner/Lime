@@ -119,7 +119,7 @@ void Lime::prozess_event(Term::Event&& event){
 			this->prozess_cursour_event();	
 		}return;
 		case Term::Event::Type::CopyPaste : {
-			this->prozess_copy_paste_event();
+			this->prozess_copy_paste_event(std::move(event));
 		}return; 
 		default : {
 			this->prozess_unhandeled_event(std::move(event));
@@ -237,8 +237,7 @@ void Lime::insert_from_clipboard(){
 
 void Lime::prozess_key_event(Term::Key keyEvent){
 	this->topMessageBar.assign("Key press: ")
-					   .append(std::to_string(keyEvent + Term::Key::NUL))
-					   .append(" Ctrl+t: ").append(std::to_string(Term::Key::CTRL + Term::Key::T));
+					   .append(std::to_string(static_cast<std::uint32_t>(keyEvent)));
 	switch(keyEvent + Term::Key::NUL){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
@@ -297,8 +296,10 @@ void Lime::prozess_cursour_event(){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Cursor' ");
 }
 
-void Lime::prozess_copy_paste_event(){
-	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'CopyPaste' ");
+void Lime::prozess_copy_paste_event(Term::Event&& event){
+	auto input = static_cast<std::string>(std::move(event));
+	this->topMessageBar.assign("Copy past from terminal: ").append(input.c_str());
+	this->textEditor.insert(input.c_str());
 }
 
 void Lime::prozess_unhandeled_event(Term::Event&& event){

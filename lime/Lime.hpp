@@ -97,7 +97,7 @@ private:
 	/**
 		Prozesses a copy paste event
 	*/
-	void prozess_copy_paste_event();
+	void prozess_copy_paste_event(Term::Event&& event);
 	
 	/**
 		Event handler that handles any un-handled events by for example displaying an 
