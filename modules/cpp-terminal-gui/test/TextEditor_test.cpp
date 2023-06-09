@@ -192,13 +192,13 @@ static void read_file(){
 	assert_expected(editor.number_of_lines(), 5);
 }
 
-/*static void write_file(){
+static void write_file(){
 	TermGui::TextEditor editor;
 	editor.insert("some long text in the first line");
 	editor.insert_new_line();
 	editor.insert("some long text in the second line");
 	editor.write_file("writeTest.txt");
-}*/
+}
 
 int main(){
 	
