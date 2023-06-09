@@ -18,7 +18,18 @@ enum class Identifier : std::int8_t{
 	Bytes2 		= 2,
 	Bytes3 		= 3,
 	Bytes4 		= 4
-};	
+};
+
+constexpr const char* to_string(Identifier i){
+	switch(i){
+		case Identifier::NotFirst : return "NotFirst";
+		case Identifier::Bytes1 : return "Bytes1";
+		case Identifier::Bytes2 : return "Bytes2";
+		case Identifier::Bytes3 : return "Bytes3";
+		case Identifier::Bytes4 : return "Bytes4";
+		default : return "Unsupported";
+	}
+}
 
 /// returns the length of the utf8 sequence if it is the first character
 /// returns '0' if it is a character in the sequence but not the first one
