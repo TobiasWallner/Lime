@@ -190,7 +190,7 @@ bool TermGui::TextEditor::read_file(std::ifstream& stream){
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	/*if(!std::filesystem::is_regular_file(path)) {return false;}
+	if(!std::filesystem::is_regular_file(path)) {return false;}
 	std::ofstream file(path);
 
 	if(file.is_open()){
@@ -199,7 +199,7 @@ bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
         }
         file.close();
 		return true;
-    }*/
+    }
 	return false;
 }
 

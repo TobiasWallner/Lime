@@ -181,6 +181,12 @@ static void insert_then_erase_from_file_start(){
 
 static void read_file(){
 	TermGui::TextEditor editor;
+
+	while(!std::filesystem::is_regular_file("main.cpp")){
+		std::filesystem::current_path("..");
+	}
+	std::filesystem::current_path("modules/cpp-terminal-gui/test");
+
 	editor.read_file("test.txt");
 	assert_expected(editor.is_start_of_file(), true);
 	assert_expected(editor.number_of_lines(), 5);
