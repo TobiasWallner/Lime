@@ -238,7 +238,7 @@ void Lime::insert_from_clipboard(){
 void Lime::prozess_key_event(Term::Key keyEvent){
 	this->topMessageBar.assign("Key press: ")
 					   .append(std::to_string(keyEvent + Term::Key::NUL))
-					   .append(" ALT+U: ").append(std::to_string(Term::Key::ALT + Term::Key::U));
+					   .append(" Ctrl+t: ").append(std::to_string(Term::Key::CTRL + Term::Key::T));
 	switch(keyEvent + Term::Key::NUL){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;

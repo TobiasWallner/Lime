@@ -24,11 +24,9 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 	if(numberOfArguments <= 0){
 		return Lime().run();
 	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--version") 
-				|| 0 == std::strcmp(listOfArgumentStrings[0], "version") 
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-v")){
 		return version();
-	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--help") 
-				|| 0 == std::strcmp(listOfArgumentStrings[0], "help") 
+	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--help")  
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-h")){
 		return help();
 	}else{
@@ -63,8 +61,27 @@ int help(){
 		"\n"
 		"help, --help, -h        Shows this help page\n"
 		"version, --version, -v  Displays the version string\n"
+		"\n"
+		"Shortcuts:\n"
+		"==========\n"
+		"  Cursor Movement:\n"
+		"  ----------------\n"
+		"    move back: Ctrl + j | up: Ctrl + i | forward: Ctrl + l | down: Ctrl + k\n"
+		"    move to start of file: Ctrl + t | end of file: Ctrl + e"
+		"    move to start of line: Alt + u | end of line: Alt + o"
+		"    move to top of file: Ctrl + t | end of file: Alt + e"
+		"\n"
+		"  Editing:\n"
+		"  --------\n"
+		"    from clipboard paste: Ctrl + v | (copy: Ctrl + c)* | (cut: Ctrl + x)*"
+		"    (highlight: Ctrl-h)*"
+		"\n"
+		"  File:\n"
+		"  -----\n"
+		"    open file: Ctrl-o"
+		"    save file: Ctrl-s"
+		"    save file as: Alt-s"
+		"* not yet implemented"
 		<< std::endl;
 	return EXIT_SUCCESS;
 }
-
-
