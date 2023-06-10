@@ -143,7 +143,7 @@ static void verify_string_in_file(){
 	std::cout << out;
 
 	std::filesystem::path currPath = std::filesystem::current_path();
-	fileVerify(currPath, "color_string", out);
+	assert(fileVerify(currPath, "color_string", out), "The file did not get verified");
 
 }
 

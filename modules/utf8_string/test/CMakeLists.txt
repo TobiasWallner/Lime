@@ -4,9 +4,7 @@ add_executable(utf8_char_test
 	test_utf8_char.cpp
 )
 
-target_link_libraries(utf8_char_test PUBLIC
-					utf8_string
-					verification)
+target_link_libraries(utf8_char_test utf8_string)
 
 add_test(utf8_char_ctest utf8_char_test)
 

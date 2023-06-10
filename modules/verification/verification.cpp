@@ -90,14 +90,16 @@ class Folders{
 // currPath: path where you have the verified, error and new folders
 // filename: name of the file you want checked
 // content: content you want to check with the file. 
-void fileVerify(const std::filesystem::path& currPath, const std::string& filename, std::string_view content){
+// returns true if a file is verified against a verification file. 
+// returns false otherwise
+bool fileVerify(const std::filesystem::path& currPath, const std::string& filename, std::string_view content){
     Folders currFolder(currPath); 
 
 	if(currFolder.verifiedEmpty()){
         std::cout << "Folder vertified do not exist or is empty, new file generated." << std::endl;
 		
         currFolder.writeNew(filename, content);
- 		return;
+ 		return false;
     }
 	
 	
@@ -105,7 +107,7 @@ void fileVerify(const std::filesystem::path& currPath, const std::string& filena
          std::cout << "File does not exist in verified, new file generated in new." << std::endl;
 
         currFolder.writeNew(filename, content);
-        return;
+        return false;
     }
     
     std::stringstream file_content = currFolder.getContentOfVerifiedFile(filename);
@@ -115,7 +117,7 @@ void fileVerify(const std::filesystem::path& currPath, const std::string& filena
     if(!is_content_verified){
         std::cout << "File " << filename << " in verified is NOT equal input!" << std::endl;
         currFolder.writeError(filename, "Files are not equal");
-        return;
+        return false;
     }else if(currFolder.doesFileInErrorExist(filename)){
         if(currFolder.removeErrorFile(filename)){
             std::cout << filename << " error file is removed" << std::endl;
@@ -123,7 +125,7 @@ void fileVerify(const std::filesystem::path& currPath, const std::string& filena
     }
     
     std::cout << "File: " << filename << " is successfully verified." << std::endl;
-    return;
+    return true;
 }
 
 
