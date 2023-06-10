@@ -180,3 +180,17 @@ TermGui::TextEditor& TermGui::TextEditor::erase(){
 	}
 	return *this;
 }
+
+bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){
+	if(lhs.number_of_lines() == rhs.number_of_lines()){
+		auto lhsItr = lhs.cbegin();
+		auto rhsItr = rhs.cbegin();
+		for(; lhsItr != lhs.cend() && rhsItr != rhs.cend(); ++lhsItr, ++rhsItr){
+			if(*lhsItr != *rhsItr){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
