@@ -112,7 +112,7 @@ The Lime editor is compileing, tested and running successfully on the following 
 	Windows 10: Version 22H2
 	MSYS2 GCC: gcc (Rev10, Built by MSYS2 project) 12.2.0  
 	Clang: version 16.0.3, Target: x86_64-pc-windows-msvc, Thread model: posix  
-	MSVC: Visual Studio 17 2022  
+	MSVC: Visual Studio 17 2022  version: 19.35.32217.1
 	
 + The Linux Build:
 	Debian 11
