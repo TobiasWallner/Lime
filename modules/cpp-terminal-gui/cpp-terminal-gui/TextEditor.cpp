@@ -173,6 +173,10 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
 	if(!std::filesystem::is_regular_file(path)) {return false;}
 	std::ifstream file(path);
+	return read_file(file);
+}
+
+bool TermGui::TextEditor::read_file(std::ifstream& file){
 	char buffer[4*1024];
 
 	if(file.is_open()){
@@ -180,33 +184,27 @@ bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
 			file.read (buffer, 4*1024);
 			this->insert(buffer, file.gcount());
 		}
-		file.close();
 		this->move_to_start_of_file();
 		return true;
 	}
 	return false;
 }
 
-bool TermGui::TextEditor::read_file(std::ifstream& stream){
-	return read_file(stream);
+bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
+	std::ofstream file(path);
+	return write_file(file);
 }
 
-bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	if(!std::filesystem::is_regular_file(path)) {return false;}
-	std::ofstream file(path);
-
+bool TermGui::TextEditor::write_file(std::ofstream& file){
 	if(file.is_open()){
-        for(Line line : _text){
-            file << line << "\n";
+		auto iterator = _text.cbegin();
+		file << *(iterator++);
+        for(; iterator != _text.cend(); ++iterator){
+            file << "\n" << *iterator;
         }
         file.close();
 		return true;
     }
-	return false;
-}
-
-bool TermGui::TextEditor::write_file(std::ofstream& stream){
-	///return write_file(stream);
 	return false;
 }
 
