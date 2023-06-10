@@ -228,7 +228,18 @@ static void insert_then_erase_from_file_start(){
 	assert_expected(editor.number_of_lines(), 2);
 }
 
-
+static void equality_test_for_text_editors(){
+	TermGui::TextEditor editor1;
+	TermGui::TextEditor editor2;
+	TermGui::TextEditor editor3;
+	
+	editor1.insert("Alle meine Entchen");
+	editor2.insert("schwimmend auf dem See");
+	editor3.insert("schwimmend auf dem See");
+	
+	assert_expected(editor1 == editor2, false);
+	assert_expected(editor2 == editor3, true);
+}
 
 int main(){
 	
@@ -251,6 +262,8 @@ int main(){
 	insert_then_new_line_then_erase_the_new_line();
 	insert_then_erase();
 	insert_then_erase_from_file_start();
+	
+	equality_test_for_text_editors();
 	
 	return EXIT_SUCCESS;
 	
