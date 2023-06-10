@@ -191,13 +191,13 @@ public:
 	ColorString& insert(size_type index, utf8::Char c);
 	inline ColorString& insert(size_type index, char c){this->insert(index, utf8::Char(c)); return *this;}
 	
-	// removes the character at the index position from the string.
-	// styles that are at or before the erased index stay unchanged.
-	// styles that are after the index will be moved one index to the front.
-	// styles that are thus moved to and existing command list will override that list.
+	/// removes the character at the index position from the string.
+	/// styles that are at or before the erased index stay unchanged.
+	/// styles that are after the index will be moved one index to the front.
+	/// styles that are thus moved to and existing command list will override that list.
 	ColorString& erase(size_type index);
 	
-	// as erase with one index but removes the inizes from the closed open range [index_from, index_to)
+	/// as erase with one index but removes the inizes from the closed open range [index_from, index_to)
 	ColorString& erase(size_type index_from, size_type index_to);
 	inline bool add_override(const FontStyle& command, size_type index){return this->_styles.add_override(command, index);}
 	
@@ -206,6 +206,10 @@ public:
 		stream << string._string;
 		return stream;
 	}
+	
+	/// compares equal to the content of the string not the content of the style formats
+	friend inline bool operator==(const ColorString& lhs, const ColorString& rhs){return lhs._string == rhs._string;}
+	friend inline bool operator!=(const ColorString& lhs, const ColorString& rhs){return lhs._string != rhs._string;}
 
 };
 
