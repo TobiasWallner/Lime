@@ -16,6 +16,10 @@
 
 namespace TermGui{
 	
+	
+class TextEditor; // forward declaration
+bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
+	
 class TextEditor : public RenderTrait{
 private:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
@@ -89,10 +93,10 @@ public:
 	inline const_reference cback() const {return this->_text.back();}
 	
 	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
-	inline size_type number_of_lines(){return this->_text.size();}
+	inline size_type number_of_lines() const {return this->_text.size();}
 	
 	/// returns the size of the current line
-	inline size_type line_size(){return this->lineItr()->size();}
+	inline size_type line_size() const {return this->lineItr()->size();}
 	
 	inline size_type cursor_line() const {return this->_cursor.lineNumber;}
 	inline size_type cursor_column() const {return this->_cursor.columnNumber;}
@@ -217,6 +221,9 @@ public:
 		return stream;
 	}
 	
+	friend bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
+	friend inline bool operator!=(const TextEditor& lhs, const TextEditor& rhs){return !(lhs == rhs);}
+	
 	/// erases the character at the index position
 	TextEditor& erase();
 	
@@ -225,9 +232,7 @@ private:
 	/// returns an iterator to the line at the given absolute position or the last line of the file
 	iterator find_line(size_type line);
 	const_iterator find_line(size_type line) const;
-	
-	
 
 };
-	
+
 }
