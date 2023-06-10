@@ -133,19 +133,21 @@ void TermGui::TextEditor::move_down(){
 }
 
 void TermGui::TextEditor::render(std::string& outputString) const {
-	if(this->empty()){
-		return;
-	}
-	auto itr = this->begin();
-	const auto end = this->end();
-	
-	// do first iteration without newline outside of loop
-	
-	itr->render(outputString);
-	++itr;
-	for(; itr != end; ++itr){
-		outputString += '\n';
-		itr->render(outputString);
+	for(auto itr = this->begin(); itr != this->end(); ++itr){
+		if(itr != this->begin()){
+			outputString += '\n';	
+		}
+		if(this->show_cursor && itr == this->_cursor.lineIterator){
+			TermGui::TextEditor::Line lineCopy = *itr;
+			if(this->is_end_of_line()){
+				lineCopy += ' ';
+			}
+			lineCopy.add_override(TermGui::FontStyle::Reversed::ON, this->cursor_column());
+			lineCopy.add_override(TermGui::FontStyle::Reversed::OFF, this->cursor_column() + 1);
+			lineCopy.render(outputString);
+		}else{
+			itr->render(outputString);
+		}
 	}
 }
 	
@@ -177,4 +179,18 @@ TermGui::TextEditor& TermGui::TextEditor::erase(){
 		this->_cursor.lineIterator->erase(this->_cursor.columnNumber);
 	}
 	return *this;
+}
+
+bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){
+	if(lhs.number_of_lines() == rhs.number_of_lines()){
+		auto lhsItr = lhs.cbegin();
+		auto rhsItr = rhs.cbegin();
+		for(; lhsItr != lhs.cend() && rhsItr != rhs.cend(); ++lhsItr, ++rhsItr){
+			if(*lhsItr != *rhsItr){
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
 }

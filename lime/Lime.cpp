@@ -36,20 +36,22 @@
 #endif
 
 Lime::Lime(){
-	this->infoText << "Quit: " << TermGui::FgColor(0, 200, 0) << "Ctrl + Q" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
-				   << "Paste: " << TermGui::FgColor(0, 200, 0) << "Ctrl + V" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+	this->infoText << "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
+				   << "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
 				   
-				   << "Move Left: " << TermGui::FgColor(0, 200, 0) << "Ctrl + J" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
-				   << "Move Up: " << TermGui::FgColor(0, 200, 0) << "Ctrl + I" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
-				   << "Move Right: " << TermGui::FgColor(0, 200, 0) << "Ctrl + L" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
-				   << "Move Down: " << TermGui::FgColor(0, 200, 0) << "Ctrl + K" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move Left: " << TermGui::fg_color(0, 200, 0) << "Ctrl + J" << TermGui::default_fg_color() << "\t"
+				   << "Move Up: " << TermGui::fg_color(0, 200, 0) << "Ctrl + I" << TermGui::default_fg_color() << "\t"
+				   << "Move Right: " << TermGui::fg_color(0, 200, 0) << "Ctrl + L" << TermGui::default_fg_color() << "\t"
+				   << "Move Down: " << TermGui::fg_color(0, 200, 0) << "Ctrl + K" << TermGui::default_fg_color() << "\n"
 				   
-				   << "Move to Line Start: " << TermGui::FgColor(0, 200, 0) << "Ctrl + U" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
-				   << "Move to Line End: " << TermGui::FgColor(0, 200, 0) << "Ctrl + O" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
+				   << "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + U" << TermGui::default_fg_color() << "\t"
+				   << "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + O" << TermGui::default_fg_color() << "\n"
 				   
-				   << "Move to File Start: " << TermGui::FgColor(0, 200, 0) << "Ctrl + T" << TermGui::FgColor(Term::Color::Name::Default) << "\t"
-				   << "Move to File End: " << TermGui::FgColor(0, 200, 0) << "Ctrl + E" << TermGui::FgColor(Term::Color::Name::Default) << "\t";
+				   << "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
+				   << "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n";
 }
+
+#include <cpp-terminal/style.hpp>
 
 int Lime::run(){
 	
@@ -71,6 +73,7 @@ int Lime::run(){
 	);
 	
 	// Entering the Program loop: get inputs -> prozess inputs -> display/save changes
+	
 	this->run_main_loop();
 	
 	return EXIT_SUCCESS;
@@ -116,7 +119,7 @@ void Lime::prozess_event(Term::Event&& event){
 			this->prozess_cursour_event();	
 		}return;
 		case Term::Event::Type::CopyPaste : {
-			this->prozess_copy_paste_event();
+			this->prozess_copy_paste_event(std::move(event));
 		}return; 
 		default : {
 			this->prozess_unhandeled_event(std::move(event));
@@ -156,11 +159,12 @@ static bool read_clipboard_windows(std::string& clipboardText){
 }
 #else
 
-// the unix implementation for copiing from the clipboard has been copied from:
-// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
-// and modified accordingly
+
 
 static char * x11_paste_type(const Atom& atom, Display*& display, const Window& window, const Atom& UTF8, const int& XA_STRING) {
+	// the unix implementation for copiing from the clipboard has been copied from:
+	// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+	// and modified accordingly
 	XEvent event;
 	int format;
 	unsigned long N, size;
@@ -190,6 +194,9 @@ static char * x11_paste_type(const Atom& atom, Display*& display, const Window& 
 }
 
 static char *x11_paste() {
+	// the unix implementation for copiing from the clipboard has been copied from:
+	// https://github.com/exebook/x11clipboard/blob/master/x11paste.c
+	// and modified accordingly
 	const int XA_STRING = 31;
 	static Display * display = XOpenDisplay(0);
 	static Atom UTF8 = XInternAtom(display, "UTF8_STRING", True); 
@@ -229,7 +236,25 @@ void Lime::insert_from_clipboard(){
 }
 
 void Lime::prozess_key_event(Term::Key keyEvent){
-	switch(keyEvent + Term::Key::NUL){
+	// get analyse input
+	const auto character_32 = static_cast<int32_t>(keyEvent);
+	const auto character_8 = static_cast<char>(character_32);
+	const auto utf8_id = utf8::identify(character_8);
+	// print status message: mostly for debugging
+	this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
+	
+	// insert event into the input buffer
+	if(this->input_buffer_count < this->input_buffer_len){
+		this->input_buffer[this->input_buffer_count++] = character_8;
+	}else{
+		this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
+		this->input_buffer_count = 0;
+		return;
+	}
+
+	const auto expected_utf8_bytes = static_cast<int>(utf8::identify(this->input_buffer[0]));
+	
+	switch(character_32){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
 		
@@ -244,11 +269,11 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ARROW_RIGHT : this->textEditor.move_forward(); break; 
 		case Term::Key::ARROW_DOWN 	: this->textEditor.move_down(); break; 
 		
-		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();
-		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();
+		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();break;
+		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();break;
 		
-		case Term::Key::ALT + Term::Key::U : this->textEditor.move_to_start_of_line(); break;
-		case Term::Key::ALT + Term::Key::O : this->textEditor.move_to_end_of_line(); break;
+		case Term::Key::ALT + Term::Key::u : this->textEditor.move_to_start_of_line(); break;
+		case Term::Key::ALT + Term::Key::o : this->textEditor.move_to_end_of_line(); break;
 		
 		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
 		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
@@ -265,12 +290,41 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		
 		default:{
 			// ------- key insertions ----------
-			if(keyEvent.is_ASCII()){
-				const auto ascii = static_cast<char>(keyEvent + Term::Key::NUL); 
-				this->textEditor.insert(ascii);	
+			if(this->input_buffer_count == 1){
+				if(utf8_id == utf8::Identifier::Bytes1){
+					this->textEditor.insert(character_8);
+					this->input_buffer_count = 0;
+				}else if(utf8_id == utf8::Identifier::NotFirst){
+					this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
+					this->input_buffer_count = 0;
+				}else if(utf8_id == utf8::Identifier::Unsupported){
+					this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
+					this->input_buffer_count = 0;
+				}else{
+					// wait for more characters in the input buffer
+				}
+			}else if(this->input_buffer_count < expected_utf8_bytes){
+				if(utf8_id == utf8::Identifier::NotFirst){
+					// wait for more characters in the input buffer
+				}else{
+					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->input_buffer_count = 0;
+				}
+			}else if(this->input_buffer_count == expected_utf8_bytes){
+				if(utf8_id == utf8::Identifier::NotFirst){
+					auto first = this->input_buffer;
+					auto last = this->input_buffer + this->input_buffer_count;
+					utf8::Char c(first, last);
+					this->input_buffer_count = 0;
+					this->textEditor.insert(c);
+				}else{
+					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->input_buffer_count = 0;
+				}
+					
 			}else{
-				const auto character = static_cast<char32_t>(keyEvent + Term::Key::NUL); 
-				this->topMessageBar.assign("Internal Error: Unhandeled Key press: ").append(std::to_string(character));
+				this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
+				this->input_buffer_count = 0;
 			}
 		}break;	
 	}
@@ -288,8 +342,13 @@ void Lime::prozess_cursour_event(){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Cursor' ");
 }
 
-void Lime::prozess_copy_paste_event(){
-	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'CopyPaste' ");
+void Lime::prozess_copy_paste_event(Term::Event&& event){
+	// This copy paste event will copy from a selection in the terminal
+	// for example in wnidows when you mark some text in the console with the left mouse
+	// the press the right mouse button twice
+	// TODO: BugFix: handle insertion of multiple selected lines
+	auto input = static_cast<std::string>(std::move(event));
+	this->textEditor.insert(input.c_str());
 }
 
 void Lime::prozess_unhandeled_event(Term::Event&& event){
@@ -297,7 +356,6 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 		For example by message windows or at a special place at the bottom of the screen
 	*/
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
-	
 }
 
 void Lime::render(std::string& outputString) const{

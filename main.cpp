@@ -22,13 +22,15 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 	listOfArgumentStrings = listOfArgumentStrings + 1;
 	
 	if(numberOfArguments <= 0){
-		return Lime().run();
+		try{ // the cpp-terminal library may throw an error. Catch needed to successfully deconstruct all data
+			return Lime().run();
+		}catch(...){
+			return EXIT_FAILURE;
+		}
 	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--version") 
-				|| 0 == std::strcmp(listOfArgumentStrings[0], "version") 
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-v")){
 		return version();
-	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--help") 
-				|| 0 == std::strcmp(listOfArgumentStrings[0], "help") 
+	}else if(0 == std::strcmp(listOfArgumentStrings[0], "--help")  
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-h")){
 		return help();
 	}else{
@@ -42,7 +44,7 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 }
 
 const char* version_string(){
-	return "0.2.0";
+	return "0.3.0";
 }
 
 int version(){
@@ -63,8 +65,27 @@ int help(){
 		"\n"
 		"help, --help, -h        Shows this help page\n"
 		"version, --version, -v  Displays the version string\n"
+		"\n"
+		"Shortcuts:\n"
+		"==========\n"
+		"  Cursor Movement:\n"
+		"  ----------------\n"
+		"    move back: Ctrl + j | up: Ctrl + i | forward: Ctrl + l | down: Ctrl + k\n"
+		"    move to start of file: Ctrl + t | end of file: Ctrl + e\n"
+		"    move to start of line: Alt + u | end of line: Alt + o\n"
+		"    move to top of file: Ctrl + t | end of file: Alt + e\n"
+		"\n"
+		"  Editing:\n"
+		"  --------\n"
+		"    from clipboard paste: Ctrl + v | (copy: Ctrl + c)* | (cut: Ctrl + x)*\n"
+		"    (highlight: Ctrl-h)*\n"
+		"\n"
+		"  File:\n"
+		"  -----\n"
+		"    open file: Ctrl-o\n"
+		"    save file: Ctrl-s\n"
+		"    save file as: Alt-s\n"
+		"* not yet implemented\n"
 		<< std::endl;
 	return EXIT_SUCCESS;
 }
-
-

@@ -1,5 +1,5 @@
 
-#include <cpp-terminal-gui/CommandList.hpp>
+#include <cpp-terminal-gui/FontStyleList.hpp>
 
 // C std
 #include <stdlib.h>
@@ -16,46 +16,38 @@
 
 // use static here not for memory, but for static linking so that the name of this function 
 // does not convolute the global name space for the linker
-static bool smaller(const TermGui::CommandList::value_type& lhs, const TermGui::CommandList::value_type& rhs){
+static bool smaller(const TermGui::iStylesList::value_type& lhs, const TermGui::iStylesList::value_type& rhs){
 	return lhs.index < rhs.index;
 }
 
 static void consturct_empty_CommandList(){
-	TermGui::CommandList commandList;
+	TermGui::iStylesList commandList;
 }
 
 static void consturct_empty_CommandList_is_empty(){
-	TermGui::CommandList commandList;
+	TermGui::iStylesList commandList;
 	assert(commandList.empty(), "Error: new constructed should be empty but is not");
 	const auto expected_size = 0;
 	assert(commandList.size() == expected_size, "should have size " << expected_size << " but has size " << commandList.size());
 }
 
-static void consturct_a_ForegroundColor_Command(){
-	TermGui::FgColor forgroundColor(10, 50, 80);
-}
-
-static void consturct_a_BackgroundColor_Command(){
-	TermGui::BgColor backgroundColor(90, 60, 20);
-}
-
 static void insert_a_foreground_color_into_the_command_list(){
-	TermGui::CommandList commandList;
-	TermGui::FgColor forgroundColor(10, 50, 80);
+	TermGui::iStylesList commandList;
+	auto forgroundColor = TermGui::FontStyle::fg_color(10, 50, 80);
 	const int index = 11;
 	commandList.add(forgroundColor, index);
 }
 
 static void insert_a_background_color_into_the_command_list(){
-	TermGui::CommandList commandList;
-	TermGui::BgColor backgroundColor(90, 60, 20);
+	TermGui::iStylesList commandList;
+	auto backgroundColor = TermGui::FontStyle::bg_color(90, 60, 20);
 	const int index = 11;
 	commandList.add(backgroundColor, index);
 }
 
 static void  insert_into_makes_list_not_empty(){
-	TermGui::CommandList commandList;
-	TermGui::FgColor forgroundColor(10, 50, 80);
+	TermGui::iStylesList commandList;
+	auto forgroundColor = TermGui::FontStyle::fg_color(10, 50, 80);
 	const int index = 11;
 	commandList.add(forgroundColor, index);
 	assert(commandList.empty() == false, "command list should not be empty");
@@ -64,8 +56,8 @@ static void  insert_into_makes_list_not_empty(){
 }
 
 static void  insert_3_makes_size_3(){
-	TermGui::CommandList commandList;
-	TermGui::FgColor forgroundColor(10, 50, 80);
+	TermGui::iStylesList commandList;
+	auto forgroundColor = TermGui::FontStyle::fg_color(10, 50, 80);
 	commandList.add(forgroundColor, 1);
 	commandList.add(forgroundColor, 2);
 	commandList.add(forgroundColor, 3);
@@ -75,9 +67,9 @@ static void  insert_3_makes_size_3(){
 }
 
 static void insert_two_different_commands_into_the_same_index(){
-	TermGui::CommandList commandList;
-	TermGui::FgColor forgroundColor(10, 50, 80);
-	TermGui::BgColor backgroundColor(90, 60, 20);
+	TermGui::iStylesList commandList;
+	auto forgroundColor = TermGui::FontStyle::fg_color(10, 50, 80);
+	auto backgroundColor = TermGui::FontStyle::bg_color(90, 60, 20);
 	
 	const bool result1 = commandList.add(forgroundColor, 1);
 	const bool result2 = commandList.add(backgroundColor, 1);
@@ -91,9 +83,9 @@ static void insert_two_different_commands_into_the_same_index(){
 }
 
 static void insert_two_different_commands_into_the_same_index_v2(){
-	TermGui::CommandList commandList;
-	TermGui::FgColor forgroundColor(10, 50, 80);
-	TermGui::BgColor backgroundColor(90, 60, 20);
+	TermGui::iStylesList commandList;
+	auto forgroundColor = TermGui::FontStyle::fg_color(10, 50, 80);
+	auto backgroundColor = TermGui::FontStyle::bg_color(90, 60, 20);
 	
 	const bool result1 = commandList.add(backgroundColor, 1);
 	const bool result2 = commandList.add(forgroundColor, 1);
@@ -107,9 +99,9 @@ static void insert_two_different_commands_into_the_same_index_v2(){
 }
 
 static void insert_two_similar_commands_into_the_same_index(){
-	TermGui::CommandList commandList;
-	TermGui::FgColor forgroundColor1(10, 50, 80);
-	TermGui::FgColor forgroundColor2(90, 60, 20);
+	TermGui::iStylesList commandList;
+	auto forgroundColor1 = TermGui::FontStyle::fg_color(10, 50, 80);
+	auto forgroundColor2 = TermGui::FontStyle::fg_color(90, 60, 20);
 	
 	const bool result1 = commandList.add(forgroundColor1, 1);
 	const bool result2 = commandList.add(forgroundColor2, 1);
@@ -123,8 +115,6 @@ static void insert_two_similar_commands_into_the_same_index(){
 int main(){
 	consturct_empty_CommandList();
 	consturct_empty_CommandList_is_empty();
-	consturct_a_ForegroundColor_Command();
-	consturct_a_BackgroundColor_Command();
 	insert_a_foreground_color_into_the_command_list();
 	insert_a_background_color_into_the_command_list();
 	insert_into_makes_list_not_empty();
