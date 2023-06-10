@@ -34,6 +34,13 @@ static void construct_empty_text_editor(){
 	assert_expected(editor.line_number(), 0);
 	assert_expected(editor.column_number(), 0);
 	assert_expected(editor.number_of_lines(), 1);
+	assert_expected(editor.is_start_of_line(), true);
+	assert_expected(editor.is_end_of_line(), true);
+	assert_expected(editor.is_last_line(), true);
+	assert_expected(editor.is_first_line(), true);
+	assert_expected(editor.is_start_of_file(), true);
+	assert_expected(editor.is_end_of_file(), true);
+	
 }
 
 static void insert_character_advances_column(){
@@ -154,6 +161,48 @@ static void insert_then_new_line_then_erase_the_new_line(){
 	assert_expected(newSize, size1 + size2);
 }
 
+static void insert_move_to_start_of_line(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_line();
+	assert_expected(editor.cursor_line(), 1);
+	assert_expected(editor.cursor_column(), 0);
+}
+
+static void insert_move_to_start_of_line_then_end_of_line(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_line();
+	editor.move_to_end_of_line();
+	assert_expected(editor.cursor_line(), 1);
+	assert_expected(editor.cursor_column(), sizeof("some long text in the second line")-1);
+}
+
+static void insert_move_to_start_of_file(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_file();
+	assert_expected(editor.cursor_line(), 0);
+	assert_expected(editor.cursor_column(), 0);
+}
+
+static void insert_move_to_start_of_file_then_end_of_file(){
+	TermGui::TextEditor editor;
+	editor.insert("some long text in the first line");
+	editor.insert_new_line();
+	editor.insert("some long text in the second line");
+	editor.move_to_start_of_file();
+	editor.move_to_end_of_file();
+	assert_expected(editor.cursor_line(), 1);
+	assert_expected(editor.cursor_column(), sizeof("some long text in the second line")-1);
+}
+
 static void insert_then_erase_from_file_start(){
 	TermGui::TextEditor editor;
 	editor.insert("some long text in the first line");
@@ -200,6 +249,19 @@ static void write_file(){
 	editor.write_file("writeTest.txt");
 }
 
+static void equality_test_for_text_editors(){
+	TermGui::TextEditor editor1;
+	TermGui::TextEditor editor2;
+	TermGui::TextEditor editor3;
+	
+	editor1.insert("Alle meine Entchen");
+	editor2.insert("schwimmend auf dem See");
+	editor3.insert("schwimmend auf dem See");
+	
+	assert_expected(editor1 == editor2, false);
+	assert_expected(editor2 == editor3, true);
+}
+
 int main(){
 	
 	construct_empty_text_editor();
@@ -212,6 +274,11 @@ int main(){
 	insert_text_movve_back_twice_insert_line_break_move_up();
 	insert_after_new_line();
 	
+	insert_move_to_start_of_line();
+	insert_move_to_start_of_line_then_end_of_line();
+	insert_move_to_start_of_file();
+	insert_move_to_start_of_file_then_end_of_file();
+	
 	insert_then_erase();
 	insert_then_new_line_then_erase_the_new_line();
 	insert_then_erase();
@@ -219,6 +286,8 @@ int main(){
 
 	read_file();
 	///write_file();
+	
+	equality_test_for_text_editors();
 	
 	return EXIT_SUCCESS;
 	

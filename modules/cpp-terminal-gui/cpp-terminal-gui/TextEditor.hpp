@@ -16,6 +16,10 @@
 
 namespace TermGui{
 	
+	
+class TextEditor; // forward declaration
+bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
+	
 class TextEditor : public RenderTrait{
 private:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
@@ -46,6 +50,7 @@ private:
 	
 	Text _text; // stores the text data
 	Cursor _cursor;
+	bool show_cursor = true;
 
 public:
 
@@ -67,9 +72,9 @@ public:
 	const_iterator end() const {return this->_text.cend();}
 	const_iterator cend() const {return this->_text.cend();}
 	
-	iterator last(){return this->rbegin().base();}
-	const_iterator last() const {return this->crbegin().base();}
-	const_iterator clast() const {return this->crbegin().base();}
+	iterator last(){return --this->end();}
+	const_iterator last() const {return --this->cend();}
+	const_iterator clast() const {return --this->cend();}
 	
 	reverse_iterator rbegin(){return this->_text.rbegin();}
 	const_reverse_iterator rbegin() const {return this->_text.crbegin();}
@@ -88,10 +93,10 @@ public:
 	inline const_reference cback() const {return this->_text.back();}
 	
 	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
-	inline size_type number_of_lines(){return this->_text.size();}
+	inline size_type number_of_lines() const {return this->_text.size();}
 	
 	/// returns the size of the current line
-	inline size_type line_size(){return this->lineItr()->size();}
+	inline size_type line_size() const {return this->lineItr()->size();}
 	
 	inline size_type cursor_line() const {return this->_cursor.lineNumber;}
 	inline size_type cursor_column() const {return this->_cursor.columnNumber;}
@@ -191,7 +196,7 @@ public:
 	inline bool is_end_of_line() const {return this->column_number() == this->lineItr()->size();}
 	
 	/// return true if the cursor is located somewhere in the last line
-	inline bool is_last_line() const {return this->lineItr() == this->last();}
+	inline bool is_last_line() const { return this->lineItr() == this->last(); }
 	
 	/// returns true if the cursor is located at the very end of the last line 
 	inline bool is_end_of_file() const { return this->is_last_line() && this->is_end_of_line(); }
@@ -219,6 +224,9 @@ public:
 		return stream;
 	}
 	
+	friend bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
+	friend inline bool operator!=(const TextEditor& lhs, const TextEditor& rhs){return !(lhs == rhs);}
+	
 	/// erases the character at the index position
 	TextEditor& erase();
 	
@@ -227,9 +235,7 @@ private:
 	/// returns an iterator to the line at the given absolute position or the last line of the file
 	iterator find_line(size_type line);
 	const_iterator find_line(size_type line) const;
-	
-	
 
 };
-	
+
 }
