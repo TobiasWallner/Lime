@@ -5,7 +5,7 @@
 // filename: name of the file written to 
 // content: content that will be written
 static void writeToFile(const std::filesystem::path& path, const std::string& filename, std::string_view content){
-    std::ofstream file(path / filename);
+    std::ofstream file(path / filename, std::ios_base::binary);
     file << std::string(content);
     file.close();
 }
@@ -116,7 +116,7 @@ bool fileVerify(const std::filesystem::path& currPath, const std::string& filena
    
     if(!is_content_verified){
         std::cout << "File " << filename << " in verified is NOT equal input!" << std::endl;
-        currFolder.writeError(filename, "Files are not equal");
+        currFolder.writeError(filename, content);
         return false;
     }else if(currFolder.doesFileInErrorExist(filename)){
         if(currFolder.removeErrorFile(filename)){

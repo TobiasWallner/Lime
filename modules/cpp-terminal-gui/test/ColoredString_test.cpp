@@ -126,26 +126,65 @@ static void erase_from_text_after_last_style() {
 
 static void verify_string_in_file(){
 	TermGui::ColorString string;
-	string << "I see skyes of " << TermGui::fg_color(0, 0, 255) << " blue" << TermGui::fg_color(255, 255, 255);
-	string << " and clouds of " << TermGui::fg_color(0, 0, 0) << TermGui::bg_color(255, 255, 255) << " white\n";
-	string << TermGui::fg_color(255, 255, 0) << TermGui::bg_color(0, 0, 0) << "The bright blessed days, ";
-	string << TermGui::fg_color(255, 255, 255) << TermGui::bg_color(105,105,105) << "the dark sacred nights\n";
-	string << TermGui::fg_color(255, 255, 255) << TermGui::bg_color(0, 0, 0) << "And I think to myself\n";
-  	string << TermGui::fg_color(255, 0, 0)  << "Wh";
-  	string << TermGui::fg_color(255, 165, 0)  << "at ";
-  	string << TermGui::fg_color(255, 255, 0)  << "a ";
-  	string << TermGui::fg_color(0, 128, 0)  << "wonder";
-  	string << TermGui::fg_color(0, 0, 255)  << "ful ";
-  	string << TermGui::fg_color(75, 0, 130)  << "wor";
-  	string << TermGui::fg_color(238, 130, 238)  << "ld\n";
+	string << "I see skyes of " << TermGui::fg_color(0, 0, 255) << " blue";// << TermGui::fg_color(255, 255, 255);
+	// string << " and clouds of " << TermGui::fg_color(0, 0, 0) << TermGui::bg_color(255, 255, 255) << " white\n";
+	// string << TermGui::fg_color(255, 255, 0) << TermGui::bg_color(0, 0, 0) << "The bright blessed days, ";
+	// string << TermGui::fg_color(255, 255, 255) << TermGui::bg_color(105,105,105) << "the dark sacred nights\n";
+	// string << TermGui::fg_color(255, 255, 255) << TermGui::bg_color(0, 0, 0) << "And I think to myself\n";
+  	// string << TermGui::fg_color(255, 0, 0)  << "Wh";
+  	// string << TermGui::fg_color(255, 165, 0)  << "at ";
+  	// string << TermGui::fg_color(255, 255, 0)  << "a ";
+  	// string << TermGui::fg_color(0, 128, 0)  << "wonder";
+  	// string << TermGui::fg_color(0, 0, 255)  << "ful ";
+  	// string << TermGui::fg_color(75, 0, 130)  << "wor";
+  	// string << TermGui::fg_color(238, 130, 238)  << "ld\n";
 	std::string out;
 	string.render(out);
 	std::cout << out;
+
+	for(char c : out){
+		printf("%x ", c);
+	}
+	
+	std::cout << std::endl;
+	
+	std::cout << out << std::endl;
+	
 
 	std::filesystem::path currPath = std::filesystem::current_path();
 	assert(fileVerify(currPath, "color_string", out), "The file did not get verified");
 
 }
+
+
+static void print_colored_string_to_file(){
+	TermGui::ColorString string;
+	string << "word1 " << TermGui::fg_color(255, 0, 0) << " red" << TermGui::fg_color(255, 255, 255) << " this is red now";
+	
+	std::string rendered_output;
+	
+	string.render(rendered_output);
+	
+	std::ofstream ofile("test_color_string.txt", std::ios_base::binary);
+	
+	ofile << rendered_output;
+	
+	for(char c : rendered_output){
+		printf("%x ", c);
+	}
+	
+	std::cout << std::endl;
+	
+	std::cout << rendered_output << std::endl;
+	
+	char c;
+	
+	std::cout << "Press any key to end" << std::endl;
+	
+	std::cin >> c;
+	
+}
+
 
 int main(){
 	
@@ -154,6 +193,9 @@ int main(){
 	insert_into_string_and_erase_first();
 	insert_into_string_and_erase_range();
 	erase_from_text_after_last_style();
+	print_colored_string_to_file();
 	verify_string_in_file();
+	
+	
 	return EXIT_SUCCESS;
 }
