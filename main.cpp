@@ -34,7 +34,7 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-h")){
 		return help();
 	}else{
-		std::cout 	<< "This command will later create a new file with the file name '" 
+		std::cout 	<< "This command will later create a new file with the file name '" ///return Lime().run(numberOfArguments, listOfArgumentStrings)
 					<<  listOfArgumentStrings[0] 
 					<< "', but is currently unsupported." 
 					<< std::endl;
