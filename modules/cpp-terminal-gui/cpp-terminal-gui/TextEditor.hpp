@@ -105,6 +105,7 @@ public:
 	TermGui::TextEditor& insert(utf8::Char c);
 	inline TermGui::TextEditor& insert(char c){return this->insert(utf8::Char(c));}
 	bool insert(const char* str);
+	bool insert(const char* str, size_type size);
 	
 	/// inserts a new line after the current cursor position
 	inline void insert_line_after(){
@@ -203,11 +204,13 @@ public:
 	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
 	void render(std::string& outputString) const override;
 	
+	/// reads the content of a file into the Editor
 	bool read_file(const std::filesystem::path& path);
 	bool read_file(std::ifstream& stream);
 	
+	/// writes the content of the Editor into a file
 	bool write_file(const std::filesystem::path& path);
-	bool write_file(std::ifstream& stream);
+	bool write_file(std::ofstream& stream);
 	
 	template<class Stream>
 	friend Stream& operator << (Stream& stream, TextEditor& self){

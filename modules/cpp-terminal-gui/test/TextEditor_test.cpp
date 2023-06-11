@@ -228,6 +228,27 @@ static void insert_then_erase_from_file_start(){
 	assert_expected(editor.number_of_lines(), 2);
 }
 
+static void read_file(){
+	TermGui::TextEditor editor;
+
+	editor.read_file("test.txt");
+	assert_expected(editor.is_start_of_file(), true);
+	assert_expected(editor.number_of_lines(), 5);
+}
+
+static void writeRead_file(){
+	TermGui::TextEditor editor1;
+	TermGui::TextEditor editor2;
+	editor1.insert("some long text in the first line");
+	editor1.insert_new_line();
+	editor1.insert("some long text in the second line");
+
+	editor1.write_file("writeTest.txt");
+	editor2.read_file("writeTest.txt");
+	assert_expected(editor1.number_of_lines(), editor2.number_of_lines());
+	assert_expected(editor1 == editor2, true);
+}
+
 static void equality_test_for_text_editors(){
 	TermGui::TextEditor editor1;
 	TermGui::TextEditor editor2;
@@ -242,6 +263,10 @@ static void equality_test_for_text_editors(){
 }
 
 int main(){
+	while(!std::filesystem::is_regular_file("main.cpp")){
+		std::filesystem::current_path("..");
+	}
+	std::filesystem::current_path("modules/cpp-terminal-gui/test");
 	
 	construct_empty_text_editor();
 	insert_character_advances_column();
@@ -262,6 +287,9 @@ int main(){
 	insert_then_new_line_then_erase_the_new_line();
 	insert_then_erase();
 	insert_then_erase_from_file_start();
+
+	read_file();
+	writeRead_file();
 	
 	equality_test_for_text_editors();
 	

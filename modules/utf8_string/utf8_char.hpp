@@ -173,6 +173,10 @@ public:
 	/// reads the first utf8 character from the string and stores it in the character
 	/// returns the string iterator after the read character
 	inline std::string_view::const_iterator assign(const std::string_view& str){return this->assign(str.cbegin(), str.cend());}
+
+	/// reads the first utf8 character from the string and stores it in the character
+	/// returns the string iterator after the read character
+	inline const_iterator assign(const_iterator str, size_type size){return this->assign(str, str+size);}
 	
 	
 	/// assigns an ascii character to the utf8 character

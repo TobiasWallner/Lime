@@ -6,6 +6,9 @@
 
 #include "TextEditor.hpp"
 
+#include <fstream>
+#include <iostream>
+
 TermGui::TextEditor::TextEditor(){
 	this->_text.emplace_back();
 	this->_cursor.lineNumber = 0;
@@ -58,6 +61,22 @@ bool TermGui::TextEditor::insert(const char* str){
 	while(*str != '\0'){
 		utf8::Char c;
 		const char* next = c.assign(str);
+		if(next == str){
+			// no characters have been read -> error
+			return false;
+		}
+		this->insert(c);
+		str = next;
+	}
+	return true;
+}
+
+bool TermGui::TextEditor::insert(const char* str, size_type size){
+	size_type pos = 0;
+	while(pos != size){
+		utf8::Char c;
+		const char* next = c.assign(str, size);
+		size -= std::distance(str, next);
 		if(next == str){
 			// no characters have been read -> error
 			return false;
@@ -150,15 +169,42 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		}
 	}
 }
-	
 
 bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
-	//TODO(Helena):
+	if(!std::filesystem::is_regular_file(path)) {return false;}
+	std::ifstream file(path);
+	return read_file(file);
+}
+
+bool TermGui::TextEditor::read_file(std::ifstream& file){
+	char buffer[4*1024];
+
+	if(file.is_open()){
+		while(!file.eof()){
+			file.read (buffer, 4*1024);
+			this->insert(buffer, file.gcount());
+		}
+		this->move_to_start_of_file();
+		return true;
+	}
 	return false;
 }
 
 bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	//TODO(Helena):
+	std::ofstream file(path);
+	return write_file(file);
+}
+
+bool TermGui::TextEditor::write_file(std::ofstream& file){
+	if(file.is_open()){
+		auto iterator = _text.cbegin();
+		file << *(iterator++);
+        for(; iterator != _text.cend(); ++iterator){
+            file << "\n" << *iterator;
+        }
+        file.close();
+		return true;
+    }
 	return false;
 }
 
