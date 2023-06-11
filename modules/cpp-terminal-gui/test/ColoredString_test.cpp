@@ -1,10 +1,11 @@
 
 
 #include <cpp-terminal-gui/ColorString.hpp>
+#include <cpp-terminal/terminal.hpp>
 
 #include "../verification/verification.hpp"
 
-#include <cpp-terminal/terminal.hpp>
+
 // C std
 #include <stdlib.h>
 
