@@ -1,23 +1,29 @@
 #pragma once
 
+//utf8 string
 #include <utf8_string.hpp>
 
-#include "ColorString.hpp"
+//project
 #include "RenderTrait.hpp"
+#include "EditTrait.hpp"
 
 namespace TermGui{
 
 /// offers an editable string with a callback function that gets executed on enter.
 /// On construction offer a pointer to the object that should be notified and a 
-template<class CallbackObject, class CallbackMethod>
+/// will move the command string into the provided method
+template<class CallbackObjectType>
 class CommandLine : public RenderTrait, public EditTrait{
 public:
-	using size_type = ColorString::size_type;
+	using string_type = utf8::string;
+	using value_type = string_type::value_type;
+	using size_type = string_type::size_type;
+	using method_type = void(CallbackObjectType::*)(utf8::string&&);
 	
 private:
-	utf8::string commandString;
-	CallbackObject* const objectPtr; // pointer cannot be changed after construction
-	CallbackMethod const method; // method cannot be changed after construction
+	string_type commandString;
+	CallbackObjectType* objectPtr; // pointer cannot be changed after construction
+	method_type method; // method cannot be changed after construction
 	size_type cursorIndex = 0;
 	
 	bool showCursor = false;
@@ -26,32 +32,58 @@ public:
 
 	/// constructs a command line with a pointer to and object
 	/// that should be called with the provided method uppon pressing enter
-	CommandLine(CallbackObject* objectPtr, CallbackMethod method) : 
+	CommandLine(CallbackObjectType* objectPtr, method_type method) : 
 		commandString(), 
 		objectPtr(objectPtr),
 		method(method),
 		cursorIndex(0)
 		{}
+		
+	CommandLine(const CommandLine&) = default;
+	CommandLine(CommandLine&&) = default;
 	
-	inline void show_cursor(bool on_off){ this->showCursor = on_off; }
+	CommandLine& operator=(const CommandLine&) = default;
+	CommandLine& operator=(CommandLine&&) = default;
 	
-	inline clear(){
+	inline void show_cursor(bool on_off) override { this->showCursor = on_off; }
+	
+	inline void clear() override {
 		this->move_to_start_of_line();
 		this->commandString.clear();
 	}
 	
-	inline ColorString& insert(utf8::Char c){
-		if(c != '\n'){
-			this->commandString.insert(cursorIndex, c);
-			this->move_forward()
+	inline void insert(utf8::Char c) override {
+		if(c == '\n'){
+			this->enter();
+		}else if(c == '\b'){
+			this->Delete();
 		}else{
-			objectPtr->method();
-			this->clear();
+			this->commandString.insert(cursorIndex, c);
+			this->move_forward();
 		}
 	}
 	
-	inline EditTrait& insert(char c) override {this->insert(utf8::Char(c)); return *this;}
+	inline bool insert(const char* str){return this->EditTrait::insert(str);}
+	inline bool insert(const char* str, size_t size){return this->EditTrait::insert(str, size);}
 	
+	/// calls the provided method, passes the command string and clears the command line
+	inline void enter() override {
+		(objectPtr->*(method))(std::move(this->commandString));
+		this->clear();
+	}
+	
+	inline void erase() override { 
+		if(!this->is_end_of_line()){
+			this->commandString.erase(this->cursorIndex); 
+		}
+	}
+	
+	inline void Delete() override {
+		if(!this->is_start_of_line()){
+			this->move_back();
+			this->commandString.erase(this->cursorIndex);
+		}
+	}
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
@@ -85,7 +117,37 @@ public:
 	inline bool is_end_of_line() const { return this->cursorIndex == this->commandString.size(); }
 	
 	
-	void render(std::string& outputString) const override;
+	void render(std::string& outputString) const override {
+		outputString += ": ";
+		
+		if(this->showCursor){
+			if(this->is_end_of_line()){
+				this->commandString.append_to(outputString);
+				outputString += to_string(FontStyle::Reversed::ON);
+				outputString +=	' ';
+				outputString +=	to_string(FontStyle::Reversed::OFF);
+			}else{
+				auto itr = this->commandString.cbegin();
+				const auto cursorItr = this->commandString.cbegin() + this->cursorIndex;
+				const auto endItr = this->commandString.cend();
+				
+				for(; itr != cursorItr; ++itr){
+					outputString += itr->to_std_string_view();
+				}
+				
+				outputString += to_string(FontStyle::Reversed::ON);
+				outputString += itr->to_std_string_view();
+				++itr;
+				outputString += to_string(FontStyle::Reversed::OFF);
+				
+				for(; itr != endItr; ++itr){
+					outputString += itr->to_std_string_view();
+				}
+			}
+		}else{
+			this->commandString.append_to(outputString);
+		}
+	}
 	
 
 };
