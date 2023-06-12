@@ -34,6 +34,8 @@ public:
 		DIM = static_cast<std::uint8_t>(Term::Style::DIM),
 	};
 	
+	
+	
 	enum class Italic : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::ITALIC),
 		#ifdef NEW_CPP_TERMINAL_VERSION
@@ -42,6 +44,8 @@ public:
 		OFF = 23,
 		#endif
 	};
+	
+	
 	
 	enum class Blink : std::uint8_t{
 		SLOW = static_cast<std::uint8_t>(Term::Style::BLINK),
@@ -53,6 +57,8 @@ public:
 		#endif
 	};
 	
+	
+	
 	enum class Reversed : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::REVERSED),
 		#ifdef NEW_CPP_TERMINAL_VERSION
@@ -61,6 +67,7 @@ public:
 		OFF = 27,
 		#endif
 	};
+	
 	
 	enum class Conceal : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::CONCEAL),
@@ -71,6 +78,7 @@ public:
 		#endif
 	};
 	
+	
 	enum class Crossed : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::CROSSED),
 		#ifdef NEW_CPP_TERMINAL_VERSION
@@ -80,6 +88,7 @@ public:
 		#endif
 	};
 	
+	
 	enum class Underline : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::UNDERLINE),
 		#ifdef NEW_CPP_TERMINAL_VERSION
@@ -88,6 +97,7 @@ public:
 		OFF = 24,
 		#endif
 	};
+	
 	
 	enum class Font : std::uint8_t{
 		#ifdef NEW_CPP_TERMINAL_VERSION
@@ -117,6 +127,7 @@ public:
 		#endif
 	};
 	
+	
 	enum class Bar : std::uint8_t{
 		#ifdef NEW_CPP_TERMINAL_VERSION
 		LEFT = static_cast<std::uint8_t>(Term::Style::BAR_LEFT),
@@ -128,11 +139,10 @@ public:
 		OFF = 65, 
 		#endif
 	};
-	
-private:
+
 	struct Reset_t{};
-public:
 	static constexpr Reset_t Reset{}; // empty type used as a token
+	
 	
 	enum class Type : std::uint8_t{
 		reset, 
@@ -239,5 +249,16 @@ inline FontStyle default_fg_color(){return FontStyle::default_fg_color();}
 inline FontStyle bg_color(std::uint8_t red, std::uint8_t green, std::uint8_t blue){return FontStyle::bg_color(red, green, blue);}
 
 inline FontStyle default_bg_color(){return FontStyle::default_bg_color();}
+
+inline std::string to_string(FontStyle::Width v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Italic v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Blink v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Reversed v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Conceal v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Crossed v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Underline v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Font v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Bar v){return Term::style(static_cast<Term::Style>(v));}
+inline std::string to_string(FontStyle::Reset_t v){return Term::style(Term::Style::RESET);}
 
 }
