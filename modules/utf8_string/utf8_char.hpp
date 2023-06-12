@@ -234,7 +234,7 @@ public:
 	
 	/// reads an utf8 char from the input stream
 	template<class IStream>
-	friend std::istream& operator >> (IStream& stream, Char& c) {
+	friend IStream& operator >> (IStream& stream, Char& c) {
 		c[0] = stream.get();
 		const auto length = identify(c[0]);
 		switch(length){
