@@ -2,13 +2,13 @@
 
 add_library(cpp-terminal-gui
 	cpp-terminal-gui/RenderTrait.hpp
-	
+	cpp-terminal-gui/EditTrait.hpp
 	cpp-terminal-gui/FontStyle.hpp
 	cpp-terminal-gui/FontStyleList.cpp	cpp-terminal-gui/FontStyleList.hpp
-	
 	cpp-terminal-gui/ColorString.cpp	cpp-terminal-gui/ColorString.hpp
-	
 	cpp-terminal-gui/TextEditor.cpp		cpp-terminal-gui/TextEditor.hpp
+	cpp-terminal-gui/CommandLine.cpp	cpp-terminal-gui/CommandLine.hpp
+	
 )
 
 target_include_directories(cpp-terminal-gui PUBLIC
