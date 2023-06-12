@@ -23,11 +23,11 @@ namespace TermGui{
 
 class ColorString : public RenderTrait{
 
-private:
+public:
 	using size_type = utf8::string::size_type;
-
 	using string_type = utf8::string;
 
+public:
 	string_type _string;
 	iStylesList _styles;
 
@@ -130,18 +130,25 @@ public:
 	inline ColorString& append(const std::string& str){this->_string.append(str); return *this;}
 	inline ColorString& append(std::string_view str){this->_string.append(str); return *this;}
 	inline ColorString& append(std::string_view str, size_type pos, size_type n){this->_string.append(str, pos, n); return *this;}
+	inline ColorString& append(const utf8::string str){this->_string.append(str); return *this;}
+	inline ColorString& append(const utf8::string_view str){this->_string.append(str); return *this;}
+	
 	
 	inline ColorString& operator+=(utf8::Char c){return this->append(c);}
 	inline ColorString& operator+=(char c){return this->append(c);}
 	inline ColorString& operator+=(const char* first){return this->append(first);}
 	inline ColorString& operator+=(const std::string& str){return this->append(str);}
 	inline ColorString& operator+=(std::string_view str){return this->append(str);}
+	inline ColorString& operator+=(const utf8::string str){this->_string.append(str); return *this;}
+	inline ColorString& operator+=(const utf8::string_view str){this->_string.append(str); return *this;}
 	
 	inline ColorString& operator<<(utf8::Char c){return this->append(c);}
 	inline ColorString& operator<<(char c){return this->append(c);}
 	inline ColorString& operator<<(const char* first){return this->append(first);}
 	inline ColorString& operator<<(const std::string& str){return this->append(str);}
 	inline ColorString& operator<<(std::string_view str){return this->append(str);}
+	inline ColorString& operator<<(const utf8::string str){this->_string.append(str); return *this;}
+	inline ColorString& operator<<(const utf8::string_view str){this->_string.append(str); return *this;}
 	
 	/// appends the given command to the line which will then format all string elements inserted after wards	
 	inline ColorString& append(const FontStyle& fontStyle){
@@ -175,12 +182,16 @@ public:
 	inline ColorString& assign(const std::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(std::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(std::initializer_list<char> ilist){this->_styles.clear(); this->_string.assign(ilist); return *this;}
+	inline ColorString& assign(const utf8::string str){this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string_view str){this->_string.assign(str); return *this;}
 	
 	inline ColorString& operator=(utf8::Char c){return this->assign(c);}
 	inline ColorString& operator=(char c){return this->assign(c);}
 	inline ColorString& operator=(const char* first){return this->assign(first);}
 	inline ColorString& operator=(const std::string& str){return this->assign(str);}
 	inline ColorString& operator=(std::string_view str){return this->assign(str);}
+	inline ColorString& operator=(const utf8::string str){this->_string.assign(str); return *this;}
+	inline ColorString& operator=(const utf8::string_view str){this->_string.assign(str); return *this;}
 	
 	// TODO: iterators
 	
