@@ -15,15 +15,15 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 
 ## Usage
 
-### download releases
-
-[Download Releases from here.](https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject/releases)
-
 ### download source
 
 ```
 git clone --recurse-submodules https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject
 ```
+
+last stable commit of the cpp-terminal library: 49e3160358237a3af25e7c7c3e70e593812cd0fe
+
+after cloning this repo. Go into the cpp-terminal library and checkout the commit above.
 
 ### Complilation on Windows
 
