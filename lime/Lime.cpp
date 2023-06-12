@@ -290,17 +290,17 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 	
 	switch(character_32){
 		//---- basics -----
-		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
+		case Term::Key::CTRL_Q : this->quit(); break;
 		case Term::Key::ESC : this->toggle_command_line(); break;
 		case Term::Key::ENTER : this->activeEditor->enter(); break; 
 		case Term::Key::BACKSPACE : this->activeEditor->Delete(); break;
 		case Term::Key::DEL: this->activeEditor->erase(); break;
 		
 		//----- navigation and cursor movement -----
-		case Term::Key::CTRL + Term::Key::J : this->activeEditor->move_back(); break;
-		case Term::Key::CTRL + Term::Key::I : this->activeEditor->move_up(); break;
-		case Term::Key::CTRL + Term::Key::L : this->activeEditor->move_forward(); break; 
-		case Term::Key::CTRL + Term::Key::K : this->activeEditor->move_down(); break;
+		case Term::Key::CTRL_J : this->activeEditor->move_back(); break;
+		case Term::Key::CTRL_I : this->activeEditor->move_up(); break;
+		case Term::Key::CTRL_L : this->activeEditor->move_forward(); break; 
+		case Term::Key::CTRL_K : this->activeEditor->move_down(); break;
 		///filepath nicht empty? Fehlermeldung
 		///erst schreiben, str s speichert
 		///filepath setzen, auch wenn file existiert
@@ -311,8 +311,8 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ARROW_RIGHT : this->activeEditor->move_forward(); break; 
 		case Term::Key::ARROW_DOWN 	: this->activeEditor->move_down(); break; 
 		
-		case Term::Key::CTRL + Term::Key::T : this->activeEditor->move_to_start_of_file();break;
-		case Term::Key::CTRL + Term::Key::E : this->activeEditor->move_to_end_of_file();break;
+		case Term::Key::CTRL_T : this->activeEditor->move_to_start_of_file();break;
+		case Term::Key::CTRL_E : this->activeEditor->move_to_end_of_file();break;
 		
 		case Term::Key::ALT + Term::Key::u : this->activeEditor->move_to_start_of_line(); break;
 		case Term::Key::ALT + Term::Key::o : this->activeEditor->move_to_end_of_line(); break;
@@ -323,9 +323,9 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
 		
 		// ------- editing -------
-		case Term::Key::CTRL + Term::Key::V : this->insert_from_clipboard(); break;
-		case Term::Key::CTRL + Term::Key::C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
-		case Term::Key::CTRL + Term::Key::X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
+		case Term::Key::CTRL_V : this->insert_from_clipboard(); break;
+		case Term::Key::CTRL_C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
+		case Term::Key::CTRL_X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
 		
 		default:{
 			// ------- setup and key identification ------
