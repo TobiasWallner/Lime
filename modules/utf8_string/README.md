@@ -10,4 +10,5 @@ to manage utf8 symbols:
 + `utf8::string`: stores a string of utf8 symbols. Is derived from std::basic_string
 + `utf8::string_view`: stores a view to the string. Is derived from std::basic_string_view
 
-
+note that utf8 char will store utf8 codepoints always as utf8. It will internally not convert them
+back and forth between utf32 and utf8.
