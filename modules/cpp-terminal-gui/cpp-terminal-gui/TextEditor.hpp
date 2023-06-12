@@ -13,6 +13,7 @@
 
 #include "ColorString.hpp"
 #include "RenderTrait.hpp"
+#include "EditTrait.hpp"
 
 namespace TermGui{
 	
@@ -20,7 +21,7 @@ namespace TermGui{
 class TextEditor; // forward declaration
 bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
 	
-class TextEditor : public RenderTrait{
+class TextEditor : public RenderTrait, public EditTrait{
 private:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
 	using Text = std::list<Line>;	// list of lines
@@ -50,7 +51,7 @@ private:
 	
 	Text _text; // stores the text data
 	Cursor _cursor;
-	bool show_cursor = true;
+	bool showCursor = true;
 
 public:
 
@@ -122,6 +123,8 @@ public:
 	/// character cannot be a special character like a line break or a backspace
 	/// simply inserts the character at the current cursor position without any prozessing.
 	TermGui::TextEditor& insert_naive(utf8::Char character);
+	
+	inline void show_cursor(bool on_off){ this->showCursor = on_off; }
 	
 	/// inserts a new line before the current cursor position
 	inline void insert_line_before(){this->_text.insert(this->lineItr(), Line());}

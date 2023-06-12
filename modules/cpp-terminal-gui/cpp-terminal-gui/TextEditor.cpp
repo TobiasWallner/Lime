@@ -156,7 +156,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		if(itr != this->begin()){
 			outputString += '\n';	
 		}
-		if(this->show_cursor && itr == this->_cursor.lineIterator){
+		if(this->showCursor && itr == this->_cursor.lineIterator){
 			TermGui::TextEditor::Line lineCopy = *itr;
 			if(this->is_end_of_line()){
 				lineCopy += ' ';
