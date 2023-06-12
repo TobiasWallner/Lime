@@ -21,10 +21,12 @@
 #include <cpp-terminal/terminal.hpp>
 #include <cpp-terminal/tty.hpp>
 #include <cpp-terminal/event.hpp>
+#include <cpp-terminal/style.hpp>
 
 // cpp-terminal-gui
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
+
 
 // lime (pasting both for windows and unix) 
 #ifdef _WIN32
@@ -35,7 +37,13 @@
 #include <cstring>
 #endif
 
-Lime::Lime(){
+Lime::Lime() : 
+	TermGui::ColorString topMessageBar(),
+	TermGui::TextEditor textEditor(),
+	TermGui::CommandLine commandLine(this, Lime::command_line_callback),
+	TermGui::ColorString infoText(),
+	std::filesystem::path filepath(),
+{
 	this->infoText << "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
 				   << "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
 				   
@@ -49,9 +57,10 @@ Lime::Lime(){
 				   
 				   << "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
 				   << "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n";
+				   
+	this->deactivate_command_Line();
+	this->activate_text_editor();
 }
-
-#include <cpp-terminal/style.hpp>
 
 int Lime::run(){
 	
@@ -274,6 +283,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 	switch(character_32){
 		//---- basics -----
 		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
+		case Term::Key::CTRL + Term::Key::PERIOD : this->toggle_command_line(); break;
 		
 		//----- navigation and cursor movement -----
 		case Term::Key::CTRL + Term::Key::J : this->textEditor.move_back(); break;
@@ -379,12 +389,29 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
+void Lime::command_line_callback(const utf8::string_view commands){
+	if(commands.start_with("save-as ")){
+		//TODO
+	}else if(commands.start_with("save ")){
+		//TODO
+	}else if(commands.start_with("open ")){
+		//TODO
+	}else{
+		//TODO: print an error message that the command is not supported
+	}
+	
+	this->toggle_command_line();
+	this->deactivate_command_Line();
+}
+
 void Lime::render(std::string& outputString) const{
 	this->topMessageBar.render(outputString);
 	outputString += '\n';
 	this->textEditor.render(outputString);
 	outputString += '\n';
 	this->infoText.render(outputString);
+	outputString += '\n';
+	this->commandLine.render(outputString);
 }
 
 void Lime::draw(const std::string& outputString) const{

@@ -9,12 +9,14 @@
 
 class Lime{
 	
+	static constexpr unsigned int input_buffer_len = 4;
+	
 	TermGui::ColorString topMessageBar;
 	TermGui::TextEditor textEditor;
+	TermGui::CommandLine commandLine;
 	TermGui::ColorString infoText;
 	std::filesystem::path filepath;
-	
-	static constexpr unsigned int input_buffer_len = 4;
+	TermGui::EditTrait * activeEditor = nullptr;
 	char input_buffer[input_buffer_len] = {'\0'};
 	unsigned int input_buffer_count = 0;
 	bool main_loop_continue = true;
@@ -62,6 +64,52 @@ public:
 	void quit();
 	
 private:
+
+	void command_line_callback(const utf8::string& commands);
+
+	inline void activate_command_line(){
+		this->commandLine.show_cursor(true);
+		this->activeEditor = &this->commandLine;
+		//TODO: print command line info text
+	}
+	
+	inline bool is_command_line_active() const { return this->activeEditor == &this->commandLine; }
+	
+	inline void deactivate_command_line(){
+		this->commandLine.show_cursor(false);
+		if(this->is_command_line_active()){
+			this->activeEditor = nullptr;
+			this->infoText.clear();
+		}
+	}
+	
+	inline void activate_text_editor(){
+		this->textEditor.show_cursor(true);
+		this->activeEditor = &this->textEditor;
+		//TODO: print text Editor Info text
+	}
+	
+	inline bool is_text_editor_active() const { return this->activeEditor == &this->textEditor; }
+	
+	inline void deactivate_text_editor(){
+		this->textEditor.show_cursor(false);
+		if(is_text_editor_active){
+			this->textEditor = nullptr;	
+			this->infoText.clear();
+		}
+	}
+	
+	/// if the main editor is active -> sets the console as the active editor
+	/// if the console is the active editor -> sets the textEditor as the active editor
+	inline void toggle_command_line(){
+		if(this->is_text_editor_active()){
+			this->deactivate_text_editor();
+			this->activate_command_line();
+		}else{
+			this->deactivate_command_line();
+			this->activate_text_editor();
+		}
+	}
 
 	/**
 		the main loop does three things
