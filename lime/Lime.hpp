@@ -12,6 +12,7 @@ class Lime{
 	TermGui::ColorString topMessageBar;
 	TermGui::TextEditor textEditor;
 	TermGui::ColorString infoText;
+	std::filesystem::path filepath;
 	
 	static constexpr unsigned int input_buffer_len = 4;
 	char input_buffer[input_buffer_len] = {'\0'};
@@ -48,6 +49,8 @@ public:
 			like un-mounted input and output streams to the console.
 	*/
 	int run();
+
+	int run(int numberOfArguments, char** listOfArgumentStrings);
 
 	/**
 		Savely quits the editor from the current state.

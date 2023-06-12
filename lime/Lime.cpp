@@ -79,6 +79,23 @@ int Lime::run(){
 	return EXIT_SUCCESS;
 }
 
+int Lime::run(int numberOfArguments, char** listOfArgumentStrings){
+	if(numberOfArguments > 0){
+		const bool successful_read = textEditor.read_file(listOfArgumentStrings[0]);
+		if (successful_read == TRUE){
+			return run();
+		}
+		else{
+			std::cout << "Could not read file" << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+	else{
+		std::cout << "Wrong number of arguments" << std::endl;
+		return EXIT_FAILURE;
+	}
+}
+
 void Lime::quit(){
 	/**
 		Savely quit the program.
@@ -263,6 +280,10 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::CTRL + Term::Key::I : this->textEditor.move_up(); break;
 		case Term::Key::CTRL + Term::Key::L : this->textEditor.move_forward(); break; 
 		case Term::Key::CTRL + Term::Key::K : this->textEditor.move_down(); break;
+		///filepath nicht empty? Fehlermeldung
+		///erst schreiben, str s speichert
+		///filepath setzen, auch wenn file existiert
+		///case Term::Key::CTRL + Term::Key::S : this->textEditor.write_file(filepath); break;
 		
 		case Term::Key::ARROW_LEFT 	: this->textEditor.move_back(); break;
 		case Term::Key::ARROW_UP 	: this->textEditor.move_up(); break;
