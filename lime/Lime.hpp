@@ -2,10 +2,13 @@
 // cpp-terminal
 #include <cpp-terminal/event.hpp>
 
+//utf8 string
+#include <utf8_string.hpp>
+
 // cpp-terminal-gui
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
-
+#include <cpp-terminal-gui/CommandLine.hpp>
 
 class Lime{
 	
@@ -13,7 +16,7 @@ class Lime{
 	
 	TermGui::ColorString topMessageBar;
 	TermGui::TextEditor textEditor;
-	TermGui::CommandLine commandLine;
+	TermGui::CommandLine<Lime> commandLine;
 	TermGui::ColorString infoText;
 	std::filesystem::path filepath;
 	TermGui::EditTrait * activeEditor = nullptr;
@@ -65,13 +68,9 @@ public:
 	
 private:
 
-	void command_line_callback(const utf8::string& commands);
+	void command_line_callback(utf8::string&& commands);
 
-	inline void activate_command_line(){
-		this->commandLine.show_cursor(true);
-		this->activeEditor = &this->commandLine;
-		//TODO: print command line info text
-	}
+	void activate_command_line();
 	
 	inline bool is_command_line_active() const { return this->activeEditor == &this->commandLine; }
 	
@@ -83,18 +82,14 @@ private:
 		}
 	}
 	
-	inline void activate_text_editor(){
-		this->textEditor.show_cursor(true);
-		this->activeEditor = &this->textEditor;
-		//TODO: print text Editor Info text
-	}
+	void activate_text_editor();
 	
 	inline bool is_text_editor_active() const { return this->activeEditor == &this->textEditor; }
 	
 	inline void deactivate_text_editor(){
 		this->textEditor.show_cursor(false);
-		if(is_text_editor_active){
-			this->textEditor = nullptr;	
+		if(this->is_text_editor_active()){
+			this->activeEditor = nullptr;	
 			this->infoText.clear();
 		}
 	}
