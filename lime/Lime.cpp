@@ -295,16 +295,22 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ENTER : this->activeEditor->enter(); break; 
 		case Term::Key::BACKSPACE : this->activeEditor->Delete(); break;
 		case Term::Key::DEL: this->activeEditor->erase(); break;
+
+		//---- i/o ----
+		case Term::Key::CTRL_S :
+			if(filepath.empty()){
+				this->topMessageBar.append(" Error: filepath is empty. Use save-as first.\n");
+			}
+			else{
+				this->textEditor.write_file(filepath);
+			}
+			break;
 		
 		//----- navigation and cursor movement -----
 		case Term::Key::CTRL_J : this->activeEditor->move_back(); break;
 		case Term::Key::CTRL_I : this->activeEditor->move_up(); break;
 		case Term::Key::CTRL_L : this->activeEditor->move_forward(); break; 
 		case Term::Key::CTRL_K : this->activeEditor->move_down(); break;
-		///filepath nicht empty? Fehlermeldung
-		///erst schreiben, str s speichert
-		///filepath setzen, auch wenn file existiert
-		///case Term::Key::CTRL + Term::Key::S : this->activeEditor->write_file(filepath); break;
 		
 		case Term::Key::ARROW_LEFT 	: this->activeEditor->move_back(); break;
 		case Term::Key::ARROW_UP 	: this->activeEditor->move_up(); break;
@@ -362,7 +368,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 				if(utf8_id == utf8::Identifier::NotFirst){
 					// wait for more characters in the input buffer
 				}else{
-					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->topMessageBar.append(" Error: utf8 character ended prematurely");
 					this->input_buffer_count = 0;
 				}
 			}else if(this->input_buffer_count == expected_utf8_bytes){
@@ -373,7 +379,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 					this->input_buffer_count = 0;
 					this->activeEditor->insert(c);
 				}else{
-					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->topMessageBar.append(" Error: utf8 character ended prematurely");
 					this->input_buffer_count = 0;
 				}
 					

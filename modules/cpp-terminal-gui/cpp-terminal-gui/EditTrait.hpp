@@ -82,7 +82,6 @@ class EditTrait{
 	virtual void move_to_end_of_line() = 0;
 	
 	virtual void move_to_end_of_file() = 0;
-
 };
 
 }
