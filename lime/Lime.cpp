@@ -115,15 +115,13 @@ int Lime::run(){
 int Lime::run(int numberOfArguments, char** listOfArgumentStrings){
 	if(numberOfArguments > 0){
 		const bool successful_read = textEditor.read_file(listOfArgumentStrings[0]);
-		if (successful_read == TRUE){
+		if (successful_read){
 			return run();
-		}
-		else{
+		}else{
 			std::cout << "Could not read file" << std::endl;
 			return EXIT_FAILURE;
 		}
-	}
-	else{
+	}else{
 		std::cout << "Wrong number of arguments" << std::endl;
 		return EXIT_FAILURE;
 	}
