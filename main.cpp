@@ -44,7 +44,7 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 }
 
 const char* version_string(){
-	return "0.3.0";
+	return "0.4.0";
 }
 
 int version(){
