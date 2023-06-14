@@ -127,7 +127,7 @@ static void insert_after_new_line(){
 	assert_expected(editor.back().size(), 3);
 }
 
-static void insert_then_erase(){
+static void insert_then_Delete(){
 	TermGui::TextEditor editor;
 	editor.insert("some long text in the first line");
 	auto size = editor.front().size();
@@ -135,7 +135,7 @@ static void insert_then_erase(){
 	auto cursorLine = editor.cursor_line();
 	auto cursorColumn = editor.cursor_column();
 	
-	editor.erase();
+	editor.Delete();
 	auto newSize = editor.front().size();
 	
 	assert_expected(editor.cursor_line(), cursorLine);
@@ -143,7 +143,7 @@ static void insert_then_erase(){
 	assert_expected(newSize, size - 1);
 }
 
-static void insert_then_new_line_then_erase_the_new_line(){
+static void insert_then_new_line_then_Delete_the_new_line(){
 	TermGui::TextEditor editor;
 	editor.insert("some long text in the first line");
 	editor.insert_new_line();
@@ -152,7 +152,7 @@ static void insert_then_new_line_then_erase_the_new_line(){
 	auto size2 = editor.back().size();
 	editor.move_to_start_of_line();
 	
-	editor.erase();
+	editor.Delete();
 	auto newSize = editor.front().size();
 	
 	assert_expected(editor.cursor_line(), 0);
@@ -203,7 +203,7 @@ static void insert_move_to_start_of_file_then_end_of_file(){
 	assert_expected(editor.cursor_column(), sizeof("some long text in the second line")-1);
 }
 
-static void insert_then_erase_from_file_start(){
+static void insert_then_Delete_from_file_start(){
 	TermGui::TextEditor editor;
 	editor.insert("some long text in the first line");
 	editor.insert_new_line();
@@ -216,7 +216,7 @@ static void insert_then_erase_from_file_start(){
 	
 	auto size1 = editor.front().size();
 	auto size2 = editor.back().size();
-	editor.erase();
+	editor.Delete();
 	auto newSize1 = editor.front().size();
 	auto newSize2 = editor.back().size();
 	
@@ -283,10 +283,10 @@ int main(){
 	insert_move_to_start_of_file();
 	insert_move_to_start_of_file_then_end_of_file();
 	
-	insert_then_erase();
-	insert_then_new_line_then_erase_the_new_line();
-	insert_then_erase();
-	insert_then_erase_from_file_start();
+	insert_then_Delete();
+	insert_then_new_line_then_Delete_the_new_line();
+	insert_then_Delete();
+	insert_then_Delete_from_file_start();
 
 	read_file();
 	writeRead_file();

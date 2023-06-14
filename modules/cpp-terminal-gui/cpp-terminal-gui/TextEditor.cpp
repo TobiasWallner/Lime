@@ -31,60 +31,28 @@ bool TermGui::TextEditor::empty() const{
 	}
 }
 
-TermGui::TextEditor& TermGui::TextEditor::insert_naive(utf8::Char character){
+void TermGui::TextEditor::insert_naive(utf8::Char character){
 	this->_cursor.lineIterator->insert(this->_cursor.columnNumber, character);
 	this->move_forward();
-	return *this;
 }
 
-TermGui::TextEditor& TermGui::TextEditor::insert_new_line(){
+void TermGui::TextEditor::insert_new_line(){
 	auto prevCursor = this->_cursor;
 	this->insert_line_after();
 	++this->_cursor.lineNumber;
 	++this->_cursor.lineIterator;
 	this->_cursor.columnNumber = 0;
 	this->lineItr()->move_append(*(prevCursor.lineIterator), prevCursor.columnNumber, prevCursor.lineIterator->size() - prevCursor.columnNumber);
-	return *this;
 }
 
-TermGui::TextEditor& TermGui::TextEditor::insert(utf8::Char c){
+void TermGui::TextEditor::insert(utf8::Char c){
 	if(c == '\n'){
-		return this->insert_new_line();
+		this->insert_new_line();
 	}else if(c == '\b'){
-		return this->erase();
+		this->Delete();
 	}else{
-		return this->insert_naive(c);
+		this->insert_naive(c);
 	}	
-}
-
-bool TermGui::TextEditor::insert(const char* str){
-	while(*str != '\0'){
-		utf8::Char c;
-		const char* next = c.assign(str);
-		if(next == str){
-			// no characters have been read -> error
-			return false;
-		}
-		this->insert(c);
-		str = next;
-	}
-	return true;
-}
-
-bool TermGui::TextEditor::insert(const char* str, size_type size){
-	size_type pos = 0;
-	while(pos != size){
-		utf8::Char c;
-		const char* next = c.assign(str, size);
-		size -= std::distance(str, next);
-		if(next == str){
-			// no characters have been read -> error
-			return false;
-		}
-		this->insert(c);
-		str = next;
-	}
-	return true;
 }
 
 TermGui::TextEditor::iterator TermGui::TextEditor::find_line(size_type line){
@@ -156,7 +124,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		if(itr != this->begin()){
 			outputString += '\n';	
 		}
-		if(this->show_cursor && itr == this->_cursor.lineIterator){
+		if(this->showCursor && itr == this->_cursor.lineIterator){
 			TermGui::TextEditor::Line lineCopy = *itr;
 			if(this->is_end_of_line()){
 				lineCopy += ' ';
@@ -202,13 +170,12 @@ bool TermGui::TextEditor::write_file(std::ofstream& file){
         for(; iterator != _text.cend(); ++iterator){
             file << "\n" << *iterator;
         }
-        file.close();
 		return true;
     }
 	return false;
 }
 
-TermGui::TextEditor& TermGui::TextEditor::erase(){
+void TermGui::TextEditor::Delete(){
 	if(this->is_start_of_file()){
 		// nothing to do
 	}else if(this->is_start_of_line()){
@@ -224,7 +191,21 @@ TermGui::TextEditor& TermGui::TextEditor::erase(){
 		this->move_back();
 		this->_cursor.lineIterator->erase(this->_cursor.columnNumber);
 	}
-	return *this;
+}
+
+void TermGui::TextEditor::erase(){
+	if(this->is_end_of_file()){
+		// nothing to do
+	}else if(this->is_end_of_line()){
+		// erase line break
+		auto nextLineIterator = this->_cursor.lineIterator;
+		++nextLineIterator;
+		this->_cursor.lineIterator->append(*nextLineIterator);
+		this->_text.erase(nextLineIterator);
+	}else{
+		// erase element inside string
+		this->_cursor.lineIterator->erase(this->_cursor.columnNumber);
+	}
 }
 
 bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){

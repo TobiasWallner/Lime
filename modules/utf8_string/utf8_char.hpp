@@ -234,7 +234,7 @@ public:
 	
 	/// reads an utf8 char from the input stream
 	template<class IStream>
-	friend std::istream& operator >> (IStream& stream, Char& c) {
+	friend IStream& operator >> (IStream& stream, Char& c) {
 		c[0] = stream.get();
 		const auto length = identify(c[0]);
 		switch(length){
@@ -395,5 +395,160 @@ public:
 	template<class Range> friend constexpr inline bool operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
 	template<class Range> friend constexpr inline bool operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
 };
+
+
+inline constexpr bool is_control(Char c){
+	auto i = c.to_int();
+	return (0x0 <= i && i <= 0x1f) || (0x7f <= i && i <= 0x9f);
+}
+
+inline constexpr bool is_whitespace(Char c){
+	return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
+}
+
+inline constexpr bool is_ascii(Char c){
+	auto i = c.to_int();
+	return (i <= 0x7f);
+}
+
+inline constexpr bool is_ascii_lower_alpha(Char c){
+	return ('a' <= c && c <= 'z');
+}
+
+inline constexpr bool is_ascii_upper_alpha(Char c){
+	return ('A' <= c && c <= 'Z');
+}
+
+inline constexpr bool is_ascii_alpha(Char c){
+	return is_ascii_lower_alpha(c) || is_ascii_upper_alpha(c);
+}
+
+inline constexpr bool is_ascii_number(Char c){
+	return ('0' <= c && c <= '9');
+}
+
+inline constexpr bool is_ascii_alnum(Char c){
+	return is_ascii_alpha(c) || is_ascii_number(c);
+}
+
+inline constexpr bool is_basic_latin(Char c){
+	auto i = c.to_int();
+	return (0x0 <= i && i <= 0x7f);
+}
+
+inline constexpr bool is_latin_1_suplement(Char c){
+	auto i = c.to_int();
+	return (0x80 <= i && i <= 0xff);
+}
+
+inline constexpr bool is_latin_extended_a(Char c){
+	auto i = c.to_int();
+	return (0x100 <= i && i <= 0x17f);
+}
+
+inline constexpr bool is_latin_extended_b(Char c){
+	auto i = c.to_int();
+	return (0x180 <= i && i <= 0x24f);
+}
+
+inline constexpr bool is_ipa_extension(Char c){
+	auto i = c.to_int();
+	return (0x250 <= i && i <= 0x2af);
+}
+
+inline constexpr bool is_spaceing_modifier(Char c){
+	auto i = c.to_int();
+	return (0x2b0 <= i && i <= 0x2ff);
+}
+
+inline constexpr bool is_combining_diacritical_mark(Char c){
+	auto i = c.to_int();
+	return (0x300 <= i && i <= 0x36f);
+}
+
+inline constexpr bool is_greek(Char c){
+	auto i = c.to_int();
+	return (0x370 <= i && i <= 0x3ff);
+}
+
+inline constexpr bool is_cyrillic(Char c){
+	auto i = c.to_int();
+	return (0x400 <= i && i <= 0x4ff);
+}
+
+inline constexpr bool is_cyrillic_supplement(Char c){
+	auto i = c.to_int();
+	return (0x500 <= i && i <= 0x52f);
+}
+
+inline constexpr bool is_armenian(Char c){
+	auto i = c.to_int();
+	return (0x530 <= i && i <= 0x58f);
+}
+
+inline constexpr bool is_hebrew(Char c){
+	auto i = c.to_int();
+	return (0x590 <= i && i <= 0x5ff);
+}
+
+inline constexpr bool is_arabic(Char c){
+	auto i = c.to_int();
+	return (0x600 <= i && i <= 0x6ff);
+}
+
+inline constexpr bool is_syriac(Char c){
+	auto i = c.to_int();
+	return (0x700 <= i && i <= 0x74f);
+}
+
+inline constexpr bool is_arabic_suplement(Char c){
+	auto i = c.to_int();
+	return (0x750 <= i && i <= 0x77f);
+}
+
+inline constexpr bool is_thaana(Char c){
+	auto i = c.to_int();
+	return (0x780 <= i && i <= 0x7bf);
+}
+
+inline constexpr bool is_nko(Char c){
+	auto i = c.to_int();
+	return (0x7C0 <= i && i <= 0x7ff);
+}
+
+inline constexpr bool is_samaritan(Char c){
+	auto i = c.to_int();
+	return (0x800 <= i && i <= 0x83f);
+}
+
+inline constexpr bool is_mandaic(Char c){
+	auto i = c.to_int();
+	return (0x840 <= i && i <= 0x85f);
+}
+
+inline constexpr bool is_syriac_supplement(Char c){
+	auto i = c.to_int();
+	return (0x860 <= i && i <= 0x86f);
+}
+
+inline constexpr bool is_arabic_extended_b(Char c){
+	auto i = c.to_int();
+	return (0x870 <= i && i <= 0x89f);
+}
+
+inline constexpr bool is_arabic_extended_a(Char c){
+	auto i = c.to_int();
+	return (0x8a0 <= i && i <= 0x8ff);
+}
+
+inline constexpr bool is_devanagari(Char c){
+	auto i = c.to_int();
+	return (0x900 <= i && i <= 0x87f);
+}
+
+inline constexpr bool is_bengali(Char c){
+	auto i = c.to_int();
+	return (0x980 <= i && i <= 0x9ff);
+}
 
 }

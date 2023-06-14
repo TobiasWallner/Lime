@@ -21,10 +21,12 @@
 #include <cpp-terminal/terminal.hpp>
 #include <cpp-terminal/tty.hpp>
 #include <cpp-terminal/event.hpp>
+#include <cpp-terminal/style.hpp>
 
 // cpp-terminal-gui
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
+
 
 // lime (pasting both for windows and unix) 
 #ifdef _WIN32
@@ -35,23 +37,53 @@
 #include <cstring>
 #endif
 
-Lime::Lime(){
-	this->infoText << "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
-				   << "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
-				   
-				   << "Move Left: " << TermGui::fg_color(0, 200, 0) << "Ctrl + J" << TermGui::default_fg_color() << "\t"
-				   << "Move Up: " << TermGui::fg_color(0, 200, 0) << "Ctrl + I" << TermGui::default_fg_color() << "\t"
-				   << "Move Right: " << TermGui::fg_color(0, 200, 0) << "Ctrl + L" << TermGui::default_fg_color() << "\t"
-				   << "Move Down: " << TermGui::fg_color(0, 200, 0) << "Ctrl + K" << TermGui::default_fg_color() << "\n"
-				   
-				   << "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + U" << TermGui::default_fg_color() << "\t"
-				   << "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + O" << TermGui::default_fg_color() << "\n"
-				   
-				   << "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
-				   << "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n";
+Lime::Lime() : 
+	topMessageBar(),
+	textEditor(),
+	commandLine(this, &Lime::command_line_callback),
+	infoText(),
+	filepath()
+{   
+	this->deactivate_command_line();
+	this->activate_text_editor();
 }
 
-#include <cpp-terminal/style.hpp>
+inline void Lime::activate_command_line(){
+	this->commandLine.show_cursor(true);
+	this->activeEditor = &this->commandLine;
+	
+	// load infotext
+	this->infoText.clear();
+	this->infoText  << TermGui::fg_color(0, 200, 0) << "save" << TermGui::default_fg_color() << "  ...............  saves the current file\n"
+					<< TermGui::fg_color(0, 200, 0) << "save-as <filename>" << TermGui::default_fg_color() << " ..  saves the current file under a new name\n"
+					<< TermGui::fg_color(0, 200, 0) << "open <filename>" << TermGui::default_fg_color() << "  ....  opens the file under the provided name";
+	
+}
+
+void Lime::activate_text_editor(){
+	this->textEditor.show_cursor(true);
+	this->activeEditor = &this->textEditor;
+		
+		//load infotext
+	this->infoText.clear();
+	this->infoText  
+		<< "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
+		<< "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
+			   
+		<< "Move Left: " << TermGui::fg_color(0, 200, 0) << "Ctrl + J" << TermGui::default_fg_color() << "\t"
+		<< "Move Up: " << TermGui::fg_color(0, 200, 0) << "Ctrl + I" << TermGui::default_fg_color() << "\t"
+		<< "Move Right: " << TermGui::fg_color(0, 200, 0) << "Ctrl + L" << TermGui::default_fg_color() << "\t"
+		<< "Move Down: " << TermGui::fg_color(0, 200, 0) << "Ctrl + K" << TermGui::default_fg_color() << "\n"
+			   
+		<< "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + U" << TermGui::default_fg_color() << "\t"
+		<< "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + O" << TermGui::default_fg_color() << "\n"
+		   
+		<< "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
+		<< "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n"
+		
+		<< "Toggle Command Line: " << TermGui::fg_color(0, 200, 0) << "Esc" << TermGui::default_fg_color();
+		
+}
 
 int Lime::run(){
 	
@@ -246,7 +278,7 @@ void Lime::insert_from_clipboard(){
 	std::string clipboardBuffer;
 	const bool successfulRead = read_clipboard(clipboardBuffer);
 	if(successfulRead){
-		this->textEditor.insert(clipboardBuffer.c_str());
+		this->activeEditor->insert(clipboardBuffer.c_str(), clipboardBuffer.size());
 	}else{
 		this->topMessageBar.assign("Bad Copy Paste Event");
 	}
@@ -255,65 +287,73 @@ void Lime::insert_from_clipboard(){
 void Lime::prozess_key_event(Term::Key keyEvent){
 	// get analyse input
 	const auto character_32 = static_cast<int32_t>(keyEvent);
-	const auto character_8 = static_cast<char>(character_32);
-	const auto utf8_id = utf8::identify(character_8);
-	// print status message: mostly for debugging
-	this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
-	
-	// insert event into the input buffer
-	if(this->input_buffer_count < this->input_buffer_len){
-		this->input_buffer[this->input_buffer_count++] = character_8;
-	}else{
-		this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
-		this->input_buffer_count = 0;
-		return;
-	}
-
-	const auto expected_utf8_bytes = static_cast<int>(utf8::identify(this->input_buffer[0]));
 	
 	switch(character_32){
 		//---- basics -----
-		case Term::Key::CTRL + Term::Key::Q : this->quit(); break;
+		case Term::Key::CTRL_Q : this->quit(); break;
+		case Term::Key::ESC : this->toggle_command_line(); break;
+		case Term::Key::ENTER : this->activeEditor->enter(); break; 
+		case Term::Key::BACKSPACE : this->activeEditor->Delete(); break;
+		case Term::Key::DEL: this->activeEditor->erase(); break;
+
+		//---- i/o ----
+		case Term::Key::CTRL_S :
+			if(filepath.empty()){
+				this->topMessageBar.append(" Error: filepath is empty. Use save-as first.\n");
+			}
+			else{
+				this->textEditor.write_file(filepath);
+			}
+			break;
 		
 		//----- navigation and cursor movement -----
-		case Term::Key::CTRL + Term::Key::J : this->textEditor.move_back(); break;
-		case Term::Key::CTRL + Term::Key::I : this->textEditor.move_up(); break;
-		case Term::Key::CTRL + Term::Key::L : this->textEditor.move_forward(); break; 
-		case Term::Key::CTRL + Term::Key::K : this->textEditor.move_down(); break;
-		///filepath nicht empty? Fehlermeldung
-		///erst schreiben, str s speichert
-		///filepath setzen, auch wenn file existiert
-		///case Term::Key::CTRL + Term::Key::S : this->textEditor.write_file(filepath); break;
+		case Term::Key::CTRL_J : this->activeEditor->move_back(); break;
+		case Term::Key::CTRL_I : this->activeEditor->move_up(); break;
+		case Term::Key::CTRL_L : this->activeEditor->move_forward(); break; 
+		case Term::Key::CTRL_K : this->activeEditor->move_down(); break;
 		
-		case Term::Key::ARROW_LEFT 	: this->textEditor.move_back(); break;
-		case Term::Key::ARROW_UP 	: this->textEditor.move_up(); break;
-		case Term::Key::ARROW_RIGHT : this->textEditor.move_forward(); break; 
-		case Term::Key::ARROW_DOWN 	: this->textEditor.move_down(); break; 
+		case Term::Key::ARROW_LEFT 	: this->activeEditor->move_back(); break;
+		case Term::Key::ARROW_UP 	: this->activeEditor->move_up(); break;
+		case Term::Key::ARROW_RIGHT : this->activeEditor->move_forward(); break; 
+		case Term::Key::ARROW_DOWN 	: this->activeEditor->move_down(); break; 
 		
-		case Term::Key::CTRL + Term::Key::T : this->textEditor.move_to_start_of_file();break;
-		case Term::Key::CTRL + Term::Key::E : this->textEditor.move_to_end_of_file();break;
+		case Term::Key::CTRL_T : this->activeEditor->move_to_start_of_file();break;
+		case Term::Key::CTRL_E : this->activeEditor->move_to_end_of_file();break;
 		
-		case Term::Key::ALT + Term::Key::u : this->textEditor.move_to_start_of_line(); break;
-		case Term::Key::ALT + Term::Key::o : this->textEditor.move_to_end_of_line(); break;
+		case Term::Key::ALT + Term::Key::u : this->activeEditor->move_to_start_of_line(); break;
+		case Term::Key::ALT + Term::Key::o : this->activeEditor->move_to_end_of_line(); break;
 		
 		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
 		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
 		case Term::Key::ALT + Term::Key::L : this->topMessageBar.assign("/*TODO: move one word right*/"); break; 
 		case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
 		
-		// ----- special inserts -----
-		case Term::Key::ENTER : this->textEditor.insert_new_line(); break; 
-		
 		// ------- editing -------
-		case Term::Key::CTRL + Term::Key::V : this->insert_from_clipboard(); break;
-		case Term::Key::CTRL + Term::Key::C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
-		case Term::Key::CTRL + Term::Key::X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
+		case Term::Key::CTRL_V : this->insert_from_clipboard(); break;
+		case Term::Key::CTRL_C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
+		case Term::Key::CTRL_X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
 		
 		default:{
+			// ------- setup and key identification ------
+			const auto character_8 = static_cast<char>(character_32);
+			const auto utf8_id = utf8::identify(character_8);
+			// print status message: mostly for debugging
+			this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
+			
+			// insert event into the input buffer
+			if(this->input_buffer_count < this->input_buffer_len){
+				this->input_buffer[this->input_buffer_count++] = character_8;
+			}else{
+				this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
+				this->input_buffer_count = 0;
+				return;
+			}
+			const auto expected_utf8_bytes = static_cast<int32_t>(utf8::identify(this->input_buffer[0]));
+			
 			// ------- key insertions ----------
 			if(this->input_buffer_count == 1){
 				if(utf8_id == utf8::Identifier::Bytes1){
-					this->textEditor.insert(character_8);
+					this->activeEditor->insert(character_8);
 					this->input_buffer_count = 0;
 				}else if(utf8_id == utf8::Identifier::NotFirst){
 					this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
@@ -324,11 +364,11 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 				}else{
 					// wait for more characters in the input buffer
 				}
-			}else if(this->input_buffer_count < expected_utf8_bytes){
+			}else if(static_cast<int32_t>(this->input_buffer_count) < expected_utf8_bytes){
 				if(utf8_id == utf8::Identifier::NotFirst){
 					// wait for more characters in the input buffer
 				}else{
-					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->topMessageBar.append(" Error: utf8 character ended prematurely");
 					this->input_buffer_count = 0;
 				}
 			}else if(this->input_buffer_count == expected_utf8_bytes){
@@ -337,9 +377,9 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 					auto last = this->input_buffer + this->input_buffer_count;
 					utf8::Char c(first, last);
 					this->input_buffer_count = 0;
-					this->textEditor.insert(c);
+					this->activeEditor->insert(c);
 				}else{
-					this->topMessageBar.append(" Error: utf8 character ended prematurelly");
+					this->topMessageBar.append(" Error: utf8 character ended prematurely");
 					this->input_buffer_count = 0;
 				}
 					
@@ -369,7 +409,7 @@ void Lime::prozess_copy_paste_event(Term::Event&& event){
 	// the press the right mouse button twice
 	// TODO: BugFix: handle insertion of multiple selected lines
 	auto input = static_cast<std::string>(std::move(event));
-	this->textEditor.insert(input.c_str());
+	this->activeEditor->insert(input.c_str(), input.size());
 }
 
 void Lime::prozess_unhandeled_event(Term::Event&& event){
@@ -379,12 +419,85 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
+/// parses a utf8 view of a command string into a vector of string views
+/// returns a vector where each element holds one word or string ("..") of the command
+static std::vector<utf8::string_view> parse_command_string(utf8::string_view commandString){
+	std::vector<utf8::string_view> commandList;
+	auto itr = commandString.cbegin();
+	const auto end = commandString.cend();
+	while(itr != end){
+		//skip whitespaces
+		if(utf8::is_whitespace(*itr) || utf8::is_control(*itr)){
+			// go to next
+			++itr;
+		}else if(*itr == '"'){
+			// find next " or end
+			auto next = itr+1;
+			for (; next != end; ++next) {
+				if (*next == '"') break;
+			}
+			const bool has_quotation_marks = next != end;
+			const auto distance = std::distance(itr + 1, next);
+			const utf8::string_view::const_pointer pChar = &(*(itr + 1));
+			commandList.emplace_back(pChar, distance);
+			itr = next + has_quotation_marks;
+		}else{
+			// find next whitespaces
+			auto next = itr+1;
+			for (; next != end; ++next) {
+				if (utf8::is_whitespace(*next)) break;
+			}
+			const auto distance = std::distance(itr, next);
+			const utf8::string_view::const_pointer pChar = &(*itr);
+			commandList.emplace_back(pChar, distance);
+			itr = next;
+		}
+	}
+	return commandList;
+}
+
+void Lime::command_line_callback(utf8::string&& commands){
+	// parse commands into list of commands
+	const auto commandList = parse_command_string(commands);
+	if(commandList.empty()){
+		this->topMessageBar.assign("Error: empty command string");
+		return;
+	}
+	
+	// prozess commanad
+	if(commandList[0] == "save-as"){
+		if(commandList.size() >= 2){
+			this->filepath = utf8::to_std_string(commandList[1]);
+			this->textEditor.write_file(this->filepath);
+		}else{
+			this->topMessageBar.assign("Error: the command save-as needs a filename");
+		}
+	}else if(commandList[0] == "save"){
+		this->textEditor.write_file(this->filepath);
+	}else if(commandList[0] == "open"){
+		if(commandList.size() >= 2){
+			this->filepath = utf8::to_std_string(commandList[1]);
+			this->textEditor.read_file(this->filepath);
+		}else{
+			this->topMessageBar.assign("Error: the command open needs a filename");
+		}
+	}else{
+		this->topMessageBar.assign("Unsupported Command: ").append(commands);
+	}
+	
+	// go back into the editor mode
+	this->toggle_command_line();
+	this->deactivate_command_line();
+}
+
 void Lime::render(std::string& outputString) const{
 	this->topMessageBar.render(outputString);
-	outputString += '\n';
+	outputString += "\n--------------------------\n";
 	this->textEditor.render(outputString);
-	outputString += '\n';
+	outputString += "\n--------------------------\n";
 	this->infoText.render(outputString);
+	outputString += "\n--------------------------\n";
+	this->commandLine.render(outputString);
 }
 
 void Lime::draw(const std::string& outputString) const{

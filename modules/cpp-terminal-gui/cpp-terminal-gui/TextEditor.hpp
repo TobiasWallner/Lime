@@ -13,6 +13,7 @@
 
 #include "ColorString.hpp"
 #include "RenderTrait.hpp"
+#include "EditTrait.hpp"
 
 namespace TermGui{
 	
@@ -20,7 +21,7 @@ namespace TermGui{
 class TextEditor; // forward declaration
 bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
 	
-class TextEditor : public RenderTrait{
+class TextEditor : public RenderTrait, public EditTrait{
 private:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
 	using Text = std::list<Line>;	// list of lines
@@ -50,7 +51,7 @@ private:
 	
 	Text _text; // stores the text data
 	Cursor _cursor;
-	bool show_cursor = true;
+	bool showCursor = true;
 
 public:
 
@@ -59,6 +60,8 @@ public:
 	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
+	
+	inline void clear() override { this->move_to_start_of_file(); this->_text.clear(); }
 	
 	iterator begin(){return this->_text.begin();}
 	const_iterator begin() const {return this->_text.cbegin();}
@@ -102,10 +105,10 @@ public:
 	inline size_type cursor_column() const {return this->_cursor.columnNumber;}
 	
 	/// inserts a character at the current cursor position into the string
-	TermGui::TextEditor& insert(utf8::Char c);
-	inline TermGui::TextEditor& insert(char c){return this->insert(utf8::Char(c));}
-	bool insert(const char* str);
-	bool insert(const char* str, size_type size);
+	void insert(utf8::Char c) override;
+	inline void insert(char c){return this->insert(utf8::Char(c));}
+	inline bool insert(const char* str){return this->EditTrait::insert(str);}
+	inline bool insert(const char* str, size_t size){return this->EditTrait::insert(str, size);}
 	
 	/// inserts a new line after the current cursor position
 	inline void insert_line_after(){
@@ -116,12 +119,14 @@ public:
 	
 	/// inserts a new line after the current one and moves the cursor to the beginning
 	/// of the inserted line. copies the remaining string to the beginning of the new line
-	TermGui::TextEditor& insert_new_line();
+	void insert_new_line();
 	
 	/// expects that the character is a number, letter, bracket, operator, or the like.
 	/// character cannot be a special character like a line break or a backspace
 	/// simply inserts the character at the current cursor position without any prozessing.
-	TermGui::TextEditor& insert_naive(utf8::Char character);
+	void insert_naive(utf8::Char character);
+	
+	inline void show_cursor(bool on_off) override { this->showCursor = on_off; }
 	
 	/// inserts a new line before the current cursor position
 	inline void insert_line_before(){this->_text.insert(this->lineItr(), Line());}
@@ -136,14 +141,14 @@ public:
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
-	void move_forward();
+	void move_forward() override;
 	
 	/// moves forward n times
 	inline void move_forward(size_type n){for(size_type i = 0; i < n; ++i) move_forward();}
 	
 	/// moves the cursor to the left, aka. decreases the column by one.
 	/// if the cursot is at the beginning of the file -> moves the cursor to the end of the previous line
-	void move_back();
+	void move_back() override;
 	
 	/// moves backward n times
 	inline void move_back(size_type n){for(size_type i = 0; i < n; ++i) move_back();}
@@ -152,7 +157,7 @@ public:
 	/// if at the beginning of the file-> does nothing
 	/// if at the first line -> moves to the beginning of the file
 	/// if the column is larger than the line size of the line above -> places cursor at the end of the line
-	void move_up();
+	void move_up() override;
 	
 	/// moves up n times
 	inline void move_up(size_type n){for(size_type i = 0; i < n; ++i) move_up();}
@@ -160,24 +165,24 @@ public:
 	/// moves the cursor down a line, aka. advances the line number and line iterator by one
 	/// if the cursor is already at the last line -> moves the cursor to the end of the line / end of file
 	/// if the column is greater than the column of the next line -> moves the cursor to the end of that line
-	void move_down();
+	void move_down() override;
 	
 	/// moves down n times
 	inline void move_down(size_type n){for(size_type i = 0; i < n; ++i) move_down();}
 	
 	/// moves the cursor to the start of the line
-	inline void move_to_start_of_line(){this->_cursor.columnNumber = 0;}
+	inline void move_to_start_of_line() override {this->_cursor.columnNumber = 0;}
 	
-	inline void move_to_start_of_file(){
+	inline void move_to_start_of_file() override {
 		this->_cursor.columnNumber = 0; 
 		this->_cursor.lineNumber = 0; 
 		this->_cursor.lineIterator = this->begin();
 	}
 	
 	/// moves the cursor to the end of the line;
-	inline void move_to_end_of_line(){this->_cursor.columnNumber = this->lineItr()->size();}
+	inline void move_to_end_of_line() override {this->_cursor.columnNumber = this->lineItr()->size();}
 	
-	inline void move_to_end_of_file(){
+	inline void move_to_end_of_file() override {
 		this->_cursor.lineNumber = this->_text.size()-1;
 		this->_cursor.lineIterator = this->last();
 		this->_cursor.columnNumber = this->last()->size();
@@ -227,9 +232,14 @@ public:
 	friend bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
 	friend inline bool operator!=(const TextEditor& lhs, const TextEditor& rhs){return !(lhs == rhs);}
 	
-	/// erases the character at the index position
-	TextEditor& erase();
+	/// erases the character at the cursor position
+	void erase() override;
 	
+	/// deletes the character befor the cursor position
+	void Delete() override;
+	
+	/// inserts a new line
+	inline void enter() override {this->insert_new_line();}
 private:
 
 	/// returns an iterator to the line at the given absolute position or the last line of the file

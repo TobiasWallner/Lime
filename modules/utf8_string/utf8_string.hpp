@@ -7,6 +7,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
+#include <iterator>
 
 //Project
 #include "utf8_char.hpp"
@@ -16,7 +17,45 @@
 
 namespace utf8{
 
-using BaseString_view = std::basic_string_view<Char>;
+using string_view = std::basic_string_view<Char>;
+
+inline bool operator == (const string_view& lhs, const char* rhs){
+	auto lhsItr = lhs.cbegin();
+	const auto lhsEnd = lhs.cend();
+	auto rhsItr = rhs;
+	
+	for(; lhsItr != lhsEnd && *rhsItr != '\0';++lhsItr, (void)++rhsItr){
+		if(*lhsItr != *rhsItr){
+			return false;
+		}
+	}
+	
+	const auto lhsDist = std::distance(lhs.cbegin(), lhsItr);
+	const auto rhsDist = std::distance(rhs, rhsItr);
+	const bool result = lhsDist == rhsDist;
+	return result;
+}
+
+inline bool operator == (const char* lhs, const string_view& rhs){return rhs == lhs;}
+inline bool operator != (const string_view& lhs, const char* rhs){return !(lhs == rhs);}
+inline bool operator != (const char* lhs, const string_view& rhs){return !(lhs == rhs);}
+
+inline size_t c_string_size(string_view stringView){
+	size_t sum = 0;
+	for(const Char c : stringView){
+		sum += c.size();
+	}
+	return sum;
+}
+
+inline std::string to_std_string(string_view stringView){
+	std::string result;
+	result.reserve(c_string_size(stringView));
+	for(const Char c : stringView){
+		result += c.to_std_string_view();
+	}
+	return result;
+}
 
 /// BaseString that stores utf8::Char types 
 ///
@@ -130,7 +169,7 @@ public:
 	/// appends the provided ranged c-string to this BaseString. 
 	/// only works if the character is convertible to utf8::Char
 	template<class CharItr>
-	 BaseString& _append(CharItr first, CharItr last){
+	BaseString& _append(CharItr first, CharItr last){
 		this->reserve(std::distance(first, last));
 		while(first < last){
 			Char c;
@@ -148,6 +187,10 @@ public:
 	template<class CharItr>
 	BaseString& append(CharItr first, CharItr last){return this->_append(first, last);}
 	
+	BaseString& append(const_iterator first, const_iterator last){this->base_class::append(first, last); return *this;}
+	BaseString& append(utf8::string_view::const_iterator first, utf8::string_view::const_iterator last){this->base_class::append(first, last); return *this;}
+	
+	
 	/// appends the provided ranged c-string to this BaseString
 	inline BaseString& append(const BaseString& str){this->base_class::append(str); return *this;}
 	inline BaseString& append(const BaseString& str, size_type pos, size_type n){this->base_class::append(str, pos, n); return *this;}
@@ -160,6 +203,8 @@ public:
 	inline BaseString& append(std::string_view str){return this->_append(str.begin(), str.end());}
 	inline BaseString& append(std::string_view str, size_type pos, size_type n){return this->_append(str.begin() + pos, str.end() + pos + n);}
 	inline BaseString& append(std::initializer_list<char> ilist){return this->_append(ilist.begin(), ilist.end());}
+	inline BaseString& append(utf8::string_view str){return this->append(str.begin(), str.end());}
+	inline BaseString& append(utf8::string_view str, size_type pos, size_type n){return this->append(str.begin() + pos, str.end() + pos + n);}
 	
 	/// Appends the given character ch to the end of the BaseString. 
 	inline void push_back(char c){this->base_class::push_back(Char(c));}
@@ -205,6 +250,7 @@ public:
 	inline BaseString& operator+=(const std::string& str){return this->append(str);}
 	inline BaseString& operator+=(std::string_view str){return this->append(str);}
 	inline BaseString& operator+=(std::initializer_list<char> ilist){return this->append(ilist);}
+	inline BaseString& operator+=(utf8::string_view str){return this->append(str);}
 	
 	/// appends one given character or BaseString to this BaseString
 	friend inline BaseString& operator<<(BaseString& stream, const BaseString& str){return stream.append(str);}
@@ -214,8 +260,10 @@ public:
 	friend inline BaseString& operator<<(BaseString& stream, const std::string& str){return stream.append(str);}
 	friend inline BaseString& operator<<(BaseString& stream, std::string_view str){return stream.append(str);}
 	friend inline BaseString& operator<<(BaseString& stream, std::initializer_list<char> ilist){return stream.append(ilist);}
+	friend inline BaseString& operator<<(BaseString& stream, utf8::string_view str){return stream.append(str);}
 	
-	/// assigns a char c-string
+	BaseString& assign(const_iterator first, const_iterator last){this->base_class::assign(first, last); return *this;}
+	BaseString& assign(utf8::string_view::const_iterator first, utf8::string_view::const_iterator last){this->base_class::assign(first, last); return *this;}
 	inline BaseString& assign(const BaseString& str){this->operator=(str); return *this;}
 	inline BaseString& assign(BaseString&& str){this->operator=(std::move(str)); return *this;}
 	inline BaseString& assign(char c){this->clear(); return this->append(c);}
@@ -226,13 +274,16 @@ public:
 	inline BaseString& assign(const std::string& str){this->clear(); return this->append(str);}
 	inline BaseString& assign(std::string_view str){this->clear(); return this->append(str);}
 	inline BaseString& assign(std::initializer_list<char> ilist){this->clear(); return this->append(ilist);}
+	inline BaseString& assign(utf8::string_view str){this->clear(); return this->append(str);}
+	
 	
 	/// assignment from std containers that use char
-	inline BaseString& operator=(char c){this->clear(); return this->append(c);}
-	inline BaseString& operator=(const char* str){this->clear(); return this->append(str);}
-	inline BaseString& operator=(const std::string& str){this->clear(); return this->append(str);}
-	inline BaseString& operator=(std::string_view str){this->clear(); return this->append(str);}
-	inline BaseString& operator=(std::initializer_list<char> ilist){this->clear(); return this->append(ilist);}
+	inline BaseString& operator=(char c){return this->assign(c);}
+	inline BaseString& operator=(const char* str){return this->assign(str);}
+	inline BaseString& operator=(const std::string& str){return this->assign(str);}
+	inline BaseString& operator=(std::string_view str){return this->assign(str);}
+	inline BaseString& operator=(std::initializer_list<char> ilist){return this->assign(ilist);}
+	inline BaseString& operator=(utf8::string_view str){return this->assign(str);}
 	
 	/// concattenate two BaseStrings
 	friend inline BaseString operator+(const BaseString& lhs, const BaseString& rhs){
@@ -292,6 +343,7 @@ public:
 };
 
 using string = BaseString<>;
+
 
 }
 
