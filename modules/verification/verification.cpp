@@ -1,3 +1,6 @@
+// C++ std
+#include <sstream>
+
 #include "verification.hpp"
 
 // Writes the input content to the input file
