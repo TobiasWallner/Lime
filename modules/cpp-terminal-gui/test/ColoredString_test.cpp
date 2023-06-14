@@ -1,6 +1,10 @@
 
 
 #include <cpp-terminal-gui/ColorString.hpp>
+#include <cpp-terminal/terminal.hpp>
+
+#include "../verification/verification.hpp"
+
 
 // C std
 #include <stdlib.h>
@@ -8,6 +12,7 @@
 // C++ std
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 #define assert(condition, message) if(!(condition)){ \
 										std::cout << "test failed in file: " << __FILE__ << std::endl; \
@@ -121,13 +126,61 @@ static void erase_from_text_after_last_style() {
 	assert_expected(string.styles().back().index, last_color_index);
 }
 
+static void verify_string_in_file(){
+	TermGui::ColorString string;
+	string << "I see skyes of " << TermGui::fg_color(0, 0, 255) << " blue" << TermGui::fg_color(255, 255, 255);
+	string << " and clouds of " << TermGui::fg_color(0, 0, 0) << TermGui::bg_color(255, 255, 255) << " white\n";
+	string << TermGui::fg_color(255, 255, 0) << TermGui::bg_color(0, 0, 0) << "The bright blessed days, ";
+	string << TermGui::fg_color(255, 255, 255) << TermGui::bg_color(105,105,105) << "the dark sacred nights\n";
+	string << TermGui::fg_color(255, 255, 255) << TermGui::bg_color(0, 0, 0) << "And I think to myself\n";
+  	string << TermGui::fg_color(255, 0, 0)  << "Wh";
+  	string << TermGui::fg_color(255, 165, 0)  << "at ";
+  	string << TermGui::fg_color(255, 255, 0)  << "a ";
+  	string << TermGui::fg_color(0, 128, 0)  << "wonder";
+  	string << TermGui::fg_color(0, 0, 255)  << "ful ";
+  	string << TermGui::fg_color(75, 0, 130)  << "wor";
+  	string << TermGui::fg_color(238, 130, 238)  << "ld\n";
+	std::string out;
+	string.render(out);
+	std::cout << out;
+
+	for(char c : out){
+		printf("%x ", c);
+	}
+	
+	std::cout << std::endl;
+	
+	std::cout << out << std::endl;
+	
+
+	std::filesystem::path currPath = std::filesystem::current_path();
+	assert(fileVerify(currPath, "color_string", out), "The file did not get verified");
+
+}
+
+
+
 int main(){
 	
-	insert_into_string_and_erase_last();
-	insert_into_string_and_erase_between();
-	insert_into_string_and_erase_first();
-	insert_into_string_and_erase_range();
-	erase_from_text_after_last_style();
+	try{
+		Term::terminal.setOptions(
+					Term::Option::ClearScreen, 	// start from a cear screen
+					Term::Option::NoSignalKeys, // deactivate key combinations that generate a signal or interrupt
+					Term::Option::NoCursor, 	// deactivate the cursor, we will display it ourselfs
+					Term::Option::Raw			// get the raw and unprozessed io data from the console buffers
+		);
+		
+		insert_into_string_and_erase_last();
+		insert_into_string_and_erase_between();
+		insert_into_string_and_erase_first();
+		insert_into_string_and_erase_range();
+		erase_from_text_after_last_style();
+		verify_string_in_file();
 	
+	}catch(...){
+		std::cout << "Error: exception thrown" << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	return EXIT_SUCCESS;
 }

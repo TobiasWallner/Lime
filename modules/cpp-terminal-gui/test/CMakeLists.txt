@@ -14,8 +14,9 @@ add_test(cpp_terminal_gui_istyleslist_ctest cpp_terminal_gui_istyleslist_test)
 
 add_executable(cpp_terminal_gui_colored_string_test ColoredString_test.cpp)
 
-target_link_libraries(cpp_terminal_gui_colored_string_test
+target_link_libraries(cpp_terminal_gui_colored_string_test PUBLIC
 	cpp-terminal-gui
+	verification
 )
 
 add_test(cpp_terminal_gui_colored_string_ctest cpp_terminal_gui_colored_string_test)
