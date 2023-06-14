@@ -151,6 +151,11 @@ static void verify_string_in_file(){
 
 
 int main(){
+
+	while(!std::filesystem::is_regular_file("main.cpp")){
+		std::filesystem::current_path("..");
+	}
+	std::filesystem::current_path("modules/cpp-terminal-gui/test");
 	
 	try{
 		Term::terminal.setOptions(
