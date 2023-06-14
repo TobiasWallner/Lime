@@ -68,6 +68,7 @@ void Lime::activate_text_editor(){
 	this->infoText.clear();
 	this->infoText  
 		<< "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
+		<< "Save: " << TermGui::fg_color(0, 200, 0) << "Ctrl + S" << TermGui::default_fg_color() << "\t"
 		<< "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
 			   
 		<< "Move Left: " << TermGui::fg_color(0, 200, 0) << "Ctrl + J" << TermGui::default_fg_color() << "\t"

@@ -60,8 +60,10 @@ public:
 	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
+
+	void init();
 	
-	inline void clear() override { this->move_to_start_of_file(); this->_text.clear(); }
+	inline void clear() override { this->_text.clear(); this->init();}
 	
 	iterator begin(){return this->_text.begin();}
 	const_iterator begin() const {return this->_text.cbegin();}
@@ -143,15 +145,9 @@ public:
 	/// if at the end of line perform a jump to the next line, if it exists
 	void move_forward() override;
 	
-	/// moves forward n times
-	inline void move_forward(size_type n){for(size_type i = 0; i < n; ++i) move_forward();}
-	
 	/// moves the cursor to the left, aka. decreases the column by one.
 	/// if the cursot is at the beginning of the file -> moves the cursor to the end of the previous line
 	void move_back() override;
-	
-	/// moves backward n times
-	inline void move_back(size_type n){for(size_type i = 0; i < n; ++i) move_back();}
 	
 	/// moves the cursor up one line, aka. decreases the line number and iterator
 	/// if at the beginning of the file-> does nothing
@@ -159,34 +155,20 @@ public:
 	/// if the column is larger than the line size of the line above -> places cursor at the end of the line
 	void move_up() override;
 	
-	/// moves up n times
-	inline void move_up(size_type n){for(size_type i = 0; i < n; ++i) move_up();}
-	
 	/// moves the cursor down a line, aka. advances the line number and line iterator by one
 	/// if the cursor is already at the last line -> moves the cursor to the end of the line / end of file
 	/// if the column is greater than the column of the next line -> moves the cursor to the end of that line
 	void move_down() override;
 	
-	/// moves down n times
-	inline void move_down(size_type n){for(size_type i = 0; i < n; ++i) move_down();}
-	
 	/// moves the cursor to the start of the line
-	inline void move_to_start_of_line() override {this->_cursor.columnNumber = 0;}
+	void move_to_start_of_line() override;
 	
-	inline void move_to_start_of_file() override {
-		this->_cursor.columnNumber = 0; 
-		this->_cursor.lineNumber = 0; 
-		this->_cursor.lineIterator = this->begin();
-	}
+	void move_to_start_of_file() override;
 	
 	/// moves the cursor to the end of the line;
-	inline void move_to_end_of_line() override {this->_cursor.columnNumber = this->lineItr()->size();}
+	void move_to_end_of_line() override;
 	
-	inline void move_to_end_of_file() override {
-		this->_cursor.lineNumber = this->_text.size()-1;
-		this->_cursor.lineIterator = this->last();
-		this->_cursor.columnNumber = this->last()->size();
-	}
+	void move_to_end_of_file() override;
 	
 	/// returns true if the cursor is at the start of the current line and false otherwise
 	inline bool is_start_of_line() const {return this->column_number() == 0;}
@@ -211,7 +193,8 @@ public:
 	
 	/// reads the content of a file into the Editor
 	bool read_file(const std::filesystem::path& path);
-	bool read_file(std::ifstream& stream);
+	bool append_file(std::ifstream& stream);
+	bool append_file(const std::filesystem::path& path);
 	
 	/// writes the content of the Editor into a file
 	bool write_file(const std::filesystem::path& path);
@@ -225,7 +208,7 @@ public:
 	
 	template<class Stream>
 	friend Stream& operator >> (Stream& stream, TextEditor& self){
-		self.read_file(stream);
+		self.append_file(stream);
 		return stream;
 	}
 	
@@ -239,7 +222,7 @@ public:
 	void Delete() override;
 	
 	/// inserts a new line
-	inline void enter() override {this->insert_new_line();}
+	void enter() override;
 private:
 
 	/// returns an iterator to the line at the given absolute position or the last line of the file

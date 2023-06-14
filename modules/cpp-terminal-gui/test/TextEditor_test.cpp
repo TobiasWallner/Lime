@@ -228,15 +228,15 @@ static void insert_then_Delete_from_file_start(){
 	assert_expected(editor.number_of_lines(), 2);
 }
 
-static void read_file(){
+static void append_file(){
 	TermGui::TextEditor editor;
-
-	editor.read_file("test.txt");
+	editor.append_file("test.txt");
+	editor.append_file("test.txt");
 	assert_expected(editor.is_start_of_file(), true);
-	assert_expected(editor.number_of_lines(), 5);
+	assert_expected(editor.number_of_lines(), 9);
 }
 
-static void writeRead_file(){
+static void writeAppend_file(){
 	TermGui::TextEditor editor1;
 	TermGui::TextEditor editor2;
 	editor1.insert("some long text in the first line");
@@ -244,9 +244,19 @@ static void writeRead_file(){
 	editor1.insert("some long text in the second line");
 
 	editor1.write_file("writeTest.txt");
-	editor2.read_file("writeTest.txt");
+	editor2.append_file("writeTest.txt");
 	assert_expected(editor1.number_of_lines(), editor2.number_of_lines());
 	assert_expected(editor1 == editor2, true);
+}
+
+static void read_file(){
+	TermGui::TextEditor editor;
+	editor.read_file("test.txt");
+	assert_expected(editor.is_start_of_file(), true);
+	assert_expected(editor.number_of_lines(), 5);
+	editor.read_file("test.txt");
+	assert_expected(editor.is_start_of_file(), true);
+	assert_expected(editor.number_of_lines(), 5);
 }
 
 static void equality_test_for_text_editors(){
@@ -288,8 +298,9 @@ int main(){
 	insert_then_Delete();
 	insert_then_Delete_from_file_start();
 
+	append_file();
+	writeAppend_file();
 	read_file();
-	writeRead_file();
 	
 	equality_test_for_text_editors();
 	
