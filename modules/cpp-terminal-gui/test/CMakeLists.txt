@@ -1,33 +1,33 @@
 
 # ------------------- CommandList Tests ----------------------
 
-add_executable(cpp_terminal_gui_istyleslist_test iStylesList_test.cpp)
+add_executable(iStylesList_test iStylesList_test.cpp)
 
-target_link_libraries(cpp_terminal_gui_istyleslist_test
+target_link_libraries(iStylesList_test
 	cpp-terminal-gui
 )
 
-add_test(cpp_terminal_gui_istyleslist_ctest cpp_terminal_gui_istyleslist_test)
+add_test(iStylesList_ctest iStylesList_test)
 
 
 # ------------------- ColoredString Tests ----------------------
 
-add_executable(cpp_terminal_gui_colored_string_test ColoredString_test.cpp)
+add_executable(ColoredString_test ColoredString_test.cpp)
 
-target_link_libraries(cpp_terminal_gui_colored_string_test PUBLIC
+target_link_libraries(ColoredString_test PUBLIC
 	cpp-terminal-gui
 	verification
 )
 
-add_test(cpp_terminal_gui_colored_string_ctest cpp_terminal_gui_colored_string_test)
+add_test(ColoredString_ctest ColoredString_test)
 
 
 # ------------------- Text Editor Tests ----------------------
 
-add_executable(cpp_terminal_gui_text_editor_test TextEditor_test.cpp)
+add_executable(TextEditor_test TextEditor_test.cpp)
 
-target_link_libraries(cpp_terminal_gui_text_editor_test
+target_link_libraries(TextEditor_test
 	cpp-terminal-gui
 )
 
-add_test(cpp_terminal_gui_text_editor_ctest cpp_terminal_gui_text_editor_test)
+add_test(TextEditor_ctest TextEditor_test)
