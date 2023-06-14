@@ -142,16 +142,6 @@ static void verify_string_in_file(){
   	string << TermGui::fg_color(238, 130, 238)  << "ld\n";
 	std::string out;
 	string.render(out);
-	std::cout << out;
-
-	for(char c : out){
-		printf("%x ", c);
-	}
-	
-	std::cout << std::endl;
-	
-	std::cout << out << std::endl;
-	
 
 	std::filesystem::path currPath = std::filesystem::current_path();
 	assert(fileVerify(currPath, "color_string", out), "The file did not get verified");
