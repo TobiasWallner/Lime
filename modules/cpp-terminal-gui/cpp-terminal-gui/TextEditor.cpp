@@ -208,6 +208,26 @@ void TermGui::TextEditor::erase(){
 	}
 }
 
+void TermGui::TextEditor::enter() {this->insert_new_line();}
+
+void TermGui::TextEditor::move_down();
+
+void TermGui::TextEditor::move_to_start_of_line() {this->_cursor.columnNumber = 0;}
+
+void TermGui::TextEditor::move_to_start_of_file() {
+	this->_cursor.columnNumber = 0; 
+	this->_cursor.lineNumber = 0; 
+	this->_cursor.lineIterator = this->begin();
+}
+
+void TermGui::TextEditor::move_to_end_of_line() {this->_cursor.columnNumber = this->lineItr()->size();}
+
+void TermGui::TextEditor::move_to_end_of_file() {
+	this->_cursor.lineNumber = this->_text.size()-1;
+	this->_cursor.lineIterator = this->last();
+	this->_cursor.columnNumber = this->last()->size();
+}
+
 bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){
 	if(lhs.number_of_lines() == rhs.number_of_lines()){
 		auto lhsItr = lhs.cbegin();
