@@ -10,6 +10,10 @@
 #include <iostream>
 
 TermGui::TextEditor::TextEditor(){
+	init();
+}
+
+void TermGui::TextEditor::init(){
 	this->_text.emplace_back();
 	this->_cursor.lineNumber = 0;
 	this->_cursor.columnNumber = 0;
@@ -138,13 +142,18 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	}
 }
 
-bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
+bool TermGui::TextEditor::append_file(const std::filesystem::path& path){
 	if(!std::filesystem::is_regular_file(path)) {return false;}
 	std::ifstream file(path);
-	return read_file(file);
+	return append_file(file);
 }
 
-bool TermGui::TextEditor::read_file(std::ifstream& file){
+bool TermGui::TextEditor::read_file(const std::filesystem::path& path){
+	this->clear();
+	return append_file(path);
+}
+
+bool TermGui::TextEditor::append_file(std::ifstream& file){
 	char buffer[4*1024];
 
 	if(file.is_open()){
