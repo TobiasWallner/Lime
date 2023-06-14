@@ -60,8 +60,10 @@ public:
 	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
+
+	void init();
 	
-	inline void clear() override { this->move_to_start_of_file(); this->_text.clear(); }
+	inline void clear() override { this->_text.clear(); this->init();}
 	
 	iterator begin(){return this->_text.begin();}
 	const_iterator begin() const {return this->_text.cbegin();}
@@ -211,7 +213,8 @@ public:
 	
 	/// reads the content of a file into the Editor
 	bool read_file(const std::filesystem::path& path);
-	bool read_file(std::ifstream& stream);
+	bool append_file(std::ifstream& stream);
+	bool append_file(const std::filesystem::path& path);
 	
 	/// writes the content of the Editor into a file
 	bool write_file(const std::filesystem::path& path);
@@ -225,7 +228,7 @@ public:
 	
 	template<class Stream>
 	friend Stream& operator >> (Stream& stream, TextEditor& self){
-		self.read_file(stream);
+		self.append_file(stream);
 		return stream;
 	}
 	
