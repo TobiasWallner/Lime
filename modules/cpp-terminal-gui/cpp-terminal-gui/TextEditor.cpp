@@ -210,8 +210,6 @@ void TermGui::TextEditor::erase(){
 
 void TermGui::TextEditor::enter() {this->insert_new_line();}
 
-void TermGui::TextEditor::move_down();
-
 void TermGui::TextEditor::move_to_start_of_line() {this->_cursor.columnNumber = 0;}
 
 void TermGui::TextEditor::move_to_start_of_file() {
