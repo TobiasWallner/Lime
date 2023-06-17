@@ -7,33 +7,21 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # ----------- dependencies ------------
-set(MODULES_PATH "modules")
+set(EXTERNAL_MODULES_PATH "external")
+set(INTERNAL_MODULES_PATH "modules")
 
 # external dependencies
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # allow to override variables within the CMakeLists.txt of the library
 set(CPPTERMINAL_BUILD_EXAMPLES OFF) # disable building examples
 set(CPPTERMINAL_ENABLE_INSTALL OFF) # disable the installation of the library
 set(CPPTERMINAL_ENABLE_TESTING OFF) # disable the tests of the library ... when running 'ctest' we only want to see our own tests
-add_subdirectory("${MODULES_PATH}/cpp-terminal")
+add_subdirectory("${EXTERNAL_MODULES_PATH}/cpp-terminal")
 
 # internal dependencies
 enable_testing() # enable testing for internal libraries
-add_subdirectory("${MODULES_PATH}/utf8_string")
-add_subdirectory("${MODULES_PATH}/cpp-terminal-gui")
-add_subdirectory("${MODULES_PATH}/verification")
-
-
-# ---------- unix specific libraries ------------
-
-set(UNIX_LIBRARIES "")
-
-if (UNIX)
-	find_package(X11 REQUIRED)
-	set(UNIX_LIBRARIES "X11")
-endif()
-
-
-# -------------------------------------------------
+add_subdirectory("${INTERNAL_MODULES_PATH}/utf8_string")
+add_subdirectory("${INTERNAL_MODULES_PATH}/cpp-terminal-gui")
+add_subdirectory("${INTERNAL_MODULES_PATH}/verification")
 
 # ---------- unix specific libraries ------------
 
