@@ -235,6 +235,22 @@ void TermGui::TextEditor::move_to_end_of_file() {
 	this->_cursor.columnNumber = this->last()->size();
 }
 
+void TermGui::TextEditor::set_position(TermGui::RenderPosition position) {
+	this->position = position;
+}
+
+TermGui::RenderPosition TermGui::TextEditor::get_position() const {
+	return this->position;
+}
+
+void TermGui::TextEditor::set_width(TermGui::RenderWidth width) {
+	this->width = width;
+}
+
+TermGui::RenderWidth TermGui::TextEditor::get_width() const {
+	return this->width;
+}
+
 bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){
 	if(lhs.number_of_lines() == rhs.number_of_lines()){
 		auto lhsItr = lhs.cbegin();
@@ -248,3 +264,5 @@ bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEdit
 	}
 	return false;
 }
+
+

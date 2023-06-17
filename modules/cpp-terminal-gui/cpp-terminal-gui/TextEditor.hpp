@@ -51,7 +51,13 @@ private:
 	
 	Text _text; // stores the text data
 	Cursor _cursor;
+	
+	RenderPosition position;
+	RenderWidth width;
+	
 	bool showCursor = true;
+	
+	
 
 public:
 
@@ -223,6 +229,18 @@ public:
 	
 	/// inserts a new line
 	void enter() override;
+	
+	/// sets the position of the object on the screen
+	void set_position(RenderPosition position) override;
+	
+	/// get the position of the object on the screen
+	RenderPosition get_position() const override;
+	
+	/// sets the width of the object on the screen
+	void set_width(RenderWidth width) override;
+	
+	/// get the render width of the object
+	RenderWidth get_width() const override;
 private:
 
 	/// returns an iterator to the line at the given absolute position or the last line of the file
