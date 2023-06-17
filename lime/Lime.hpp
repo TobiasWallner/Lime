@@ -55,7 +55,7 @@ public:
 	*/
 	int run();
 
-	int run(int numberOfArguments, char** listOfArgumentStrings);
+	int run(int numberOfArguments, const char * const* listOfArgumentStrings);
 
 	/**
 		Savely quits the editor from the current state.

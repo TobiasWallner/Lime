@@ -112,19 +112,29 @@ int Lime::run(){
 	return EXIT_SUCCESS;
 }
 
-int Lime::run(int numberOfArguments, char** listOfArgumentStrings){
-	if(numberOfArguments > 0){
-		const bool successful_read = textEditor.read_file(listOfArgumentStrings[0]);
-		if (successful_read){
-			return run();
-		}else{
-			std::cout << "Could not read file" << std::endl;
-			return EXIT_FAILURE;
+static bool contains(int numberOfArguments, const char* const* listOfArgumentStrings, const char* what){
+	for(int i = 0; i < numberOfArguments; ++i){
+		if(std::strcmp(listOfArgumentStrings[i], what) == 0){
+			return true;
 		}
-	}else{
-		std::cout << "Wrong number of arguments" << std::endl;
-		return EXIT_FAILURE;
 	}
+	return false;
+}
+
+int Lime::run(int numberOfArguments, const char* const* listOfArgumentStrings){
+	const bool newFileFlag = contains(numberOfArguments, listOfArgumentStrings, "-n");
+	if(numberOfArguments > 0){
+		this->filepath = listOfArgumentStrings[0];
+		const bool file_exists = std::filesystem::is_regular_file(std::filesystem::status(this->filepath));
+		if(file_exists){
+			const bool successful_read = this->textEditor.read_file(this->filepath);
+			if(!successful_read){
+				std::cout << "Error: could not read file: " << this->filepath << std::endl;
+				return EXIT_FAILURE;
+			}
+		}
+	}
+	return this->run();
 }
 
 void Lime::quit(){

@@ -12,11 +12,6 @@ int help();
 int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings);
 
 int main(int numberOfArguments, char** listOfArgumentStrings){
-	return lime_argument_parser(numberOfArguments, listOfArgumentStrings);
-}
-
-int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
-	
 	// remove the program name from the arguments
 	--numberOfArguments;
 	listOfArgumentStrings = listOfArgumentStrings + 1;
@@ -34,13 +29,8 @@ int lime_argument_parser(int numberOfArguments, char** listOfArgumentStrings){
 				|| 0 == std::strcmp(listOfArgumentStrings[0], "-h")){
 		return help();
 	}else{
-		std::cout 	<< "This command will later create a new file with the file name '" ///return Lime().run(numberOfArguments, listOfArgumentStrings)
-					<<  listOfArgumentStrings[0] 
-					<< "', but is currently unsupported." 
-					<< std::endl;
-		return EXIT_SUCCESS;
+		return Lime().run(numberOfArguments, listOfArgumentStrings);
 	}
-	
 }
 
 const char* version_string(){
