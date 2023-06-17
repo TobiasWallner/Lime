@@ -40,7 +40,7 @@
 Lime::Lime() : 
 	topMessageBar(),
 	textEditor(),
-	commandLine(this, &Lime::command_line_callback),
+	commandLine(this, &Lime::command_line_callback, TermGui::RenderPosition{2, 20}, TermGui::RenderWidth{10, 1}),
 	infoText(),
 	filepath()
 {   
@@ -465,7 +465,7 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view com
 	return commandList;
 }
 
-void Lime::command_line_callback(utf8::string&& commands){
+void Lime::command_line_callback(utf8::string_view commands){
 	// parse commands into list of commands
 	const auto commandList = parse_command_string(commands);
 	if(commandList.empty()){

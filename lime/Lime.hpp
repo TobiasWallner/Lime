@@ -68,7 +68,7 @@ public:
 	
 private:
 
-	void command_line_callback(utf8::string&& commands);
+	void command_line_callback(utf8::string_view commands);
 
 	void activate_command_line();
 	
