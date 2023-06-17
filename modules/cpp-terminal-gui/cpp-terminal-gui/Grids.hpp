@@ -11,7 +11,7 @@
 #include "RenderTrait.hpp"
 
 
-class VerticalGridCell{
+class VerticalGridCell {
 public:
 	using value_type = std::unique_ptr<RenderTrait>;
 
@@ -68,16 +68,12 @@ public:
 	}
 	
 	/// makes the cell a relative cell and sets the relative hight
-	inline void set_relatice_height(float height){
+	inline void set_relative_height(float height){
 		this->isAbsolute = false;
 		this->relativeHeight = height;
 	}
 	
-	inline void set_x_pos(long x){this->x_pos = x;}
-	inline void set_y_pos(long y){this->y_pos = y;}
-	
-	inline void set_height(long height){this->height = height;}
-	inline void set_width(long width){this->width = width;}
+	inline void render(std::string& output){this->element->render(output);}
 	
 	
 }
