@@ -21,7 +21,7 @@
 
 namespace TermGui{
 
-class ColorString : public RenderTrait{
+class ColorString{
 
 public:
 	using size_type = utf8::string::size_type;
@@ -196,7 +196,7 @@ public:
 	// TODO: iterators
 	
 	
-	void render(std::string& outputString) const override;
+	void render(std::string& outputString) const;
 	
 	/// inserts a character at the given position
 	ColorString& insert(size_type index, utf8::Char c);

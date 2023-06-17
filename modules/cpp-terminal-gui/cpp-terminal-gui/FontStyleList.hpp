@@ -29,7 +29,7 @@ public:
 	/// Each iStyles can only ever have one of each fontStyle types. 
 	/// styles will be stored in ascending order according to the enum of the fontStyle types.
 	/// styles will be executed in ascending order according to their enum.
-	class iStyles : RenderTrait{
+	class iStyles{
 	public:
 		using list_type =  FontStyleList;
 		using size_type = list_type::size_type;
@@ -114,7 +114,7 @@ public:
 		bool add_override(const list_type& listOfCommands);
 		bool add_override(list_type&& listOfCommands);
 		
-		inline void render(std::string& outputString) const override { for(const auto& elem : this->styles) elem.render(outputString);}
+		inline void render(std::string& outputString) const { for(const auto& elem : this->styles) elem.render(outputString);}
 		
 	private:
 		/// returns the first found iterator to an object that has an index that is smaller or equal.
