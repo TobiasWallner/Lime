@@ -38,8 +38,8 @@ private:
 	CallbackObjectType* objectPtr; // pointer cannot be changed after construction
 	method_type method; // method cannot be changed after construction
 	
-	RenderPosition position;
-	RenderWidth width;
+	ScreenPosition position;
+	ScreenWidth width;
 	
 	size_type cursorIndex = 0;
 	size_type renderStart = 0;
@@ -50,7 +50,7 @@ private:
 	
 public:
 	
-	CommandLine(CallbackObjectType* objectPtr, method_type method, RenderPosition position, RenderWidth width) : 
+	CommandLine(CallbackObjectType* objectPtr, method_type method, ScreenPosition position, ScreenWidth width) : 
 		commandString(), 
 		objectPtr(objectPtr),
 		method(method),
@@ -112,19 +112,35 @@ public:
 		}
 	}
 	
+private:
+	
+	inline void scrowl_forward(){
+		const bool over_scrowl_protection = this->renderStart + this->line_width() < this->commandString.size();
+		const bool cursor_near_end = this->cursorIndex + 3 > this->line_width() + this->renderStart;
+		this->renderStart += over_scrowl_protection && cursor_near_end;
+	}
+	
+	inline void scrowl_back(){
+		const bool underscrowl_protection =  this->renderStart > 0;
+		const bool cursor_near_start = this->renderStart + 3 > this->cursorIndex;
+		this->renderStart -= underscrowl_protection && cursor_near_start;
+	}
+	
+public:
+	
+	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
 	inline void move_forward() override { 
 		this->cursorIndex += !this->is_end_of_line();
-		this->renderStart += (this->renderStart + this->line_width() < this->commandString.size()) 
-								&& (this->cursorIndex - this->renderStart + 3 > this->line_width());
+		this->scrowl_forward();
 	}
 	
 	/// moves the cursor to the left, aka. decreases the column by one.
 	/// if the cursot is at the beginning of the file -> moves the cursor to the end of the previous line
 	inline void move_back() override { 
 		this->cursorIndex -= !this->is_start_of_line();
-		this->renderStart -= (this->renderStart > 0) && (this->renderStart + 3 > this->cursorIndex);
+		this->scrowl_back();
 	}
 
 
@@ -182,23 +198,23 @@ public:
 	inline bool is_end_of_line() const { return this->cursorIndex == this->commandString.size(); }
 	
 	/// sets the position of the object on the screen
-	inline void set_position(RenderPosition position) override {this->position = position;}
+	inline void set_screen_position(ScreenPosition position) override {this->position = position;}
 	
 	/// get the position of the object on the screen
-	RenderPosition get_position() const override {return this->position;}
+	ScreenPosition get_screen_position() const override {return this->position;}
 	
 	/// sets the width of the object on the screen
-	void set_width(RenderWidth width) override {this->width = width;}
+	void set_screen_width(ScreenWidth width) override {this->width = width;}
 	
 	/// get the render width of the object
-	RenderWidth get_width() const override{return this->width;}
+	ScreenWidth get_screen_width() const override{return this->width;}
 	
 	void render(std::string& outputString) const override {
 		if(this->width.y > 0){
 			outputString += Term::cursor_move(this->position.y, this->position.x);
 			outputString += ": ";
-			const auto end = std::min(this->line_width() + this->renderStart, this->commandString.size());
-			for(auto i = this->renderStart; i < end; ++i){ 
+			const auto end = std::min(this->line_width() + this->renderStart - this->is_end_of_line(), this->commandString.size());
+			for(auto i = this->renderStart; i != end; ++i){ 
 				if(this->showCursor && i == cursorIndex){
 						outputString += to_string(FontStyle::Reversed::ON);
 						outputString += this->commandString[i].to_std_string_view();
