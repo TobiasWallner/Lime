@@ -6,7 +6,6 @@
 #include <utf8_string.hpp>
 
 // Project
-#include "RenderTrait.hpp"
 #include "FontStyle.hpp"
 #include "FontStyleList.hpp"
 
@@ -24,14 +23,22 @@ namespace TermGui{
 class ColorString{
 
 public:
-	using size_type = utf8::string::size_type;
-	using string_type = utf8::string;
 
-public:
+	using string_type = utf8::string;
+	using size_type = string_type::size_type;
+	using difference_type = string_type::difference_type;
+
+private:
 	string_type _string;
 	iStylesList _styles;
 
 public:
+	
+	string_type::const_iterator string_cbegin() const { return this->_string.cbegin(); }
+	string_type::const_iterator string_cend() const { return this->_string.cend(); }
+	
+	iStylesList::const_iterator style_list_cbegin() const { return this->_styles.cbegin(); }
+	iStylesList::const_iterator style_list_cend() const { return this->_styles.cend(); }
 	
 	/// 1) default constuctor
 	inline ColorString() = default;
@@ -196,7 +203,6 @@ public:
 	// TODO: iterators
 	
 	
-	void render(std::string& outputString) const;
 	
 	/// inserts a character at the given position
 	ColorString& insert(size_type index, utf8::Char c);
@@ -221,6 +227,8 @@ public:
 	/// compares equal to the content of the string not the content of the style formats
 	friend inline bool operator==(const ColorString& lhs, const ColorString& rhs){return lhs._string == rhs._string;}
 	friend inline bool operator!=(const ColorString& lhs, const ColorString& rhs){return lhs._string != rhs._string;}
+
+	void render(std::string& outputString) const;
 
 };
 
