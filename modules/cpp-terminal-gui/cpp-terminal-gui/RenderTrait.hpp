@@ -3,6 +3,7 @@
 
 // C++ STD
 #include <string>
+#include <cinttypes>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
@@ -17,15 +18,19 @@ namespace TermGui{
 	virtual render(std::string& outputString) = 0;
 */
 
-struct RenderPosition{
-	unsigned long x = 0;
-	unsigned long y = 0;
+struct ScreenPosition{
+	using size_type = std::int16_t;
+	
+	size_type x = 0;
+	size_type y = 0;
 };
 
 
-struct RenderWidth{
-	unsigned long x = 0;
-	unsigned long y = 0;
+struct ScreenWidth{
+	using size_type = std::int16_t;
+	
+	size_type x = 0;
+	size_type y = 0;
 };
 
 class RenderTrait{
@@ -43,16 +48,16 @@ class RenderTrait{
 	virtual void render(std::string& outputString) const = 0;
 	
 	/// sets the position of the object on the screen
-	virtual void set_position(RenderPosition position) = 0;
+	virtual void set_screen_position(ScreenPosition position) = 0;
 	
 	/// get the position of the object on the screen
-	virtual RenderPosition get_position() const = 0;
+	virtual ScreenPosition get_screen_position() const = 0;
 	
 	/// sets the width of the object on the screen
-	virtual void set_width(RenderWidth width) = 0;
+	virtual void set_screen_width(ScreenWidth width) = 0;
 	
 	/// get the render width of the object
-	virtual RenderWidth get_width() const = 0;
+	virtual ScreenWidth get_screen_width() const = 0;
 	
 };
 
