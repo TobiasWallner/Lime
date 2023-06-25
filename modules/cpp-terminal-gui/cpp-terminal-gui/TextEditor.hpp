@@ -28,7 +28,7 @@ private:
 
 public:
 
-	using size_type = std::size_t;
+	using size_type = Line::size_type;
 	using iterator = Text::iterator;
 	using const_iterator = Text::const_iterator;
 	using reverse_iterator = Text::reverse_iterator;
@@ -41,8 +41,8 @@ public:
 	using allocator_type = Text::allocator_type;
 	
 	struct Cursor{
-		size_type lineNumber;
-		size_type columnNumber;
+		long lineNumber;
+		long columnNumber;
 		Text::iterator lineIterator;
 	};
 
@@ -52,24 +52,30 @@ private:
 	Text _text; // stores the text data
 	Cursor _cursor;
 	
-	RenderPosition position;
-	RenderWidth width;
+	ScreenPosition screenPosition;
+	ScreenWidth screenWidth;
 	
-	bool showCursor = true;
+	size_type renderLineStart;
+	const_iterator renderLineStartItr;
+	size_type renderColumnStart;
 	
+	static constexpr utf8::Char lineWrapSymbol = "→";
 	
+	//TODO: bool lineWrapping = false;
+	bool showCursor = false;
 
 public:
 
+	inline TextEditor(){this->init({0,0}, {0,0});}
 	/// constructs a text with one empty line + sets the cursor position and iterators
-	TextEditor();
+	inline TextEditor(ScreenPosition screenPosition, ScreenWidth screenWidth){this->init(screenPosition, screenWidth);}
 	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
 
-	void init();
+	void init(ScreenPosition screenPosition, ScreenWidth screenWidth);
 	
-	inline void clear() override { this->_text.clear(); this->init();}
+	inline void clear() override { this->_text.clear(); this->init(this->screenPosition, this->screenWidth);}
 	
 	iterator begin(){return this->_text.begin();}
 	const_iterator begin() const {return this->_text.cbegin();}
@@ -197,10 +203,14 @@ public:
 	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
 	void render(std::string& outputString) const override;
 	
-	/// reads the content of a file into the Editor
-	bool read_file(const std::filesystem::path& path);
+	/// reads the content of the file into the current cursor position
 	bool append_file(std::ifstream& stream);
 	bool append_file(const std::filesystem::path& path);
+
+	/// reads the content of a file into the Editor
+	bool read_file(std::ifstream& file);
+	bool read_file(const std::filesystem::path& path);
+	
 	
 	/// writes the content of the Editor into a file
 	bool write_file(const std::filesystem::path& path);
@@ -231,21 +241,29 @@ public:
 	void enter() override;
 	
 	/// sets the position of the object on the screen
-	void set_position(RenderPosition position) override;
+	void set_screen_position(ScreenPosition position) override;
 	
 	/// get the position of the object on the screen
-	RenderPosition get_position() const override;
+	ScreenPosition get_screen_position() const override;
 	
 	/// sets the width of the object on the screen
-	void set_width(RenderWidth width) override;
+	void set_screen_width(ScreenWidth width) override;
 	
 	/// get the render width of the object
-	RenderWidth get_width() const override;
+	ScreenWidth get_screen_width() const override;
 private:
 
 	/// returns an iterator to the line at the given absolute position or the last line of the file
 	iterator find_line(size_type line);
 	const_iterator find_line(size_type line) const;
+	
+	inline size_type line_width() const {return static_cast<size_type>(this->screenWidth.x);}
+	inline size_type line_height() const {return static_cast<size_type>(this->screenWidth.y);}
+	
+	void scrowl_forward();
+	void scrowl_back();
+	void scrowl_up();
+	void scrowl_down();
 
 };
 
