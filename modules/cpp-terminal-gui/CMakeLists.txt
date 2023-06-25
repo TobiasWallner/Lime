@@ -8,6 +8,7 @@ add_library(cpp-terminal-gui
 	cpp-terminal-gui/ColorString.cpp	cpp-terminal-gui/ColorString.hpp
 	cpp-terminal-gui/TextEditor.cpp		cpp-terminal-gui/TextEditor.hpp
 	cpp-terminal-gui/CommandLine.cpp	cpp-terminal-gui/CommandLine.hpp
+	cpp-terminal-gui/VerticalGrid.cpp	cpp-terminal-gui/VerticalGrid.hpp
 	
 )
 
