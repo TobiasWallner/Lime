@@ -103,31 +103,33 @@ public:
 	inline Char() = default;
 	
 	/// supports default copy construction
-	inline Char(const Char&) = default;
+	constexpr inline Char(const Char&) = default;
 	
 	/// supports default copy assignment
-	inline Char& operator=(const Char&) = default;
+	constexpr inline Char& operator=(const Char&) = default;
 	
 	/// construct from an ascii character
-	inline explicit Char(char ascii) {utf8[0] = ascii;}
+	constexpr inline Char(char ascii) : utf8{ascii, 0, 0, 0} {}
+	
+	constexpr inline Char(const char* character) : utf8{0} {this->assign(character);}
 	
 	/// reads one utf8 character from the range and stores it in the char
 	template<class CharItr>
-	inline explicit Char(CharItr first){this->assign(first);}
+	constexpr inline explicit Char(CharItr first) : utf8{0} {this->assign(first);}
 	
 	/// reads one utf8 character from the range and stores it in the char, 
 	/// makes sure to not read more than the buffer
 	template<class CharItr>
-	constexpr inline Char(CharItr first, CharItr last){this->assign(first, last);}
+	constexpr inline Char(CharItr first, CharItr last) : utf8{0} {this->assign(first, last);}
 	
 	template<class CharItr>
-	constexpr inline Char(CharItr first, size_type n){this->assign(first, first + n);}
+	constexpr inline Char(CharItr first, size_type n) : utf8{0} {this->assign(first, first + n);}
 	
 	/// reads first utf8 character from the string and makes sure not to read more than the strings content
-	inline explicit Char(const std::string& str){this->assign(str);}
+	inline explicit Char(const std::string& str) : utf8{0} {this->assign(str);}
 	
 	/// reads first utf8 character from the string and makes sure not to read more than the strings content
-	inline explicit Char(const std::string_view& str){this->assign(str);}
+	inline explicit Char(const std::string_view& str) : utf8{0} {this->assign(str);}
 	
 	/// assigns the ascii character to the utf8 character
 	constexpr inline void assign(char ascii){utf8[0] = ascii;}
