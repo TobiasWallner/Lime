@@ -38,19 +38,28 @@
 #endif
 
 Lime::Lime() : 
+	grid(	TermGui::ScreenPosition{.x = 0, .y = 0}, 
+			TermGui::ScreenWidth{	.x = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().columns()), 
+									.y = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().rows())}),
 	topMessageBar(),
-	textEditor(),
-	commandLine(this, &Lime::command_line_callback, TermGui::RenderPosition{2, 20}, TermGui::RenderWidth{10, 1}),
+	textEditor(	TermGui::ScreenPosition{.x = 5, .y = 12}, 
+				TermGui::ScreenWidth{	.x = 20, 
+										.y = 5}),
+	filepath(),
 	infoText(),
-	filepath()
+	commandLine(this, &Lime::command_line_callback, 
+				TermGui::ScreenPosition{.x = 1, .y = 17}, 
+				TermGui::ScreenWidth{	.x = 20, 
+										.y = 1})
 {   
+	activeEditor = &(this->textEditor);
 	this->deactivate_command_line();
 	this->activate_text_editor();
 }
 
 inline void Lime::activate_command_line(){
 	this->commandLine.show_cursor(true);
-	this->activeEditor = &this->commandLine;
+	this->activeCursor = &this->commandLine;
 	
 	// load infotext
 	this->infoText.clear();
@@ -62,7 +71,7 @@ inline void Lime::activate_command_line(){
 
 void Lime::activate_text_editor(){
 	this->textEditor.show_cursor(true);
-	this->activeEditor = &this->textEditor;
+	this->activeCursor = &this->textEditor;
 		
 		//load infotext
 	this->infoText.clear();
@@ -287,7 +296,7 @@ void Lime::insert_from_clipboard(){
 	std::string clipboardBuffer;
 	const bool successfulRead = read_clipboard(clipboardBuffer);
 	if(successfulRead){
-		this->activeEditor->insert(clipboardBuffer.c_str(), clipboardBuffer.size());
+		this->activeCursor->insert(clipboardBuffer.c_str(), clipboardBuffer.size());
 	}else{
 		this->topMessageBar.assign("Bad Copy Paste Event");
 	}
@@ -301,9 +310,9 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		//---- basics -----
 		case Term::Key::CTRL_Q : this->quit(); break;
 		case Term::Key::ESC : this->toggle_command_line(); break;
-		case Term::Key::ENTER : this->activeEditor->enter(); break; 
-		case Term::Key::BACKSPACE : this->activeEditor->Delete(); break;
-		case Term::Key::DEL: this->activeEditor->erase(); break;
+		case Term::Key::ENTER : this->activeCursor->enter(); break; 
+		case Term::Key::BACKSPACE : this->activeCursor->Delete(); break;
+		case Term::Key::DEL: this->activeCursor->erase(); break;
 
 		//---- i/o ----
 		case Term::Key::CTRL_S :
@@ -316,21 +325,21 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 			break;
 		
 		//----- navigation and cursor movement -----
-		case Term::Key::CTRL_J : this->activeEditor->move_back(); break;
-		case Term::Key::CTRL_I : this->activeEditor->move_up(); break;
-		case Term::Key::CTRL_L : this->activeEditor->move_forward(); break; 
-		case Term::Key::CTRL_K : this->activeEditor->move_down(); break;
+		case Term::Key::CTRL_J : this->activeCursor->move_back(); break;
+		case Term::Key::CTRL_I : this->activeCursor->move_up(); break;
+		case Term::Key::CTRL_L : this->activeCursor->move_forward(); break; 
+		case Term::Key::CTRL_K : this->activeCursor->move_down(); break;
 		
-		case Term::Key::ARROW_LEFT 	: this->activeEditor->move_back(); break;
-		case Term::Key::ARROW_UP 	: this->activeEditor->move_up(); break;
-		case Term::Key::ARROW_RIGHT : this->activeEditor->move_forward(); break; 
-		case Term::Key::ARROW_DOWN 	: this->activeEditor->move_down(); break; 
+		case Term::Key::ARROW_LEFT 	: this->activeCursor->move_back(); break;
+		case Term::Key::ARROW_UP 	: this->activeCursor->move_up(); break;
+		case Term::Key::ARROW_RIGHT : this->activeCursor->move_forward(); break; 
+		case Term::Key::ARROW_DOWN 	: this->activeCursor->move_down(); break; 
 		
-		case Term::Key::CTRL_T : this->activeEditor->move_to_start_of_file();break;
-		case Term::Key::CTRL_E : this->activeEditor->move_to_end_of_file();break;
+		case Term::Key::CTRL_T : this->activeCursor->move_to_start_of_file();break;
+		case Term::Key::CTRL_E : this->activeCursor->move_to_end_of_file();break;
 		
-		case Term::Key::ALT + Term::Key::u : this->activeEditor->move_to_start_of_line(); break;
-		case Term::Key::ALT + Term::Key::o : this->activeEditor->move_to_end_of_line(); break;
+		case Term::Key::ALT + Term::Key::u : this->activeCursor->move_to_start_of_line(); break;
+		case Term::Key::ALT + Term::Key::o : this->activeCursor->move_to_end_of_line(); break;
 		
 		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
 		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
@@ -362,7 +371,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 			// ------- key insertions ----------
 			if(this->input_buffer_count == 1){
 				if(utf8_id == utf8::Identifier::Bytes1){
-					this->activeEditor->insert(character_8);
+					this->activeCursor->insert(character_8);
 					this->input_buffer_count = 0;
 				}else if(utf8_id == utf8::Identifier::NotFirst){
 					this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
@@ -386,7 +395,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 					auto last = this->input_buffer + this->input_buffer_count;
 					utf8::Char c(first, last);
 					this->input_buffer_count = 0;
-					this->activeEditor->insert(c);
+					this->activeCursor->insert(c);
 				}else{
 					this->topMessageBar.append(" Error: utf8 character ended prematurely");
 					this->input_buffer_count = 0;
@@ -418,7 +427,7 @@ void Lime::prozess_copy_paste_event(Term::Event&& event){
 	// the press the right mouse button twice
 	// TODO: BugFix: handle insertion of multiple selected lines
 	auto input = static_cast<std::string>(std::move(event));
-	this->activeEditor->insert(input.c_str(), input.size());
+	this->activeCursor->insert(input.c_str(), input.size());
 }
 
 void Lime::prozess_unhandeled_event(Term::Event&& event){
