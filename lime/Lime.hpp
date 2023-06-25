@@ -9,17 +9,26 @@
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
 #include <cpp-terminal-gui/CommandLine.hpp>
+#include <cpp-terminal-gui/VerticalGrid.hpp>
 
 class Lime{
 	
 	static constexpr unsigned int input_buffer_len = 4;
 	
+	TermGui::VerticalGrid grid;
+	
 	TermGui::ColorString topMessageBar;
+	
 	TermGui::TextEditor textEditor;
-	TermGui::CommandLine<Lime> commandLine;
-	TermGui::ColorString infoText;
 	std::filesystem::path filepath;
+	
+	TermGui::ColorString infoText;
+	
+	TermGui::CommandLine<Lime> commandLine;
+	
 	TermGui::EditTrait * activeEditor = nullptr;
+	TermGui::EditTrait * activeCursor = nullptr;
+	
 	char input_buffer[input_buffer_len] = {'\0'};
 	unsigned int input_buffer_count = 0;
 	bool main_loop_continue = true;
@@ -72,24 +81,24 @@ private:
 
 	void activate_command_line();
 	
-	inline bool is_command_line_active() const { return this->activeEditor == &this->commandLine; }
+	inline bool is_command_line_active() const { return this->activeCursor == &this->commandLine; }
 	
 	inline void deactivate_command_line(){
 		this->commandLine.show_cursor(false);
 		if(this->is_command_line_active()){
-			this->activeEditor = nullptr;
+			this->activeCursor = nullptr;
 			this->infoText.clear();
 		}
 	}
 	
 	void activate_text_editor();
 	
-	inline bool is_text_editor_active() const { return this->activeEditor == &this->textEditor; }
+	inline bool is_text_editor_active() const { return this->activeCursor == &this->textEditor; }
 	
 	inline void deactivate_text_editor(){
 		this->textEditor.show_cursor(false);
 		if(this->is_text_editor_active()){
-			this->activeEditor = nullptr;	
+			this->activeCursor = nullptr;	
 			this->infoText.clear();
 		}
 	}
