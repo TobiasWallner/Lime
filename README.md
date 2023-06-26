@@ -21,7 +21,7 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 ### download source
 
 ```
-git clone --recurse-submodules https://stea.iue.tuwien.ac.at/CppProjects2023/GroupIProject
+git clone --recurse-submodules https://github.com/TobiasWallner/Lime.git
 ```
 
 last stable commit of the cpp-terminal library: 49e3160358237a3af25e7c7c3e70e593812cd0fe
@@ -126,10 +126,3 @@ The Lime editor is compileing, tested and running successfully on the following 
 
 If you use Clang on windows you will need some additional libraries that will have to be linked to your project in order to access the Windows Console API.
 You can easily get those by installing Visual Studio (Community Eddition is enough) and then install the C++ Desktop Developement in the Visual Studio Package Manager (not to confuse wih vcpack).
-
-## Team
-- Rafał Górniak 12232999
-- Sondre Hatlehol 12202296
-- Helena Schneider 11812332
-- Stefan Schüttengruber 11807476
-- Tobias Wallner 11775206 (Team Lead)
