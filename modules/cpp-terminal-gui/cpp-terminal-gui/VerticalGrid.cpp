@@ -144,6 +144,8 @@ void TermGui::VerticalGrid::distribute_cells(){
 			// post - prozessing and preparation for the next iteration
 			relativeCellsHeight -= relativeHeight;
 			remainingScreenHeight -= assignedHeight;
+		}else if(elem.is_absolute()){
+			elem.set_screen_width(TermGui::ScreenWidth{this->screenWidth.x, elem.get_height_if_absolute()});
 		}
 		elem.set_screen_position(position);
 		position.y += elem.get_screen_width().y;

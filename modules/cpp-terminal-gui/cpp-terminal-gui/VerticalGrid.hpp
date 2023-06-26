@@ -89,13 +89,13 @@ public:
 	inline ScreenWidth::size_type get_dynamic_height() const {return this->element->get_screen_width().y;}
 	
 	/// returns the absolute height of grid cell if the cell is an absolute cell and 0 otherwise
-	inline ScreenWidth::size_type get_height_if_absolute() const {return (this->is_absolute()) ? this->screenWidth.y : 0;}
+	inline ScreenWidth::size_type get_height_if_absolute() const {return this->is_absolute() ? this->screenWidth.y : 0;}
 	
 	/// return the relatice height of the grid cell if the cell is a relatice cell and 0 otherwise
-	inline float get_height_if_relative() const {return (!(this->is_relative())) ? this->relativeHeight : 0.0f;}
+	inline float get_height_if_relative() const {return this->is_relative() ? this->relativeHeight : 0.0f;}
 	
 	/// return sthe dynamic height of the grid cell if the cell is a dynaic cell and 0 otherwise
-	inline ScreenWidth::size_type get_height_if_dynamic() const {return (!(this->is_dynamic())) ? this->element->get_screen_width().y : 0;}
+	inline ScreenWidth::size_type get_height_if_dynamic() const {return this->is_dynamic() ? this->element->get_screen_width().y : 0;}
 	
 	/// makes the cell an absolute cell and sets the height
 	inline void set_absolute_height(ScreenWidth::size_type height){
@@ -178,8 +178,8 @@ public:
 	void push_back_absolute(pointer element, ScreenWidth::size_type height);
 	
 	/// appends an element with a relative line number
-	void push_back_relative(unique_pointer&& element, float height);
-	void push_back_relative(pointer element, float height);
+	void push_back_relative(unique_pointer&& element, float height = 1.0f);
+	void push_back_relative(pointer element, float height = 1.0f);
 	
 	void push_back_dynamic(unique_pointer&& element);
 	void push_back_dynamic(pointer element);
