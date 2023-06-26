@@ -50,7 +50,7 @@ private:
 	
 public:
 	
-	CommandLine(CallbackObjectType* objectPtr, method_type method, ScreenPosition position, ScreenWidth width) : 
+	CommandLine(CallbackObjectType* objectPtr, method_type method, ScreenPosition position = {0,0}, ScreenWidth width = {0,0}) : 
 		commandString(), 
 		objectPtr(objectPtr),
 		method(method),
