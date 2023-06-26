@@ -1,6 +1,7 @@
 #pragma once
 
 // c++ std
+#include <string_view>
 #include <string>
 #include <ostream>
 #include <cstring>

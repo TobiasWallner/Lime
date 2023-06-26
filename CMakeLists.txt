@@ -4,7 +4,7 @@ project(lime)
 
 # Basic compiler settings
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # ----------- dependencies ------------
 set(EXTERNAL_MODULES_PATH "external")

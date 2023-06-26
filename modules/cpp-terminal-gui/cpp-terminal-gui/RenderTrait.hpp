@@ -3,6 +3,7 @@
 
 // C++ STD
 #include <string>
+#include <cinttypes>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
@@ -16,6 +17,22 @@ namespace TermGui{
 	Derived classes have to implement the following functions:
 	virtual render(std::string& outputString) = 0;
 */
+
+struct ScreenPosition{
+	using size_type = std::int16_t;
+	
+	size_type x = 0;
+	size_type y = 0;
+};
+
+
+struct ScreenWidth{
+	using size_type = std::int16_t;
+	
+	size_type x = 0;
+	size_type y = 0;
+};
+
 class RenderTrait{
 	public:
 	
@@ -29,7 +46,19 @@ class RenderTrait{
 		The offset positions the label on the screen
 	*/
 	virtual void render(std::string& outputString) const = 0;
-
+	
+	/// sets the position of the object on the screen
+	virtual void set_screen_position(ScreenPosition position) = 0;
+	
+	/// get the position of the object on the screen
+	virtual ScreenPosition get_screen_position() const = 0;
+	
+	/// sets the width of the object on the screen
+	virtual void set_screen_width(ScreenWidth width) = 0;
+	
+	/// get the render width of the object
+	virtual ScreenWidth get_screen_width() const = 0;
+	
 };
 
 }

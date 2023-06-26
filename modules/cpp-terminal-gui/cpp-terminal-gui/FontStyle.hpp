@@ -22,7 +22,7 @@ namespace TermGui{
 	
 */
 
-class FontStyle : public RenderTrait{
+class FontStyle{
 public:
 	enum class Width : std::uint8_t{
 		#ifdef NEW_CPP_TERMINAL_VERSION
