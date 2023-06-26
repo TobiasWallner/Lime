@@ -259,11 +259,6 @@ private:
 	
 	inline size_type line_width() const {return static_cast<size_type>(this->screenWidth.x);}
 	inline size_type line_height() const {return static_cast<size_type>(this->screenWidth.y);}
-	
-	void scrowl_forward();
-	void scrowl_back();
-	void scrowl_up();
-	void scrowl_down();
 
 };
 

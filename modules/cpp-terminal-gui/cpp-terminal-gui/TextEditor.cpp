@@ -84,52 +84,20 @@ TermGui::TextEditor::const_iterator TermGui::TextEditor::find_line(size_type lin
 	return itr;
 }
 
-inline void TermGui::TextEditor::scrowl_forward(){
-	const bool over_scrowl_protection = this->renderColumnStart + this->line_width() < this->lineItr()->size();
-	const bool cursor_near_end = this->cursor_column() + 3 > this->line_width() + this->renderColumnStart;
-	const bool scrowlForward = over_scrowl_protection && cursor_near_end;
-	this->renderColumnStart += scrowlForward;
-}
-	
-inline void TermGui::TextEditor::scrowl_back(){
-	const bool underscrowl_protection =  this->renderColumnStart > 0;
-	const bool cursor_near_start = this->renderColumnStart + 3 > this->cursor_column();
-	const bool scrowlBack = underscrowl_protection && cursor_near_start;
-	this->renderColumnStart -= scrowlBack;
-}
-
-void TermGui::TextEditor::scrowl_up(){
-	const bool underscrowl_protection =  this->renderLineStart > 0;
-	const bool cursor_near_start = this->renderLineStart + 3 > this->cursor_line();
-	const bool scrowl_up = underscrowl_protection && cursor_near_start;
-	if(scrowl_up){
-		--this->renderLineStart;
-		--this->renderLineStartItr;
-	}
-}
-
-void TermGui::TextEditor::scrowl_down(){
-	const bool over_scrowl_protection = this->renderLineStart + this->line_height() < this->number_of_lines();
-	const bool cursor_near_end = this->cursor_line() + 3 > this->line_height() + this->renderLineStart;
-	const bool scrowlDown = over_scrowl_protection && cursor_near_end;
-	if(scrowlDown){
-		++this->renderLineStart;
-		++this->renderLineStartItr;
-	}
-}
-
 void TermGui::TextEditor::move_forward(){
 	if(this->is_end_of_file()){
 		return;
 	}else if(this->is_end_of_line()){
-		++this->_cursor.lineNumber;
-		++this->_cursor.lineIterator;
-		this->_cursor.columnNumber = 0;
-		this->renderColumnStart = 0;
-		this->scrowl_down();
+		this->move_down();
+		this->move_to_start_of_line();
 	}else{
 		++this->_cursor.columnNumber;
-		this->scrowl_forward();
+		
+		// scrowl forward
+		const bool over_scrowl_protection = this->renderColumnStart + this->line_width() <= this->lineItr()->size();
+		const bool cursor_near_end = this->cursor_column() + 3 > this->line_width() + this->renderColumnStart;
+		const bool scrowlForward = over_scrowl_protection && cursor_near_end;
+		this->renderColumnStart += scrowlForward;
 	}
 }
 
@@ -137,14 +105,16 @@ void TermGui::TextEditor::move_back(){
 	if(this->is_start_of_file()){
 		return;
 	}else if(this->is_start_of_line()){
-		--this->_cursor.lineNumber;
-		--this->_cursor.lineIterator;
-		this->_cursor.columnNumber = this->_cursor.lineIterator->size();
-		this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
-		this->scrowl_up();
+		this->move_up();
+		this->move_to_end_of_line();
 	}else{
 		--this->_cursor.columnNumber;
-		this->scrowl_back();
+		
+		// scrowl back
+		const bool underscrowl_protection =  this->renderColumnStart > 0;
+		const bool cursor_near_start = this->renderColumnStart + 3 > this->cursor_column();
+		const bool scrowlBack = underscrowl_protection && cursor_near_start;
+		this->renderColumnStart -= scrowlBack;
 	}
 }
 
@@ -161,7 +131,15 @@ void TermGui::TextEditor::move_up(){
 		if (this->_cursor.columnNumber < this->renderColumnStart || (this->renderColumnStart + this->screenWidth.x) < this->_cursor.columnNumber) {
 			this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
 		}
-		this->scrowl_up();
+		
+		// scrowl up
+		const bool underscrowl_protection =  this->renderLineStart > 0;
+		const bool cursor_near_start = this->renderLineStart + 3 > this->cursor_line();
+		const bool scrowl_up = underscrowl_protection && cursor_near_start;
+		if(scrowl_up){
+			--this->renderLineStart;
+			--this->renderLineStartItr;
+		}
 	}
 }
 
@@ -178,7 +156,15 @@ void TermGui::TextEditor::move_down(){
 		if (this->_cursor.columnNumber < this->renderColumnStart || (this->renderColumnStart + this->screenWidth.x) < this->_cursor.columnNumber) {
 			this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
 		}
-		this->scrowl_down();
+		
+		// scrowl down 
+		const bool over_scrowl_protection = this->renderLineStart + this->line_height() <= this->number_of_lines();
+		const bool cursor_near_end = this->cursor_line() + 3 > this->line_height() + this->renderLineStart;
+		const bool scrowlDown = over_scrowl_protection && cursor_near_end;
+		if(scrowlDown){
+			++this->renderLineStart;
+			++this->renderLineStartItr;
+		}
 	}
 }
 
@@ -210,7 +196,8 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	TextEditor::const_iterator lineItr = this->renderLineStartItr;
 	size_type lineNumber = this->renderLineStart;
 	for(; (lineNumber - this->renderLineStart) < this->screenWidth.y && lineItr != this->cend(); ++lineItr, (void)++lineNumber){
-		outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
+		const auto screenLineNumber = lineNumber - this->renderLineStart;
+		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
 		
 		// print styles until start of render
 		auto stylesItr = lineItr->style_list_cbegin();
@@ -221,7 +208,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		// print characters until the end of the screen has been reached
 		size_type column = this->renderColumnStart;
 		const size_type columnEnd = this->line_width();
-		auto string = lineItr->string_cbegin();
+		const auto string = lineItr->string_cbegin();
 		for(; (column - this->renderColumnStart) < columnEnd && column < lineItr->size(); ++column){
 			if (stylesItr != lineItr->style_list_cend()) {
 				if (stylesItr->index == column) {
