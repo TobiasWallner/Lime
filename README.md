@@ -1,6 +1,9 @@
 # Lime
 Lime is a modern and fast editor that works in the command line.
 
+![image](https://github.com/TobiasWallner/Lime/assets/70602844/ce4f1747-f4fa-42e4-94ee-485f12a6b796)
+
+
 # Lime - The command line editor
 
 Lime is a text editor that works directly in the terminal. It aims to take features of some of the best and most popular editors out there.  
