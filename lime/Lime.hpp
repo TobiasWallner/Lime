@@ -146,7 +146,7 @@ private:
 		new length and width recursively to all GUI elements so that they can dynamically
 		resize and adapt to the new avaliable screen size.
 	*/
-	void prozess_screen_event();
+	void prozess_screen_event(Term::Screen screen);
 	
 	/**
 		Prozesses a cursour event

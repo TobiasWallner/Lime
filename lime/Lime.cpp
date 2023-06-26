@@ -180,11 +180,10 @@ void Lime::prozess_event(Term::Event&& event){
 			this->prozess_empty_event();
 		}return;
 		case Term::Event::Type::Key : {
-			const auto keyEvent = Term::Key(event);
-			this->prozess_key_event(keyEvent);
+			this->prozess_key_event(event);
 		}return;
 		case Term::Event::Type::Screen : {
-			this->prozess_screen_event();
+			this->prozess_screen_event(event);
 		}return;
 		case Term::Event::Type::Cursor : {
 			this->prozess_cursour_event();	
@@ -417,8 +416,11 @@ void Lime::prozess_empty_event(){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Empty' ");
 }
 
-void Lime::prozess_screen_event(){
-	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Screen' ");
+void Lime::prozess_screen_event(Term::Screen screen){
+	this->grid.set_screen_width(
+		TermGui::ScreenWidth{ 
+			.x = static_cast<TermGui::ScreenWidth::size_type>(screen.columns()),
+			.y = static_cast<TermGui::ScreenWidth::size_type>(screen.rows())});
 }
 
 void Lime::prozess_cursour_event(){
