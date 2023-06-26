@@ -34,7 +34,7 @@ int main(int numberOfArguments, char** listOfArgumentStrings){
 }
 
 const char* version_string(){
-	return "0.4.0";
+	return "0.5.0";
 }
 
 int version(){
