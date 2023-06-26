@@ -38,20 +38,24 @@
 #endif
 
 Lime::Lime() : 
-	grid(	TermGui::ScreenPosition{.x = 0, .y = 0}, 
-			TermGui::ScreenWidth{	.x = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().columns()), 
-									.y = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().rows())}),
+	grid(	
+		TermGui::ScreenPosition{.x = 1, .y = 1}, 
+		TermGui::ScreenWidth{	
+			.x = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().columns()),
+			.y = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().rows())
+		}
+	),
 	topMessageBar(),
-	textEditor(	TermGui::ScreenPosition{.x = 5, .y = 12}, 
-				TermGui::ScreenWidth{	.x = 20, 
-										.y = 5}),
+	textEditor(),
 	filepath(),
-	infoText(),
-	commandLine(this, &Lime::command_line_callback, 
-				TermGui::ScreenPosition{.x = 1, .y = 17}, 
-				TermGui::ScreenWidth{	.x = 20, 
-										.y = 1})
+	infoText(),										
+	commandLine(this, &Lime::command_line_callback)
 {   
+	this->grid.push_back_absolute(&this->topMessageBar, 1);
+	this->grid.push_back_relative(&this->textEditor);
+	this->grid.push_back_absolute(&this->infoText, 6);
+	this->grid.push_back_absolute(&this->commandLine, 1);
+
 	activeEditor = &(this->textEditor);
 	this->deactivate_command_line();
 	this->activate_text_editor();
@@ -509,13 +513,7 @@ void Lime::command_line_callback(utf8::string_view commands){
 }
 
 void Lime::render(std::string& outputString) const{
-	this->topMessageBar.render(outputString);
-	outputString += "\n--------------------------\n";
-	this->textEditor.render(outputString);
-	outputString += "\n--------------------------\n";
-	this->infoText.render(outputString);
-	outputString += "\n--------------------------\n";
-	this->commandLine.render(outputString);
+	this->grid.render(outputString);
 }
 
 void Lime::draw(const std::string& outputString) const{

@@ -10,6 +10,7 @@
 #include <cpp-terminal-gui/TextEditor.hpp>
 #include <cpp-terminal-gui/CommandLine.hpp>
 #include <cpp-terminal-gui/VerticalGrid.hpp>
+#include <cpp-terminal-gui/Label.hpp>
 
 class Lime{
 	
@@ -17,12 +18,12 @@ class Lime{
 	
 	TermGui::VerticalGrid grid;
 	
-	TermGui::ColorString topMessageBar;
+	TermGui::Label topMessageBar;
 	
 	TermGui::TextEditor textEditor;
 	std::filesystem::path filepath;
 	
-	TermGui::ColorString infoText;
+	TermGui::Label infoText;
 	
 	TermGui::CommandLine<Lime> commandLine;
 	
