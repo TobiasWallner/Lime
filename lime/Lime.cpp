@@ -492,7 +492,13 @@ void Lime::command_line_callback(utf8::string_view commands){
 	if(commandList[0] == "save-as"){
 		if(commandList.size() >= 2){
 			this->filepath = utf8::to_std_string(commandList[1]);
-			this->textEditor.write_file(this->filepath);
+			const auto successful_write = this->textEditor.write_file(this->filepath);
+			if (successful_write) {
+				this->topMessageBar.assign("Sussessfully saved file");
+			}
+			else {
+				this->topMessageBar.assign("Error: could not write file");
+			}
 		}else{
 			this->topMessageBar.assign("Error: the command save-as needs a filename");
 		}
