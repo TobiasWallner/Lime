@@ -28,7 +28,7 @@ private:
 
 public:
 
-	using size_type = Line::size_type;
+	using size_type = long;
 	using iterator = Text::iterator;
 	using const_iterator = Text::const_iterator;
 	using reverse_iterator = Text::reverse_iterator;

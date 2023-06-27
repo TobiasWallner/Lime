@@ -1,15 +1,15 @@
 
+// C++ std
+#include <fstream>
+#include <iostream>
+#include <algorithm>
 
 // utf8 string 
 #include <utf8_char.hpp>
 #include <utf8_string.hpp>
 
+// project
 #include "TextEditor.hpp"
-
-#include <fstream>
-#include <iostream>
-
-
 
 void TermGui::TextEditor::init(ScreenPosition screenPosition, ScreenWidth screenWidth){
 	// init screen
@@ -169,7 +169,9 @@ void TermGui::TextEditor::move_down(){
 }
 
 void TermGui::TextEditor::move_to_start_of_line() { 
-	this->_cursor.columnNumber = 0; 
+	this->_cursor.columnNumber = 0;
+        
+	// scrowl
 	this->renderColumnStart = 0;
 }
 
@@ -177,10 +179,17 @@ void TermGui::TextEditor::move_to_start_of_file() {
 	this->_cursor.columnNumber = 0;
 	this->_cursor.lineNumber = 0;
 	this->_cursor.lineIterator = this->begin();
+
+	// scrowl
+	this->renderColumnStart = 0;
+	this->renderLineStart = 0;
+	this->renderLineStartItr = this->begin();
 }
 
 void TermGui::TextEditor::move_to_end_of_line() {
 	this->_cursor.columnNumber = this->lineItr()->size();
+
+    // scrowl
 	if ((this->renderColumnStart + this->screenWidth.x) < this->_cursor.columnNumber) {
 		this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
 	}
@@ -190,6 +199,17 @@ void TermGui::TextEditor::move_to_end_of_file() {
 	this->_cursor.lineNumber = this->_text.size() - 1;
 	this->_cursor.lineIterator = this->last();
 	this->_cursor.columnNumber = this->last()->size();
+
+    // scrowl 
+    this->renderColumnStart = this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
+	if(this->number_of_lines() - this->screenWidth.y * 3 / 4 <= 0){
+		this->renderLineStart = 0;
+		this->renderLineStartItr = this->begin();
+	}else{
+		this->renderLineStart = this->number_of_lines() - this->screenWidth.y * 3 / 4;
+		this->renderLineStartItr = this->_cursor.lineIterator;
+		for(long i = 1; i < this->screenWidth.y * 3 / 4; ++i) --this->renderLineStartItr;
+	}
 }
 
 void TermGui::TextEditor::render(std::string& outputString) const {
@@ -217,7 +237,16 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 				}
 			}
 			
-			if(this->showCursor && lineNumber == this->cursor_line() && column == this->cursor_column()) {
+			const int tab_width = 4;
+			const auto show_cursor = this->showCursor && lineNumber == this->cursor_line() && column == this->cursor_column();
+			if(string[column] == '\t' && show_cursor){
+				outputString += to_string(FontStyle::Reversed::ON);
+				outputString += ' ';
+				outputString += to_string(FontStyle::Reversed::OFF);
+				for(int i = 1; i < tab_width; ++i) outputString += ' ';
+			}else if(string[column] == '\t'){
+				for(int i = 0; i < tab_width; ++i) outputString += ' ';
+			}else if(show_cursor) {
 				// print cursor in text
 				outputString += to_string(TermGui::FontStyle::Reversed::ON);
 				outputString += string[column].to_std_string_view();
