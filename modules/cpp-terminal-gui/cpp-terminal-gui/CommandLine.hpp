@@ -3,9 +3,6 @@
 //utf8 string
 #include <utf8_string.hpp>
 
-//C++ std
-#pragma once
-
 // c++ std
 #include <algorithm>
 #include <list>
