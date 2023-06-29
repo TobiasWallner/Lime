@@ -26,6 +26,10 @@
 // cpp-terminal-gui
 #include <cpp-terminal-gui/ColorString.hpp>
 #include <cpp-terminal-gui/TextEditor.hpp>
+#include <cpp-terminal-gui/CommandLine.hpp>
+#include <cpp-terminal-gui/VerticalGrid.hpp>
+#include <cpp-terminal-gui/HorizontalGrid.hpp>
+#include <cpp-terminal-gui/Label.hpp>
 
 
 // lime (pasting both for windows and unix) 
@@ -38,23 +42,29 @@
 #endif
 
 Lime::Lime() : 
-	grid(	
+	mainGrid(	
 		TermGui::ScreenPosition{.x = 1, .y = 1}, 
 		TermGui::ScreenWidth{	
 			.x = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().columns()),
 			.y = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().rows())
 		}
 	),
+	textEditorGrid(),
 	topMessageBar(),
 	textEditor(),
 	filepath(),
 	infoText(),										
 	commandLine(this, &Lime::command_line_callback)
 {   
-	this->grid.push_back_absolute(&this->topMessageBar, 1);
-	this->grid.push_back_relative(&this->textEditor);
-	this->grid.push_back_absolute(&this->infoText, 6);
-	this->grid.push_back_absolute(&this->commandLine, 1);
+	this->mainGrid.push_back_absolute(&this->topMessageBar, 1);
+	this->mainGrid.push_back_relative(&this->textEditorGrid);
+	this->mainGrid.push_back_absolute(&this->infoText, 6);
+	this->mainGrid.push_back_absolute(&this->commandLine, 1);
+	
+	this->textEditorGrid.push_back_relative(&this->textEditor, 0, 100); // set the maximal width to 80
+	this->textEditorGrid.set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
+	
+	/*TODO: figure out dynamic height ... re-distribution before every render? ... element stores a callback function to the grid and tells it its size when it changes*/
 
 	activeEditor = &(this->textEditor);
 	this->deactivate_command_line();
@@ -117,6 +127,9 @@ int Lime::run(){
 			Term::Option::NoCursor, 	// deactivate the cursor, we will display it ourselfs
 			Term::Option::Raw			// get the raw and unprozessed io data from the console buffers
 	);
+	
+	
+	
 	
 	// Entering the Program loop: get inputs -> prozess inputs -> display/save changes
 	
@@ -316,6 +329,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ENTER : this->activeCursor->enter(); break; 
 		case Term::Key::BACKSPACE : this->activeCursor->Delete(); break;
 		case Term::Key::DEL: this->activeCursor->erase(); break;
+		//case Term::Key::TAB: this->activeCursor->insert('\t'); break;
 
 		//---- i/o ----
 		case Term::Key::CTRL_S :
@@ -417,10 +431,11 @@ void Lime::prozess_empty_event(){
 }
 
 void Lime::prozess_screen_event(Term::Screen screen){
-	this->grid.set_screen_width(
-		TermGui::ScreenWidth{ 
-			.x = static_cast<TermGui::ScreenWidth::size_type>(screen.columns()),
-			.y = static_cast<TermGui::ScreenWidth::size_type>(screen.rows())});
+	const auto columns = static_cast<TermGui::ScreenWidth::size_type>(screen.columns());
+	const auto rows = static_cast<TermGui::ScreenWidth::size_type>(screen.rows());
+	if (columns > 1 && rows > 1) {
+		this->mainGrid.set_screen_width(TermGui::ScreenWidth{ .x = columns, .y = rows });
+	}
 }
 
 void Lime::prozess_cursour_event(){
@@ -521,7 +536,7 @@ void Lime::command_line_callback(utf8::string_view commands){
 }
 
 void Lime::render(std::string& outputString) const{
-	this->grid.render(outputString);
+	this->mainGrid.render(outputString);
 }
 
 void Lime::draw(const std::string& outputString) const{

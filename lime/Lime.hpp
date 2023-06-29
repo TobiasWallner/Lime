@@ -10,13 +10,15 @@
 #include <cpp-terminal-gui/TextEditor.hpp>
 #include <cpp-terminal-gui/CommandLine.hpp>
 #include <cpp-terminal-gui/VerticalGrid.hpp>
+#include <cpp-terminal-gui/HorizontalGrid.hpp>
 #include <cpp-terminal-gui/Label.hpp>
 
 class Lime{
 	
 	static constexpr unsigned int input_buffer_len = 4;
 	
-	TermGui::VerticalGrid grid;
+	TermGui::VerticalGrid mainGrid;
+	TermGui::HorizontalGrid textEditorGrid;
 	
 	TermGui::Label topMessageBar;
 	
