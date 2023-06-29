@@ -55,7 +55,6 @@ void TermGui::TextEditor::insert_new_line(){
 	this->insert_line_after();
 	this->move_down();
 	this->lineItr()->move_append(*(prevCursor.lineIterator), prevCursor.columnNumber, prevCursor.lineIterator->size() - prevCursor.columnNumber);
-	
 }
 
 void TermGui::TextEditor::insert(utf8::Char c){
@@ -129,7 +128,7 @@ void TermGui::TextEditor::move_up(){
 		--this->_cursor.lineIterator;
 		this->_cursor.columnNumber = eol ? this->_cursor.lineIterator->size() : std::min(static_cast<TermGui::ColorString::size_type>(this->_cursor.columnNumber), this->_cursor.lineIterator->size());
 		if (this->_cursor.columnNumber < this->renderColumnStart || (this->renderColumnStart + this->screenWidth.x) < this->_cursor.columnNumber) {
-			this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
+			this->renderColumnStart = (this->_cursor.columnNumber > (this->screenWidth.x + 3)) ?  this->_cursor.columnNumber - this->screenWidth.x + 3 : 0L;
 		}
 		
 		// scrowl up
@@ -154,7 +153,7 @@ void TermGui::TextEditor::move_down(){
 		++this->_cursor.lineIterator;
 		this->_cursor.columnNumber = eol ? this->_cursor.lineIterator->size() : std::min(static_cast<TermGui::ColorString::size_type>(this->_cursor.columnNumber), this->_cursor.lineIterator->size());
 		if (this->_cursor.columnNumber < this->renderColumnStart || (this->renderColumnStart + this->screenWidth.x) < this->_cursor.columnNumber) {
-			this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
+			this->renderColumnStart = (this->_cursor.columnNumber > (this->screenWidth.x + 3)) ? this->_cursor.columnNumber - this->screenWidth.x + 3 : 0L;
 		}
 		
 		// scrowl down 
@@ -191,18 +190,18 @@ void TermGui::TextEditor::move_to_end_of_line() {
 
     // scrowl
 	if ((this->renderColumnStart + this->screenWidth.x) < this->_cursor.columnNumber) {
-		this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
+		this->renderColumnStart = (this->_cursor.columnNumber > (this->screenWidth.x + 3)) ? this->_cursor.columnNumber - this->screenWidth.x + 3 : 0L;
 	}
 }
 
 void TermGui::TextEditor::move_to_end_of_file() {
-	this->_cursor.lineNumber = this->_text.size() - 1;
+	this->_cursor.lineNumber = this->_text.empty() ? 0 : this->_text.size() - 1;
 	this->_cursor.lineIterator = this->last();
 	this->_cursor.columnNumber = this->last()->size();
 
     // scrowl 
-    this->renderColumnStart = this->renderColumnStart = std::max(this->_cursor.columnNumber - this->screenWidth.x + 3, 0L);
-	if(this->number_of_lines() - this->screenWidth.y * 3 / 4 <= 0){
+    this->renderColumnStart = (this->_cursor.columnNumber > (this->screenWidth.x + 3)) ? this->_cursor.columnNumber - this->screenWidth.x + 3 : 0L;
+	if(this->number_of_lines() <= this->screenWidth.y * 3 / 4){
 		this->renderLineStart = 0;
 		this->renderLineStartItr = this->begin();
 	}else{
