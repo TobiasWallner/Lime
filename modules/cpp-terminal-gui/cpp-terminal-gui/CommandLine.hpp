@@ -178,13 +178,19 @@ public:
 	};
 	
 	/// moves the cursor to the start of the line
-	inline void move_to_start_of_line() override { this->cursorIndex = 0; }
+	inline void move_to_start_of_line() override { 
+		this->cursorIndex = 0; 
+		this->renderStart = 0;
+	}
 	
 	/// moves the cursor the the start of the line
 	inline void move_to_start_of_file() override { this->move_to_start_of_line(); }
 	
 	/// moves the cursor to the end of the line;
-	inline void move_to_end_of_line() override { this->cursorIndex = this->commandString.size(); }
+	inline void move_to_end_of_line() override {
+		this->cursorIndex = this->commandString.size(); 
+		this->renderStart = (this->commandString.size() + 3 > this->line_width()) ? this->commandString.size() - (this->line_width() - 3): 0;
+	}
 	
 	inline void move_to_end_of_file() override { this->move_to_end_of_line(); }
 	
@@ -211,10 +217,10 @@ public:
 			outputString += Term::cursor_move(this->position.y, this->position.x);
 			outputString += ": ";
 			auto column = this->renderStart;
-			auto columnEnd = this->commandString.size();
+			const auto columnEnd = this->commandString.size();
 			auto screenColumn = 0;
-			auto screenColumnEnd = this->line_width() - this->is_end_of_line();
-			for(; column < columnEnd && screenColumn < screenColumnEnd; ++column, (void)++screenColumnEnd){
+			const auto screenColumnEnd = this->line_width();
+			for(; column < columnEnd && screenColumn < (screenColumnEnd - this->is_end_of_line()); ++column, (void)++screenColumn){
 				const auto show_cursor = this->showCursor && column == this->cursorIndex;
 				if(this->commandString[column] == '\t' && show_cursor){
 					outputString += to_string(FontStyle::Reversed::ON);
@@ -230,8 +236,8 @@ public:
 				}else{
 					outputString += this->commandString[column].to_std_string_view();
 				}
-				
 			}
+			
 			if (this->showCursor && this->is_end_of_line()) {
 				outputString += to_string(FontStyle::Reversed::ON);
 				outputString += ' ';
