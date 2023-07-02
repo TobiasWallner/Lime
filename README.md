@@ -1,8 +1,7 @@
 # Lime
 Lime is a modern and fast editor that works in the command line.
 
-![image](https://github.com/TobiasWallner/Lime/assets/70602844/ce4f1747-f4fa-42e4-94ee-485f12a6b796)
-
+![image](https://github.com/TobiasWallner/Lime/assets/70602844/e01e996b-8893-474f-a4f7-01784177e8bd)
 
 # Lime - The command line editor
 
