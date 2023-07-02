@@ -94,13 +94,13 @@ void Lime::activate_text_editor(){
 		<< "Save: " << TermGui::fg_color(0, 200, 0) << "Ctrl + S" << TermGui::default_fg_color() << "\t"
 		<< "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
 			   
-		<< "Move Left: " << TermGui::fg_color(0, 200, 0) << "Ctrl + J" << TermGui::default_fg_color() << "\t"
-		<< "Move Up: " << TermGui::fg_color(0, 200, 0) << "Ctrl + I" << TermGui::default_fg_color() << "\t"
-		<< "Move Right: " << TermGui::fg_color(0, 200, 0) << "Ctrl + L" << TermGui::default_fg_color() << "\t"
-		<< "Move Down: " << TermGui::fg_color(0, 200, 0) << "Ctrl + K" << TermGui::default_fg_color() << "\n"
+		<< "Move Left: " << TermGui::fg_color(0, 200, 0) << "Alt + J" << TermGui::default_fg_color() << "\t"
+		<< "Move Up: " << TermGui::fg_color(0, 200, 0) << "Alt + I" << TermGui::default_fg_color() << "\t"
+		<< "Move Right: " << TermGui::fg_color(0, 200, 0) << "Alt + L" << TermGui::default_fg_color() << "\t"
+		<< "Move Down: " << TermGui::fg_color(0, 200, 0) << "Alt + K" << TermGui::default_fg_color() << "\n"
 			   
-		<< "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + U" << TermGui::default_fg_color() << "\t"
-		<< "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + O" << TermGui::default_fg_color() << "\n"
+		<< "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Alt + U" << TermGui::default_fg_color() << "\t"
+		<< "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Alt + O" << TermGui::default_fg_color() << "\n"
 		   
 		<< "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
 		<< "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n"
@@ -342,10 +342,10 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 			break;
 		
 		//----- navigation and cursor movement -----
-		case Term::Key::CTRL_J : this->activeCursor->move_back(); break;
-		case Term::Key::CTRL_I : this->activeCursor->move_up(); break;
-		case Term::Key::CTRL_L : this->activeCursor->move_forward(); break; 
-		case Term::Key::CTRL_K : this->activeCursor->move_down(); break;
+		case Term::Key::ALT + Term::Key::j : this->activeCursor->move_back(); break; 	// change to CTRL as soon as cpp-terminal library has support
+		case Term::Key::ALT + Term::Key::i : this->activeCursor->move_up(); break;		// change to CTRL as soon as cpp-terminal library has support
+		case Term::Key::ALT + Term::Key::l : this->activeCursor->move_forward(); break; // change to CTRL as soon as cpp-terminal library has support
+		case Term::Key::ALT + Term::Key::k : this->activeCursor->move_down(); break;	// change to CTRL as soon as cpp-terminal library has support
 		
 		case Term::Key::ARROW_LEFT 	: this->activeCursor->move_back(); break;
 		case Term::Key::ARROW_UP 	: this->activeCursor->move_up(); break;
@@ -358,10 +358,10 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ALT + Term::Key::u : this->activeCursor->move_to_start_of_line(); break;
 		case Term::Key::ALT + Term::Key::o : this->activeCursor->move_to_end_of_line(); break;
 		
-		case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
-		case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
-		case Term::Key::ALT + Term::Key::L : this->topMessageBar.assign("/*TODO: move one word right*/"); break; 
-		case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
+		//case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
+		//case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
+		//case Term::Key::ALT + Term::Key::L : this->topMessageBar.assign("/*TODO: move one word right*/"); break; 
+		//case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
 		
 		// ------- editing -------
 		case Term::Key::CTRL_V : this->insert_from_clipboard(); break;
@@ -369,58 +369,60 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::CTRL_X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
 		
 		default:{
-			// ------- setup and key identification ------
-			const auto character_8 = static_cast<char>(character_32);
-			const auto utf8_id = utf8::identify(character_8);
-			// print status message: mostly for debugging
-			this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
-			
-			// insert event into the input buffer
-			if(this->input_buffer_count < this->input_buffer_len){
-				this->input_buffer[this->input_buffer_count++] = character_8;
-			}else{
-				this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
-				this->input_buffer_count = 0;
-				return;
-			}
-			const auto expected_utf8_bytes = static_cast<int32_t>(utf8::identify(this->input_buffer[0]));
-			
-			// ------- key insertions ----------
-			if(this->input_buffer_count == 1){
-				if(utf8_id == utf8::Identifier::Bytes1){
-					this->activeCursor->insert(character_8);
-					this->input_buffer_count = 0;
-				}else if(utf8_id == utf8::Identifier::NotFirst){
-					this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
-					this->input_buffer_count = 0;
-				}else if(utf8_id == utf8::Identifier::Unsupported){
-					this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
-					this->input_buffer_count = 0;
+			if(!keyEvent.isALT() && !keyEvent.isCTRL()){
+				// ------- setup and key identification ------
+				const auto character_8 = static_cast<char>(character_32);
+				const auto utf8_id = utf8::identify(character_8);
+				// print status message: mostly for debugging
+				this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
+				
+				// insert event into the input buffer
+				if(this->input_buffer_count < this->input_buffer_len){
+					this->input_buffer[this->input_buffer_count++] = character_8;
 				}else{
-					// wait for more characters in the input buffer
+					this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
+					this->input_buffer_count = 0;
+					return;
 				}
-			}else if(static_cast<int32_t>(this->input_buffer_count) < expected_utf8_bytes){
-				if(utf8_id == utf8::Identifier::NotFirst){
-					// wait for more characters in the input buffer
+				const auto expected_utf8_bytes = static_cast<int32_t>(utf8::identify(this->input_buffer[0]));
+				
+				// ------- key insertions ----------
+				if(this->input_buffer_count == 1){
+					if(utf8_id == utf8::Identifier::Bytes1){
+						this->activeCursor->insert(character_8);
+						this->input_buffer_count = 0;
+					}else if(utf8_id == utf8::Identifier::NotFirst){
+						this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
+						this->input_buffer_count = 0;
+					}else if(utf8_id == utf8::Identifier::Unsupported){
+						this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
+						this->input_buffer_count = 0;
+					}else{
+						// wait for more characters in the input buffer
+					}
+				}else if(static_cast<int32_t>(this->input_buffer_count) < expected_utf8_bytes){
+					if(utf8_id == utf8::Identifier::NotFirst){
+						// wait for more characters in the input buffer
+					}else{
+						this->topMessageBar.append(" Error: utf8 character ended prematurely");
+						this->input_buffer_count = 0;
+					}
+				}else if(this->input_buffer_count == expected_utf8_bytes){
+					if(utf8_id == utf8::Identifier::NotFirst){
+						auto first = this->input_buffer;
+						auto last = this->input_buffer + this->input_buffer_count;
+						utf8::Char c(first, last);
+						this->input_buffer_count = 0;
+						this->activeCursor->insert(c);
+					}else{
+						this->topMessageBar.append(" Error: utf8 character ended prematurely");
+						this->input_buffer_count = 0;
+					}
+						
 				}else{
-					this->topMessageBar.append(" Error: utf8 character ended prematurely");
+					this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
 					this->input_buffer_count = 0;
 				}
-			}else if(this->input_buffer_count == expected_utf8_bytes){
-				if(utf8_id == utf8::Identifier::NotFirst){
-					auto first = this->input_buffer;
-					auto last = this->input_buffer + this->input_buffer_count;
-					utf8::Char c(first, last);
-					this->input_buffer_count = 0;
-					this->activeCursor->insert(c);
-				}else{
-					this->topMessageBar.append(" Error: utf8 character ended prematurely");
-					this->input_buffer_count = 0;
-				}
-					
-			}else{
-				this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
-				this->input_buffer_count = 0;
 			}
 		}break;	
 	}
@@ -540,7 +542,6 @@ void Lime::render(std::string& outputString) const{
 }
 
 void Lime::draw(const std::string& outputString) const{
-	std::cout 	<< Term::clear_screen() 
-				<< Term::cursor_move(0, 0) 
+	std::cout 	<< Term::cursor_move(0, 0) 
 				<< outputString << std::flush;
 }
