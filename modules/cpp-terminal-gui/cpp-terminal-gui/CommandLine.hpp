@@ -210,14 +210,25 @@ public:
 		if(this->width.y > 0){
 			outputString += Term::cursor_move(this->position.y, this->position.x);
 			outputString += ": ";
-			const auto end = std::min(this->line_width() + this->renderStart - this->is_end_of_line(), this->commandString.size());
-			for(auto i = this->renderStart; i != end; ++i){ 
-				if(this->showCursor && i == cursorIndex){
-						outputString += to_string(FontStyle::Reversed::ON);
-						outputString += this->commandString[i].to_std_string_view();
-						outputString += to_string(FontStyle::Reversed::OFF);				
+			auto column = this->renderStart;
+			auto columnEnd = this->commandString.size();
+			auto screenColumn = 0;
+			auto screenColumnEnd = this->line_width() - this->is_end_of_line();
+			for(; column < columnEnd && screenColumn < screenColumnEnd; ++column, (void)++screenColumnEnd){
+				const auto show_cursor = this->showCursor && column == this->cursorIndex;
+				if(this->commandString[column] == '\t' && show_cursor){
+					outputString += to_string(FontStyle::Reversed::ON);
+					outputString += ' ';
+					outputString += to_string(FontStyle::Reversed::OFF);
+					outputString.append(3, ' ');
+				}else if(this->commandString[column] == '\t'){
+					outputString.append(4, ' ');
+				}else if(show_cursor && column == this->cursorIndex){
+					outputString += to_string(FontStyle::Reversed::ON);
+					outputString += this->commandString[column].to_std_string_view();
+					outputString += to_string(FontStyle::Reversed::OFF);				
 				}else{
-					outputString += this->commandString[i].to_std_string_view();
+					outputString += this->commandString[column].to_std_string_view();
 				}
 				
 			}
@@ -225,7 +236,9 @@ public:
 				outputString += to_string(FontStyle::Reversed::ON);
 				outputString += ' ';
 				outputString += to_string(FontStyle::Reversed::OFF);
+				++screenColumn;
 			}
+			outputString.append(screenColumnEnd - screenColumn, ' ');
 		}
 	}
 
