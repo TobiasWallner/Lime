@@ -226,9 +226,13 @@ public:
 					outputString += to_string(FontStyle::Reversed::ON);
 					outputString += ' ';
 					outputString += to_string(FontStyle::Reversed::OFF);
-					outputString.append(3, ' ');
+					const auto tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+					outputString.append(tabs_to_print, ' ');
+					screenColumn += tabs_to_print;
 				}else if(this->commandString[column] == '\t'){
-					outputString.append(4, ' ');
+					const auto tabs_to_print = std::min(4ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+					outputString.append(tabs_to_print, ' ');
+					screenColumn += tabs_to_print-1;
 				}else if(show_cursor && column == this->cursorIndex){
 					outputString += to_string(FontStyle::Reversed::ON);
 					outputString += this->commandString[column].to_std_string_view();
