@@ -216,21 +216,21 @@ public:
 		if(this->width.y > 0){
 			outputString += Term::cursor_move(this->position.y, this->position.x);
 			outputString += ": ";
-			auto column = this->renderStart;
-			const auto columnEnd = this->commandString.size();
-			auto screenColumn = 0;
-			const auto screenColumnEnd = this->line_width();
+			size_type column = this->renderStart;
+			const size_type columnEnd = this->commandString.size();
+			size_type screenColumn = 0;
+			const size_type screenColumnEnd = this->line_width();
 			for(; column < columnEnd && screenColumn < (screenColumnEnd - this->is_end_of_line()); ++column, (void)++screenColumn){
-				const auto show_cursor = this->showCursor && column == this->cursorIndex;
+				const size_type show_cursor = this->showCursor && column == this->cursorIndex;
 				if(this->commandString[column] == '\t' && show_cursor){
 					outputString += to_string(FontStyle::Reversed::ON);
 					outputString += ' ';
 					outputString += to_string(FontStyle::Reversed::OFF);
-					const auto tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+					const size_type tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
 					outputString.append(tabs_to_print, ' ');
 					screenColumn += tabs_to_print;
 				}else if(this->commandString[column] == '\t'){
-					const auto tabs_to_print = std::min(4ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+					const size_type tabs_to_print = std::min(4ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
 					outputString.append(tabs_to_print, ' ');
 					screenColumn += tabs_to_print-1;
 				}else if(show_cursor && column == this->cursorIndex){
