@@ -62,6 +62,8 @@ void TermGui::TextEditor::insert(utf8::Char c){
 		this->insert_new_line();
 	}else if(c == '\b'){
 		this->Delete();
+	}else if(c == '\r' || c == '\v' || c == '\f' || utf8::is_control(c)){
+		return;
 	}else{
 		this->insert_naive(c);
 	}	
@@ -214,8 +216,8 @@ void TermGui::TextEditor::move_to_end_of_file() {
 void TermGui::TextEditor::render(std::string& outputString) const {
 	TextEditor::const_iterator lineItr = this->renderLineStartItr;
 	size_type lineNumber = this->renderLineStart;
-	for(; (lineNumber - this->renderLineStart) < this->screenWidth.y && lineItr != this->cend(); ++lineItr, (void)++lineNumber){
-		const auto screenLineNumber = lineNumber - this->renderLineStart;
+	size_type screenLineNumber = 0;
+	for(; screenLineNumber < this->screenWidth.y && lineItr != this->cend(); ++lineItr, (void)++lineNumber, (void)++screenLineNumber){
 		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
 		
 		// print styles until start of render
@@ -228,23 +230,22 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		size_type column = this->renderColumnStart;
 		const size_type columnEnd = this->line_width();
 		const auto string = lineItr->string_cbegin();
-		for(; (column - this->renderColumnStart) < columnEnd && column < lineItr->size(); ++column){
+		auto screenColumn = 0;
+		for(; screenColumn < this->screenWidth.x && column < lineItr->size(); ++column, ++screenColumn){
 			if (stylesItr != lineItr->style_list_cend()) {
 				if (stylesItr->index == column) {
 					stylesItr->render(outputString);
 					++stylesItr;
 				}
 			}
-			
-			const int tab_width = 4;
 			const auto show_cursor = this->showCursor && lineNumber == this->cursor_line() && column == this->cursor_column();
 			if(string[column] == '\t' && show_cursor){
 				outputString += to_string(FontStyle::Reversed::ON);
 				outputString += ' ';
 				outputString += to_string(FontStyle::Reversed::OFF);
-				for(int i = 1; i < tab_width; ++i) outputString += ' ';
+				outputString.append(this->tab_width-1, ' ');
 			}else if(string[column] == '\t'){
-				for(int i = 0; i < tab_width; ++i) outputString += ' ';
+				outputString.append(this->tab_width, ' ');
 			}else if(show_cursor) {
 				// print cursor in text
 				outputString += to_string(TermGui::FontStyle::Reversed::ON);
@@ -260,9 +261,25 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 			outputString += to_string(FontStyle::Reversed::ON);
 			outputString += ' ';
 			outputString += to_string(FontStyle::Reversed::OFF);
+			++screenColumn;
 		}
-	}	
+		
+		// print styles until the end of the string
+		for(; (stylesItr != lineItr->style_list_cend()); ++stylesItr){
+			stylesItr->render(outputString);
+		}
+		
+		// override characters until the end of the provided screen
+		outputString.append(this->screenWidth.x - screenColumn, ' ');
+	}
+	//override lines until the end of the provided screen
+	for(;screenLineNumber < this->screenWidth.y; ++screenLineNumber){
+		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+		outputString += '~';
+		outputString.append(this->screenWidth.x - 1, ' ');
+	}
 }
+
 
 bool TermGui::TextEditor::append_file(std::ifstream& file) {
 	char buffer[4 * 1024];

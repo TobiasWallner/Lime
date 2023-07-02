@@ -59,6 +59,7 @@ private:
 	const_iterator renderLineStartItr;
 	size_type renderColumnStart;
 	
+	uint8_t tab_width = 4;
 	static constexpr utf8::Char lineWrapSymbol = "→";
 	
 	//TODO: bool lineWrapping = false;
@@ -201,6 +202,7 @@ public:
 	inline bool is_end_of_file() const { return this->is_last_line() && this->is_end_of_line(); }
 	
 	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
+	/// does not expect a clear screen
 	void render(std::string& outputString) const override;
 	
 	/// reads the content of the file into the current cursor position
