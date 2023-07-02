@@ -50,8 +50,36 @@ void TermGui::VerticalGrid::distribute_cells(){
 
 
 void TermGui::VerticalGrid::render(std::string& outputString) const{
-	for(const Cell& cell : this->gridCells){
-		cell.render(outputString);
+	if(this->gridCells.empty()){
+		for(int line = 0; line < this->screenWidth.y; ++line){
+			outputString += Term::cursor_move(this->screenPosition.y + line, this->screenPosition.x);
+			outputString.append(this->screenWidth.x, ' ');
+		}
+	}else {
+		
+		const auto total_clear_height = this->screenWidth.y - this->accumulate_cell_height();
+		{// clear lines before the first cell
+			const auto clearLineStart = this->screenPosition.y;
+			const auto clearLineEnd = clearLineStart + (this->centering ? total_clear_height / 2 : 0);
+			for(auto line = clearLineStart; line < clearLineEnd; ++line){
+				outputString += Term::cursor_move(line, this->screenPosition.x);
+				outputString.append(this->screenWidth.x, ' ');
+			}
+		}
+
+		// render cells
+		for(const Cell& cell : this->gridCells){
+			cell.render(outputString);
+		}
+
+		{ // clear lines after the last cell	
+			const auto clearLineEnd = this->screenPosition.y + this->screenWidth.y;
+			const auto clearLineStart = clearLineEnd - (this->centering ? total_clear_height / 2 : total_clear_height);
+			for(auto line = clearLineStart; line < clearLineEnd; ++line){
+				outputString += Term::cursor_move(line, this->screenPosition.x);
+				outputString.append(this->screenWidth.x, ' ');
+			}
+		}
 	}
 }
 

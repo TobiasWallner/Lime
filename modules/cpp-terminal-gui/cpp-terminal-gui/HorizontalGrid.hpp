@@ -134,7 +134,7 @@ class HorizontalGrid : public RenderTrait{
 		
 		/// returns the absolute width wether it is valid or not
 		/// check is_absolute() to know if it is valid
-		inline ScreenWidth::size_type get_absolute_width() const {return this->screenWidth.y;}
+		inline ScreenWidth::size_type get_absolute_width() const {return this->screenWidth.x;}
 		
 		/// returns the relative width wether it is valid or not
 		/// check is_relative to know if it is valid
@@ -308,6 +308,14 @@ public:
 	
 	
 private:
+
+	inline size_type accumulate_cell_width() const {
+		ScreenWidth::size_type sum = 0;
+		for(const Cell& elem : this->gridCells){
+			sum += elem.get_absolute_width();
+		}
+		return sum;
+	}
 
 	inline size_type accumulate_absolute_cell_width() const{
 		ScreenWidth::size_type sum = 0;

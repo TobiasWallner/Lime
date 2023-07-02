@@ -314,6 +314,14 @@ public:
 	
 private:
 
+	inline size_type accumulate_cell_height() const {
+		ScreenWidth::size_type sum = 0;
+		for(const Cell& elem : this->gridCells){
+			sum += elem.get_absolute_height();
+		}
+		return sum;
+	}
+
 	inline size_type accumulate_absolute_cell_height() const{
 		ScreenWidth::size_type sum = 0;
 		for(const Cell& elem : this->gridCells){
@@ -322,7 +330,7 @@ private:
 		return sum;
 	}
 		
-	float accumulate_relative_cell_height() const{
+	inline float accumulate_relative_cell_height() const{
 		float sum = 0;
 		for(const Cell& elem : this->gridCells){
 			sum += elem.get_height_if_relative();
