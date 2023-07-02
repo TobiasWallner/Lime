@@ -18,8 +18,12 @@ void TermGui::Label::render(std::string& outputString) const {
 				++styleItr;
 			}
 		}
-		
-		if(string[index] == '\n'){
+		if(string[index] == '\t'){
+			const auto tabs_to_print = std::min(4ULL, this->screenWidth.x - columnNumber);
+			outputString.append(tabs_to_print, ' ');
+			columnNumber += tabs_to_print-1;
+		}else if(string[index] == '\n'){
+			outputString.append(this->screenWidth.x - columnNumber, ' '); // clear after end of line
 			++lineNumber;
 			columnNumber = 0;
 			outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
@@ -33,6 +37,11 @@ void TermGui::Label::render(std::string& outputString) const {
 			styleItr->render(outputString);
 			++styleItr;
 		}
+	}
+
+	// clear until end of screen
+	for(; lineNumber < this->screenWidth.y; ++lineNumber){
+		outputString.append(this->screenWidth.x, ' ');
 	}
 }
 
