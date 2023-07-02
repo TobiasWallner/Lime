@@ -47,6 +47,8 @@ public:
 	};
 
 
+	// TODO: simulate the screen cursor and use this screen cursor as an indicator for scrowling (render frame placement)
+
 private:
 	
 	Text _text; // stores the text data

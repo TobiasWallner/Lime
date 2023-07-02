@@ -62,7 +62,7 @@ void TermGui::TextEditor::insert(utf8::Char c){
 		this->insert_new_line();
 	}else if(c == '\b'){
 		this->Delete();
-	}else if(c == '\r' || c == '\v' || c == '\f' || utf8::is_control(c)){
+	}else if(c == '\r' || c == '\v' || c == '\f'){
 		return;
 	}else{
 		this->insert_naive(c);
@@ -231,7 +231,8 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		const size_type columnEnd = this->line_width();
 		const auto string = lineItr->string_cbegin();
 		auto screenColumn = 0;
-		for(; screenColumn < this->screenWidth.x && column < lineItr->size(); ++column, ++screenColumn){
+		const auto screenColumnEnd = this->screenWidth.x;
+		for(; screenColumn < (screenColumnEnd - this->is_end_of_line()) && column < lineItr->size(); ++column, ++screenColumn){
 			if (stylesItr != lineItr->style_list_cend()) {
 				if (stylesItr->index == column) {
 					stylesItr->render(outputString);
@@ -243,9 +244,14 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 				outputString += to_string(FontStyle::Reversed::ON);
 				outputString += ' ';
 				outputString += to_string(FontStyle::Reversed::OFF);
-				outputString.append(this->tab_width-1, ' ');
+				
+				const auto tabs_to_print = std::min(this->tab_width-1, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+				outputString.append(tabs_to_print, ' ');
+				screenColumn += tabs_to_print;
 			}else if(string[column] == '\t'){
-				outputString.append(this->tab_width, ' ');
+				const auto tabs_to_print = std::min(4, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+				outputString.append(tabs_to_print, ' ');
+				screenColumn += tabs_to_print-1;
 			}else if(show_cursor) {
 				// print cursor in text
 				outputString += to_string(TermGui::FontStyle::Reversed::ON);
