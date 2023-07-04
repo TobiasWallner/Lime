@@ -2,14 +2,21 @@ Issues
 ------
 + Figure out why the editor crashes, if the screen width is too small
 + Figure out why sometimes random letters are printed on the top right of the screen
++ the save command does not work
++ when the console is not in text wrap mode, then the application crashes when resizeing the 
+	console to a smaller screen size.
++ Sometimes the screen cursor gets printed, despite it being deactivated. Figure out why and make it
+	disappear.
++ Figure out how escape codes get inserted into the editor and prevent that from happening
 
 TODOs
 -----
++ Do not re-render the whole screen but only the parts that change
++ Do not trigger a render if Ctrl or Alt is pressed
 + When the cursor is moveing up and down it should stay at the current colum and not jump fom end 
 	to end
 + For objects with the TextTrait, change the methods so that they output a string that only changes
 	the view characters on screen that actually got changed.
-+ make the tilde'~' characters after the file lime green.
 + make a class that contains a textEditor as well as the title of the file and prints that
 	ontop of the editor. It should also print a '*' if the file is unsaved.
 + consider printing status and result messages in the console entry
@@ -22,3 +29,5 @@ TODOs
 	same letters that have just been typed, and if a command has been completed show information
 	and a small help text of the command.
 + prevent the editor from closing on unsaved files
++ make a shortcut that duplicates a line Ctrl+d
++ make a shortcut that deleltes a line Ctrl+D / Alt+d? if cpp-terminal manages to support that,
