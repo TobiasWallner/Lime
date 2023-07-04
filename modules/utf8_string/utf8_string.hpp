@@ -24,15 +24,24 @@ inline bool operator == (const string_view& lhs, const char* rhs){
 	const auto lhsEnd = lhs.cend();
 	auto rhsItr = rhs;
 	
-	for(; lhsItr != lhsEnd && *rhsItr != '\0';++lhsItr, (void)++rhsItr){
-		if(*lhsItr != *rhsItr){
+	for(; lhsItr != lhsEnd && *rhsItr != '\0'; ++lhsItr){
+		Char rhsElem;
+		Char lhsElem = *lhsItr;
+		auto nextItr = rhsElem.assign(rhsItr);
+		
+		if(nextItr == rhsItr){
+			//error
+			return false;
+		}else if(lhsElem != rhsElem){
 			return false;
 		}
+		
+		rhsItr = nextItr;
 	}
 	
-	const auto lhsDist = std::distance(lhs.cbegin(), lhsItr);
-	const auto rhsDist = std::distance(rhs, rhsItr);
-	const bool result = lhsDist == rhsDist;
+	const auto lhs_at_end = lhsItr == lhsEnd;
+	const auto rhs_at_end = *rhsItr == '\0';
+	const bool result = lhs_at_end && rhs_at_end;
 	return result;
 }
 
