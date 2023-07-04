@@ -240,6 +240,13 @@ public:
 	}
 };
 
+inline std::string to_string(const FontStyle& style) {
+	std::string str;
+	style.render(str);
+	return str;
+}
+
+
 //---- foreground color ----
 inline FontStyle fg_color(std::uint8_t red, std::uint8_t green, std::uint8_t blue){return FontStyle::fg_color(red, green, blue);}
 
