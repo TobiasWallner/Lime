@@ -11,6 +11,7 @@ Issues
 
 TODOs
 -----
++ cpp-terminal has implemented a new way for handling utf8 codes -> download the newes version and update Lime
 + Do not re-render the whole screen but only the parts that change
 + Do not trigger a render if Ctrl or Alt is pressed
 + When the cursor is moveing up and down it should stay at the current colum and not jump fom end 
