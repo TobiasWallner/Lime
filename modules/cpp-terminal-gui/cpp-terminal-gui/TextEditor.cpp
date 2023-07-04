@@ -10,6 +10,7 @@
 
 // project
 #include "TextEditor.hpp"
+#include "ColorThemes.hpp"
 
 void TermGui::TextEditor::init(ScreenPosition screenPosition, ScreenWidth screenWidth){
 	// init screen
@@ -279,10 +280,14 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		outputString.append(this->screenWidth.x - screenColumn, ' ');
 	}
 	//override lines until the end of the provided screen
-	for(;screenLineNumber < this->screenWidth.y; ++screenLineNumber){
-		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
-		outputString += '~';
-		outputString.append(this->screenWidth.x - 1, ' ');
+	if(screenLineNumber < this->screenWidth.y){
+		outputString += TermGui::to_string(TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]));
+		for(;screenLineNumber < this->screenWidth.y; ++screenLineNumber){
+			outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+			outputString += '~';
+			outputString.append(this->screenWidth.x - 1, ' ');
+		}
+		outputString += TermGui::to_string(TermGui::default_fg_color());
 	}
 }
 
