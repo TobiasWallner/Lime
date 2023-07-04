@@ -175,4 +175,13 @@ private:
 	
 	/// inserts the content from the clipboard into the current active editor.
 	void insert_from_clipboard();
+	
+	/// saves the currently focussed file at the currently specified filepath
+	void save();
+	
+	/// saves the currently focussed file at the provided file path and changes the filepath of that file to the new one
+	void save_as(const std::vector<utf8::string_view>& commands);
+	
+	/// opens the file at the specified location and loads it into a new or empty and unnamed editor that is in focus
+	void open(const std::vector<utf8::string_view>& commands);
 };

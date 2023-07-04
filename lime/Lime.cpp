@@ -30,6 +30,7 @@
 #include <cpp-terminal-gui/VerticalGrid.hpp>
 #include <cpp-terminal-gui/HorizontalGrid.hpp>
 #include <cpp-terminal-gui/Label.hpp>
+#include <cpp-terminal-gui/ColorThemes.hpp>
 
 
 // lime (pasting both for windows and unix) 
@@ -77,9 +78,13 @@ inline void Lime::activate_command_line(){
 	
 	// load infotext
 	this->infoText.clear();
-	this->infoText  << TermGui::fg_color(0, 200, 0) << "save" << TermGui::default_fg_color() << "  ...............  saves the current file\n"
-					<< TermGui::fg_color(0, 200, 0) << "save-as <filename>" << TermGui::default_fg_color() << " ..  saves the current file under a new name\n"
-					<< TermGui::fg_color(0, 200, 0) << "open <filename>" << TermGui::default_fg_color() << "  ....  opens the file under the provided name";
+	
+	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
+	const auto default_fg = TermGui::default_fg_color();
+	
+	this->infoText  << lime_fg << "save" << default_fg << "  ...............  saves the current file\n"
+					<< lime_fg << "save-as <filename>" << default_fg << " ..  saves the current file under a new name\n"
+					<< lime_fg << "open <filename>" << default_fg << "  ....  opens the file under the provided name";
 	
 }
 
@@ -89,23 +94,27 @@ void Lime::activate_text_editor(){
 		
 		//load infotext
 	this->infoText.clear();
+	
+	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
+	const auto default_fg = TermGui::default_fg_color();
+	
 	this->infoText  
-		<< "Quit: " << TermGui::fg_color(0, 200, 0) << "Ctrl + Q" << TermGui::default_fg_color() << "\t"
-		<< "Save: " << TermGui::fg_color(0, 200, 0) << "Ctrl + S" << TermGui::default_fg_color() << "\t"
-		<< "Paste: " << TermGui::fg_color(0, 200, 0) << "Ctrl + V" << TermGui::default_fg_color() << "\n"
+		<< "Quit: " << lime_fg << "Ctrl + Q" << default_fg << "\t"
+		<< "Save: " << lime_fg << "Ctrl + S" << default_fg << "\t"
+		<< "Paste: " << lime_fg << "Ctrl + V" << default_fg << "\n"
 			   
-		<< "Move Left: " << TermGui::fg_color(0, 200, 0) << "Alt + J" << TermGui::default_fg_color() << "\t"
-		<< "Move Up: " << TermGui::fg_color(0, 200, 0) << "Alt + I" << TermGui::default_fg_color() << "\t"
-		<< "Move Right: " << TermGui::fg_color(0, 200, 0) << "Alt + L" << TermGui::default_fg_color() << "\t"
-		<< "Move Down: " << TermGui::fg_color(0, 200, 0) << "Alt + K" << TermGui::default_fg_color() << "\n"
+		<< "Move Left: " << lime_fg << "Alt + J" << default_fg << "\t"
+		<< "Move Up: " << lime_fg << "Alt + I" << default_fg << "\t"
+		<< "Move Right: " << lime_fg << "Alt + L" << default_fg << "\t"
+		<< "Move Down: " << lime_fg << "Alt + K" << default_fg << "\n"
 			   
-		<< "Move to Line Start: " << TermGui::fg_color(0, 200, 0) << "Alt + U" << TermGui::default_fg_color() << "\t"
-		<< "Move to Line End: " << TermGui::fg_color(0, 200, 0) << "Alt + O" << TermGui::default_fg_color() << "\n"
+		<< "Move to Line Start: " << lime_fg << "Alt + U" << default_fg << "\t"
+		<< "Move to Line End: " << lime_fg << "Alt + O" << default_fg << "\n"
 		   
-		<< "Move to File Start: " << TermGui::fg_color(0, 200, 0) << "Ctrl + T" << TermGui::default_fg_color() << "\t"
-		<< "Move to File End: " << TermGui::fg_color(0, 200, 0) << "Ctrl + E" << TermGui::default_fg_color() << "\n"
+		<< "Move to File Start: " << lime_fg << "Ctrl + T" << default_fg << "\t"
+		<< "Move to File End: " << lime_fg << "Ctrl + E" << default_fg << "\n"
 		
-		<< "Toggle Command Line: " << TermGui::fg_color(0, 200, 0) << "Esc" << TermGui::default_fg_color();
+		<< "Toggle Command Line: " << lime_fg << "Esc" << default_fg;
 		
 }
 
@@ -332,14 +341,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		//case Term::Key::TAB: this->activeCursor->insert('\t'); break;
 
 		//---- i/o ----
-		case Term::Key::CTRL_S :
-			if(filepath.empty()){
-				this->topMessageBar.append(" Error: filepath is empty. Use save-as first.\n");
-			}
-			else{
-				this->textEditor.write_file(filepath);
-			}
-			break;
+		case Term::Key::CTRL_S : this->save(); break;
 		
 		//----- navigation and cursor movement -----
 		case Term::Key::ALT + Term::Key::j : this->activeCursor->move_back(); break; 	// change to CTRL as soon as cpp-terminal library has support
@@ -497,9 +499,11 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view com
 	return commandList;
 }
 
+
+
 void Lime::command_line_callback(utf8::string_view commands){
 	// parse commands into list of commands
-	const auto commandList = parse_command_string(commands);
+	const std::vector<utf8::string_view> commandList = parse_command_string(commands);
 	if(commandList.empty()){
 		this->topMessageBar.assign("Error: empty command string");
 		return;
@@ -507,27 +511,11 @@ void Lime::command_line_callback(utf8::string_view commands){
 	
 	// prozess commanad
 	if(commandList[0] == "save-as"){
-		if(commandList.size() >= 2){
-			this->filepath = utf8::to_std_string(commandList[1]);
-			const auto successful_write = this->textEditor.write_file(this->filepath);
-			if (successful_write) {
-				this->topMessageBar.assign("Sussessfully saved file");
-			}
-			else {
-				this->topMessageBar.assign("Error: could not write file");
-			}
-		}else{
-			this->topMessageBar.assign("Error: the command save-as needs a filename");
-		}
+		this->save_as(commandList);
 	}else if(commandList[0] == "save"){
-		this->textEditor.write_file(this->filepath);
+		this->save();
 	}else if(commandList[0] == "open"){
-		if(commandList.size() >= 2){
-			this->filepath = utf8::to_std_string(commandList[1]);
-			this->textEditor.read_file(this->filepath);
-		}else{
-			this->topMessageBar.assign("Error: the command open needs a filename");
-		}
+		this->open(commandList);
 	}else{
 		this->topMessageBar.assign("Unsupported Command: ").append(commands);
 	}
@@ -535,6 +523,35 @@ void Lime::command_line_callback(utf8::string_view commands){
 	// go back into the editor mode
 	this->toggle_command_line();
 	this->deactivate_command_line();
+}
+
+void Lime::save(){
+	const bool successful_write = this->textEditor.write_file(this->filepath);
+	if (successful_write) {
+		this->topMessageBar.assign("Sussessfully saved file");
+	}
+	else {
+		this->topMessageBar.assign("Error: could not write file");
+	}
+}
+
+void Lime::save_as(const std::vector<utf8::string_view>& commands){
+	//TODO: Check if the filename already exists and ask wether or not the file should be overridden.
+	if(commands.size() >= 2){
+		this->filepath = utf8::to_std_string(commands[1]);
+		this->save();
+	}else{
+		this->topMessageBar.assign("Error: the command open needs a filename");
+	}
+}
+
+void Lime::open(const std::vector<utf8::string_view>& commands){
+	if(commands.size() >= 2){
+		this->filepath = utf8::to_std_string(commands[1]);
+		this->textEditor.read_file(this->filepath);
+	}else{
+		this->topMessageBar.assign("Error: the command open needs a filename");
+	}
 }
 
 void Lime::render(std::string& outputString) const{
