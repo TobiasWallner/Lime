@@ -435,8 +435,10 @@ void Lime::prozess_empty_event(){
 }
 
 void Lime::prozess_screen_event(Term::Screen screen){
+	
 	const auto columns = static_cast<TermGui::ScreenWidth::size_type>(screen.columns());
 	const auto rows = static_cast<TermGui::ScreenWidth::size_type>(screen.rows());
+	this->topMessageBar.assign("screen event : ").append(std::to_string(columns)).append(", ").append(std::to_string(rows));
 	if (columns > 1 && rows > 1) {
 		this->mainGrid.set_screen_width(TermGui::ScreenWidth{ .x = columns, .y = rows });
 	}
