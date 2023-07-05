@@ -27,7 +27,7 @@ void TermGui::Label::render(std::string& outputString) const {
 				++lineNumber;
 				columnNumber = 0;
 				outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
-			}if (string[index] == '\t') {
+			}else if (string[index] == '\t') {
 				const auto tabs_to_print = std::min(4ULL, this->screenWidth.x - columnNumber);
 				outputString.append(tabs_to_print, ' ');
 				columnNumber += tabs_to_print - 1;
@@ -41,7 +41,6 @@ void TermGui::Label::render(std::string& outputString) const {
 			columnNumber = 0;
 			outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
 		}
-		
 	}
 
 	// there could be one last style (probably for resetting styles) after the last character
