@@ -56,12 +56,15 @@ void TermGui::HorizontalGrid::render(std::string& outputString) const{
 		}
 	}else {
 		
-		const auto total_clear_width = this->screenWidth.x - this->accumulate_cell_width();
 		if(this->centering){// clear lines before the first cell
-			const auto clear_width = total_clear_width / 2;
-			for(auto line = 0; line < this->screenWidth.y; ++line){
-				outputString += Term::cursor_move(this->screenPosition.y + line, this->screenPosition.x);
-				outputString.append(clear_width, ' ');
+			const auto x_from = this->screenPosition.x;
+			const auto x_to = this->gridCells.front().get_screen_position().x;
+			const auto clear_width = x_to - x_from;
+			if (clear_width != 0) {
+				for (auto line = 0; line < this->screenWidth.y; ++line) {
+					outputString += Term::cursor_move(this->screenPosition.y + line, x_from);
+					outputString.append(clear_width, ' ');
+				}
 			}
 		}
 		
@@ -70,10 +73,12 @@ void TermGui::HorizontalGrid::render(std::string& outputString) const{
 		}
 		
 		{// clear lines before the first cell
-			const auto clear_width = this->centering ? total_clear_width / 2 : total_clear_width;
+			const auto x_from = this->gridCells.back().get_screen_position().x + this->gridCells.back().get_screen_width().x;
+			const auto x_to = this->screenPosition.x + this->screenWidth.x;
+			const auto clear_width = x_to - x_from;
 			if(clear_width != 0){
 				for(auto line = 0; line < this->screenWidth.y; ++line){
-					outputString += Term::cursor_move(this->screenPosition.y + line, this->screenPosition.x + this->screenWidth.x - clear_width);
+					outputString += Term::cursor_move(this->screenPosition.y + line, x_from);
 					outputString.append(clear_width, ' ');
 				}	
 			}			
