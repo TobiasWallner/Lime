@@ -1,13 +1,13 @@
 Issues
 ------
-+ Figure out why the editor crashes, if the screen width is too small
-+ Figure out why sometimes random letters are printed on the top right of the screen
-+ the save command does not work
++ Fix the auto scroll of the cursor. 
 + when the console is not in text wrap mode, then the application crashes when resizeing the 
 	console to a smaller screen size.
-+ Sometimes the screen cursor gets printed, despite it being deactivated. Figure out why and make it
++ Sometimes the screen cursor gets printed, despite it being deactivated. Figure out why and make itt
 	disappear.
 + Figure out how escape codes get inserted into the editor and prevent that from happening
++ Change movement with to the top and end of the file to top(alt+t) and end(alt+e)
+	that makes it more consistent and then 
 
 TODOs
 -----
@@ -32,3 +32,6 @@ TODOs
 + prevent the editor from closing on unsaved files
 + make a shortcut that duplicates a line Ctrl+d
 + make a shortcut that deleltes a line Ctrl+D / Alt+d? if cpp-terminal manages to support that,
++ an autosave or place to store backups of unsaved files. That can be later recovered
++ make themes and the gui elements should be able to take a theme on their construction and or set
+	one later that they then use to color the text forground / background + syntax highlighting.
