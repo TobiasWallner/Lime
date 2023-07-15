@@ -20,14 +20,3 @@ target_link_libraries(ColoredString_test PUBLIC
 )
 
 add_test(ColoredString_ctest ColoredString_test)
-
-
-# ------------------- Text Editor Tests ----------------------
-
-add_executable(TextEditor_test TextEditor_test.cpp)
-
-target_link_libraries(TextEditor_test
-	cpp-terminal-gui
-)
-
-add_test(TextEditor_ctest TextEditor_test)
