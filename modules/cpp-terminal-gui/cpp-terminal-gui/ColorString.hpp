@@ -229,6 +229,10 @@ public:
 	friend inline bool operator!=(const ColorString& lhs, const ColorString& rhs){return lhs._string != rhs._string;}
 
 	void render(std::string& outputString) const;
+	
+	utf8::Char& at(size_type index) { return this->_string.at(index);}
+	const utf8::Char& at(size_type index) const { return this->_string.at(index);}
+	
 
 };
 
