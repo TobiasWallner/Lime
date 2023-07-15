@@ -14,6 +14,7 @@
 #include "ColorString.hpp"
 #include "RenderTrait.hpp"
 #include "EditTrait.hpp"
+#include "TextCursor.hpp"
 
 namespace TermGui{
 	
@@ -31,28 +32,18 @@ public:
 	using size_type = Text::size_type;
 	using iterator = Text::iterator;
 	using const_iterator = Text::const_iterator;
-	using reverse_iterator = Text::reverse_iterator;
-	using const_reverse_iterator = Text::const_reverse_iterator;
 	using reference = Text::const_reference;
 	using const_reference = Text::const_reference;
 	using value_type = Text::value_type;
 	using pointer = Text::pointer;
 	using const_pointer = Text::const_pointer;
-	using allocator_type = Text::allocator_type;
-	
-	struct Cursor{
-		long lineNumber;
-		long columnNumber;
-		Text::iterator lineIterator;
-	};
-
 
 	// TODO: simulate the screen cursor and use this screen cursor as an indicator for scrowling (render frame placement)
 
 private:
 	
 	Text _text; // stores the text data
-	Cursor _cursor;
+	TextCursor _cursor;
 	
 	ScreenPosition screenPosition;
 	ScreenWidth screenWidth;
@@ -61,7 +52,7 @@ private:
 	const_iterator renderLineStartItr;
 	size_type renderColumnStart;
 	
-	uint8_t tab_width = 4;
+	uint8_t tabSize = 4;
 	static constexpr utf8::Char lineWrapSymbol = "→";
 	
 	//TODO: bool lineWrapping = false;
@@ -69,40 +60,21 @@ private:
 
 public:
 
-	inline TextEditor(){this->init({0,0}, {0,0});}
-	/// constructs a text with one empty line + sets the cursor position and iterators
-	inline TextEditor(ScreenPosition screenPosition, ScreenWidth screenWidth){this->init(screenPosition, screenWidth);}
+	TextEditor(ScreenPosition screenPosition=ScreenPosition{0,0}, ScreenWidth screenWidth=ScreenWidth{0,0});
 	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
-
-	void init(ScreenPosition screenPosition, ScreenWidth screenWidth);
+	void clear() override;
 	
-	inline void clear() override { this->_text.clear(); this->init(this->screenPosition, this->screenWidth);}
+	inline iterator un_const(const_iterator constIterator) {return this->_text.erase(constIterator, constIterator);}
 	
 	iterator begin(){return this->_text.begin();}
 	const_iterator begin() const {return this->_text.cbegin();}
 	const_iterator cbegin() const {return this->_text.cbegin();}
 	
-	iterator lineItr(){return this->_cursor.lineIterator;}
-	const_iterator lineItr() const {return this->_cursor.lineIterator;}
-	const_iterator clineItr() const {return this->_cursor.lineIterator;}
-	
 	iterator end(){return this->_text.end();}
 	const_iterator end() const {return this->_text.cend();}
 	const_iterator cend() const {return this->_text.cend();}
-	
-	iterator last(){return --this->end();}
-	const_iterator last() const {return --this->cend();}
-	const_iterator clast() const {return --this->cend();}
-	
-	reverse_iterator rbegin(){return this->_text.rbegin();}
-	const_reverse_iterator rbegin() const {return this->_text.crbegin();}
-	const_reverse_iterator crbegin() const {return this->_text.crbegin();}
-	
-	reverse_iterator rend(){return this->_text.rend();}
-	const_reverse_iterator rend() const {return this->_text.crend();}
-	const_reverse_iterator crend() const {return this->_text.crend();}
 	
 	inline reference front(){return this->_text.front();}
 	inline const_reference front() const {return this->_text.front();}
@@ -115,12 +87,6 @@ public:
 	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
 	inline size_type number_of_lines() const {return this->_text.size();}
 	
-	/// returns the size of the current line
-	inline size_type line_size() const {return this->lineItr()->size();}
-	
-	inline size_type cursor_line() const {return this->_cursor.lineNumber;}
-	inline size_type cursor_column() const {return this->_cursor.columnNumber;}
-	
 	/// inserts a character at the current cursor position into the string
 	void insert(utf8::Char c) override;
 	inline void insert(char c){return this->insert(utf8::Char(c));}
@@ -129,7 +95,7 @@ public:
 	
 	/// inserts a new line after the current cursor position
 	inline void insert_line_after(){
-		auto itr = this->lineItr();
+		auto itr = this->_cursor.line_iterator();
 		++itr;
 		this->_text.insert(itr, Line());
 	}
@@ -146,15 +112,7 @@ public:
 	inline void show_cursor(bool on_off) override { this->showCursor = on_off; }
 	
 	/// inserts a new line before the current cursor position
-	inline void insert_line_before(){this->_text.insert(this->lineItr(), Line());}
-	
-	
-	/// returns the line position of the cursor
-	inline size_type line_number() const {return this->_cursor.lineNumber;}
-	
-	/// returns the column position of the cursor in the line
-	inline size_type column_number() const {return this->_cursor.columnNumber;}
-	
+	inline void insert_line_before(){this->_text.insert(this->_cursor.line_iterator(), Line());}
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
@@ -184,24 +142,6 @@ public:
 	void move_to_end_of_line() override;
 	
 	void move_to_end_of_file() override;
-	
-	/// returns true if the cursor is at the start of the current line and false otherwise
-	inline bool is_start_of_line() const {return this->column_number() == 0;}
-	
-	/// returns true if the cusor is located somewhere in the first line and false otherwise
-	inline bool is_first_line() const {return this->line_number() == 0;}
-	
-	/// returs true if the cursor is located at the very start of the file before the first caracter
-	inline bool is_start_of_file() const {return this->is_first_line() && this->is_start_of_line();}
-
-	/// returns true if the cursor is located at the very end of the current line
-	inline bool is_end_of_line() const {return this->column_number() == this->lineItr()->size();}
-	
-	/// return true if the cursor is located somewhere in the last line
-	inline bool is_last_line() const { return this->lineItr() == this->last(); }
-	
-	/// returns true if the cursor is located at the very end of the last line 
-	inline bool is_end_of_file() const { return this->is_last_line() && this->is_end_of_line(); }
 	
 	/// renders the content of the editor that is visible into an ANSII string format that can be printed onto the screen.
 	/// does not expect a clear screen
@@ -255,14 +195,6 @@ public:
 	
 	/// get the render width of the object
 	ScreenWidth get_screen_width() const override;
-private:
-
-	/// returns an iterator to the line at the given absolute position or the last line of the file
-	iterator find_line(size_type line);
-	const_iterator find_line(size_type line) const;
-	
-	inline size_type line_width() const {return static_cast<size_type>(this->screenWidth.x);}
-	inline size_type line_height() const {return static_cast<size_type>(this->screenWidth.y);}
 
 };
 
