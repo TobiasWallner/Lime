@@ -10,16 +10,18 @@
 #include "ColorString.hpp"
 #include "TextCursor.hpp"
 
-TermGui::TextCursor::TextCursor(Text* pText,
-				Text::iterator lineIterator,
+TermGui::TextCursor::TextCursor(const Text* pText,
+				Text::const_iterator lineIterator,
 				std::int32_t lineIndex,
 				std::int32_t columnIndex,
-				std::int32_t screenColumn) :
+				std::int32_t screenColumn,
+				std::int32_t tabSize) :
 	pText(pText),
 	lineIterator(lineIterator),
 	lineIndex(lineIndex),
 	columnIndex(columnIndex),
-	screenColumn(screenColumn)
+	screenColumn(screenColumn),
+	tabSize(tabSize)
 	{}
 
 

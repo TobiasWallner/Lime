@@ -19,8 +19,8 @@ public:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
 	using Text = std::list<Line>;	// list of lines
 	
-	Text* pText;
-	Text::iterator lineIterator;
+	const Text* pText;
+	Text::const_iterator lineIterator;
 	std::int32_t lineIndex;
 	std::int32_t columnIndex;
 
@@ -29,17 +29,21 @@ public:
 	std::int32_t tabSize = 4;
 public:
 	
-	explicit TextCursor(Text* pText,
-				Text::iterator lineIterator,
+	TextCursor(const Text* pText,
+				Text::const_iterator lineIterator,
 				std::int32_t lineIndex,
 				std::int32_t columnIndex = 0,
-				std::int32_t screenColumn = 0);
+				std::int32_t screenColumn = 0,
+				std::int32_t tabSize = 4);
+	
+	explicit inline TextCursor(const Text* pText) : TextCursor(pText, pText->begin(), 0){}
+	
 	
 	TextCursor(const TextCursor& other) = default;
 	
-	TextCursor& operator=(TextCursor& other) = default;
+	TextCursor& operator=(const TextCursor& other) = default;
 
-	inline Text::iterator line_iterator() const {return this->lineIterator;}
+	inline Text::const_iterator line_iterator() const {return this->lineIterator;}
 	inline std::int32_t line_index() const {return this->lineIndex;}
 	inline std::int32_t column_index() const {return this->columnIndex;}
 	inline std::int32_t screen_column() const {return this->screenColumn;}
