@@ -1,5 +1,3 @@
-
-
 #include "ColorString.hpp"
 
 TermGui::ColorString& TermGui::ColorString::append(const TermGui::ColorString& other){
