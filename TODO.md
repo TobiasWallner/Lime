@@ -1,16 +1,13 @@
 Issues
 ------
-+ Fix the auto scroll of the cursor. 
-+ when the console is not in text wrap mode, then the application crashes when resizeing the 
-	console to a smaller screen size.
-+ Sometimes the screen cursor gets printed, despite it being deactivated. Figure out why and make itt
-	disappear.
-+ Figure out how escape codes get inserted into the editor and prevent that from happening
 + Change movement with to the top and end of the file to top(alt+t) and end(alt+e)
 	that makes it more consistent and then 
++ Moving the cursor to the end of the screen makes the cursor dissappear
 
 TODOs
 -----
++ implement line cursors for screen boundaries and margin boundaries for automatic scrowling
+	of the rendered screen. 
 + cpp-terminal has implemented a new way for handling utf8 codes -> download the newes version and update Lime
 + Do not re-render the whole screen but only the parts that change
 + Do not trigger a render if Ctrl or Alt is pressed
