@@ -32,7 +32,7 @@ public:
 	using size_type = Text::size_type;
 	using iterator = Text::iterator;
 	using const_iterator = Text::const_iterator;
-	using reference = Text::const_reference;
+	using reference = Text::reference;
 	using const_reference = Text::const_reference;
 	using value_type = Text::value_type;
 	using pointer = Text::pointer;
@@ -44,6 +44,8 @@ private:
 	
 	Text _text; // stores the text data
 	TextCursor _cursor;
+	
+	std::filesystem::path _filename;
 	
 	ScreenPosition screenPosition;
 	ScreenWidth screenWidth;
@@ -57,10 +59,12 @@ private:
 	
 	//TODO: bool lineWrapping = false;
 	bool showCursor = false;
+	
+	bool saved = true;
 
 public:
 
-	TextEditor(ScreenPosition screenPosition=ScreenPosition{0,0}, ScreenWidth screenWidth=ScreenWidth{0,0});
+	TextEditor(std::filesystem::path filename = "", ScreenPosition screenPosition=ScreenPosition{0,0}, ScreenWidth screenWidth=ScreenWidth{0,0});
 	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
@@ -78,11 +82,9 @@ public:
 	
 	inline reference front(){return this->_text.front();}
 	inline const_reference front() const {return this->_text.front();}
-	inline const_reference cfront() const {return this->_text.front();}
 	
 	inline reference back(){return this->_text.back();}
 	inline const_reference back() const {return this->_text.back();}
-	inline const_reference cback() const {return this->_text.back();}
 	
 	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
 	inline size_type number_of_lines() const {return this->_text.size();}
@@ -147,32 +149,11 @@ public:
 	/// does not expect a clear screen
 	void render(std::string& outputString) const override;
 	
-	/// reads the content of the file into the current cursor position
-	bool append_file(std::ifstream& stream);
-	bool append_file(const std::filesystem::path& path);
-
-	/// reads the content of a file into the Editor
-	bool read_file(std::ifstream& file);
-	bool read_file(const std::filesystem::path& path);
+	bool save() const;
+	bool save_as(std::filesystem::path newFilename);
+	bool open(std::filesystem::path filename);
 	
-	
-	/// writes the content of the Editor into a file
-	bool write_file(const std::filesystem::path& path);
-	bool write_file(std::ofstream& stream);
-	
-	template<class Stream>
-	friend Stream& operator << (Stream& stream, TextEditor& self){
-		self.write_file(stream);
-		return stream;
-	}
-	
-	template<class Stream>
-	friend Stream& operator >> (Stream& stream, TextEditor& self){
-		self.append_file(stream);
-		return stream;
-	}
-	
-	friend bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
+	friend bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
 	friend inline bool operator!=(const TextEditor& lhs, const TextEditor& rhs){return !(lhs == rhs);}
 	
 	/// erases the character at the cursor position

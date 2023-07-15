@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 
 // utf8 string 
 #include <utf8_char.hpp>
@@ -12,9 +13,10 @@
 #include "TextEditor.hpp"
 #include "ColorThemes.hpp"
 
-TermGui::TextEditor::TextEditor(ScreenPosition screenPosition, ScreenWidth screenWidth) :
+TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition screenPosition, ScreenWidth screenWidth) :
 		_text(1),
 		_cursor(&this->_text),
+		_filename(filename),
 		screenPosition(screenPosition),
 		screenWidth(screenWidth),
 		renderLineStart(0),
@@ -41,6 +43,7 @@ void TermGui::TextEditor::insert_naive(utf8::Char character){
 	Text::iterator lineIterator = this->un_const(this->_cursor.line_iterator());
 	lineIterator->insert(this->_cursor.column_index(), character);
 	this->move_forward();
+	this->saved = false;
 }
 
 void TermGui::TextEditor::insert_new_line(){
@@ -52,6 +55,7 @@ void TermGui::TextEditor::insert_new_line(){
 	this->move_down();
 	Text::iterator lineIterator = this->un_const(this->_cursor.line_iterator());
 	lineIterator->move_append(prevLine, from, to);
+	this->saved = false;
 }
 
 void TermGui::TextEditor::insert(utf8::Char c){
@@ -59,11 +63,9 @@ void TermGui::TextEditor::insert(utf8::Char c){
 		this->insert_new_line();
 	}else if(c == '\b'){
 		this->Delete();
-	}else if(c == '\r' || c == '\v' || c == '\f'){
-		return;
-	}else{
+	}else if(c == '\t' || !utf8::is_control(c)){
 		this->insert_naive(c);
-	}	
+	}
 }
 
 void TermGui::TextEditor::move_forward(){
@@ -177,88 +179,94 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	}
 }
 
-
-bool TermGui::TextEditor::append_file(std::ifstream& file) {
-	char buffer[4 * 1024];
-	if (file.is_open()) {
-		while (!file.eof()) {
-			file.read(buffer, 4 * 1024);
-			this->insert(buffer, file.gcount());
-		}
+bool TermGui::TextEditor::save() const{
+	if(this->_filename.empty()){
+		return false;
+	}
+	
+	std::ofstream file(this->_filename);
+	
+	if(!file.is_open()) {
+		return false;
+	}
+	
+	if(this->empty()){
 		return true;
 	}
-	return false;
+	
+	const_iterator iterator = _text.cbegin();
+	file << *(iterator++);
+	for(; iterator != _text.cend(); ++iterator){
+		file << "\n" << *iterator;
+	}
+	
+	return true;
 }
 
-bool TermGui::TextEditor::append_file(const std::filesystem::path& path){
-	if(!std::filesystem::is_regular_file(path)) {return false;}
-	std::ifstream file(path);
-	return append_file(file);
+bool TermGui::TextEditor::save_as(std::filesystem::path newFilename){
+	this->_filename = newFilename;
+	return this->save();
 }
 
+bool TermGui::TextEditor::open(std::filesystem::path filename){
+	std::ifstream file(filename);
 
+	if(!file.is_open()) {
+		return false;
+	}
 
-bool TermGui::TextEditor::read_file(std::ifstream& file) {
 	this->clear();
-	const auto result = append_file(file);
-	this->move_to_start_of_file();
-	return result;
-}
-
-bool TermGui::TextEditor::read_file(const std::filesystem::path& path) {
-	if (!std::filesystem::is_regular_file(path)) { return false; }
-	std::ifstream file(path);
-	return read_file(file);
-}
-
-bool TermGui::TextEditor::write_file(const std::filesystem::path& path){
-	std::ofstream file(path);
-	return write_file(file);
-}
-
-bool TermGui::TextEditor::write_file(std::ofstream& file){
-	if(file.is_open()){
-		auto iterator = _text.cbegin();
-		file << *(iterator++);
-        for(; iterator != _text.cend(); ++iterator){
-            file << "\n" << *iterator;
-        }
-		return true;
-    }
-	return false;
+	this->_filename = filename;
+	
+	while (!file.eof()) {
+		char buffer[4 * 1024];
+		file.read(buffer, 4 * 1024);
+		
+		for(size_type i = 0; i != file.gcount(); ++i){
+			if(buffer[i] == '\n'){
+				this->_text.emplace_back();
+			}else if(buffer[i] == '\t' || !std::iscntrl(buffer[i])){
+				this->back().append(utf8::Char(buffer[i]));
+			}
+		}
+	}
+	this->saved = true;
+	return true;
 }
 
 void TermGui::TextEditor::Delete(){
-	if(this->_cursor.is_start_of_file()){
-		// nothing to do
-	}else if(this->_cursor.is_start_of_line()){
-		// remove the line break
-		this->move_up();
-		this->move_to_end_of_line();
-		const_iterator nextLineIterator = this->_cursor.line_iterator();
-		++nextLineIterator;
-		this->un_const(this->_cursor.line_iterator())->append(*nextLineIterator);
-		this->_text.erase(nextLineIterator);
-	}else{
-		// erase element inside string
-		this->move_back();
-		this->un_const(this->_cursor.line_iterator())->erase(this->_cursor.column_index());
-	}
+	if(!this->_cursor.is_start_of_file()){
+		if(this->_cursor.is_start_of_line()){
+			// remove the line break
+			this->move_up();
+			this->move_to_end_of_line();
+			const_iterator nextLineIterator = this->_cursor.line_iterator();
+			++nextLineIterator;
+			this->un_const(this->_cursor.line_iterator())->append(*nextLineIterator);
+			this->_text.erase(nextLineIterator);
+		}else{
+			// erase element inside string
+			this->move_back();
+			this->un_const(this->_cursor.line_iterator())->erase(this->_cursor.column_index());
+		}
+		this->saved = false;
+	} 
 }
 
 void TermGui::TextEditor::erase(){
-	if(this->_cursor.is_end_of_file()){
-		// nothing to do
-	}else if(this->_cursor.is_end_of_line()){
-		// erase line break
-		const_iterator nextLineIterator = this->_cursor.line_iterator();
-		++nextLineIterator;
-		this->un_const(this->_cursor.line_iterator())->append(*nextLineIterator);
-		this->_text.erase(nextLineIterator);
-	}else{
-		// erase element inside string
-		this->un_const(this->_cursor.line_iterator())->erase(this->_cursor.column_index());
-	}
+	if(!this->_cursor.is_end_of_file()){
+		if(this->_cursor.is_end_of_line()){
+			// erase line break
+			const_iterator nextLineIterator = this->_cursor.line_iterator();
+			++nextLineIterator;
+			this->un_const(this->_cursor.line_iterator())->append(*nextLineIterator);
+			this->_text.erase(nextLineIterator);
+		}else{
+			// erase element inside string
+			this->un_const(this->_cursor.line_iterator())->erase(this->_cursor.column_index());
+		}
+		this->saved = false;
+	} 
 }
 
 void TermGui::TextEditor::enter() {this->insert_new_line();}
@@ -280,12 +288,15 @@ TermGui::ScreenWidth TermGui::TextEditor::get_screen_width() const {
 }
 
 void TermGui::TextEditor::clear() { 
-	this->_text.clear();
-	this->_text.emplace_back();
-	this->_cursor = TextCursor(&this->_text);
-	this->renderLineStart = 0;
-	this->renderLineStartItr = this->_text.begin();
-	this->renderColumnStart = 0;
+	if(!this->empty()){
+		this->_text.clear();
+		this->_text.emplace_back();
+		this->_cursor = TextCursor(&this->_text);
+		this->renderLineStart = 0;
+		this->renderLineStartItr = this->_text.begin();
+		this->renderColumnStart = 0;
+		this->saved = false;
+	}
 }
 
 bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){
