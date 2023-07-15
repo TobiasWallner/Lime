@@ -53,7 +53,6 @@ Lime::Lime() :
 	textEditorGrid(),
 	topMessageBar(),
 	textEditor(),
-	filepath(),
 	infoText(),										
 	commandLine(this, &Lime::command_line_callback)
 {   
@@ -159,12 +158,12 @@ static bool contains(int numberOfArguments, const char* const* listOfArgumentStr
 int Lime::run(int numberOfArguments, const char* const* listOfArgumentStrings){
 	const bool newFileFlag = contains(numberOfArguments, listOfArgumentStrings, "-n");
 	if(numberOfArguments > 0){
-		this->filepath = listOfArgumentStrings[0];
-		const bool file_exists = std::filesystem::is_regular_file(std::filesystem::status(this->filepath));
+		const char * const filepath = listOfArgumentStrings[0];
+		const bool file_exists = std::filesystem::is_regular_file(std::filesystem::status(filepath));
 		if(file_exists){
-			const bool successful_read = this->textEditor.read_file(this->filepath);
+			const bool successful_read = this->textEditor.open(filepath);
 			if(!successful_read){
-				std::cout << "Error: could not read file: " << this->filepath << std::endl;
+				std::cout << "Error: could not read file: " << filepath << std::endl;
 				return EXIT_FAILURE;
 			}
 		}
@@ -528,11 +527,10 @@ void Lime::command_line_callback(utf8::string_view commands){
 }
 
 void Lime::save(){
-	const bool successful_write = this->textEditor.write_file(this->filepath);
+	const bool successful_write = this->textEditor.save();
 	if (successful_write) {
 		this->topMessageBar.assign("Sussessfully saved file");
-	}
-	else {
+	}else{
 		this->topMessageBar.assign("Error: could not write file");
 	}
 }
@@ -540,8 +538,7 @@ void Lime::save(){
 void Lime::save_as(const std::vector<utf8::string_view>& commands){
 	//TODO: Check if the filename already exists and ask wether or not the file should be overridden.
 	if(commands.size() >= 2){
-		this->filepath = utf8::to_std_string(commands[1]);
-		this->save();
+		this->textEditor.save_as(utf8::to_std_string(commands[1]));
 	}else{
 		this->topMessageBar.assign("Error: the command open needs a filename");
 	}
@@ -549,8 +546,7 @@ void Lime::save_as(const std::vector<utf8::string_view>& commands){
 
 void Lime::open(const std::vector<utf8::string_view>& commands){
 	if(commands.size() >= 2){
-		this->filepath = utf8::to_std_string(commands[1]);
-		this->textEditor.read_file(this->filepath);
+		this->textEditor.open(utf8::to_std_string(commands[1]));
 	}else{
 		this->topMessageBar.assign("Error: the command open needs a filename");
 	}

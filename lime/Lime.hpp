@@ -23,7 +23,6 @@ class Lime{
 	TermGui::Label topMessageBar;
 	
 	TermGui::TextEditor textEditor;
-	std::filesystem::path filepath;
 	
 	TermGui::Label infoText;
 	
