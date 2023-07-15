@@ -16,6 +16,7 @@ add_library(cpp-terminal-gui
 	
 	# ++++++ Components ++++++
 	cpp-terminal-gui/TextEditor.cpp		cpp-terminal-gui/TextEditor.hpp
+	cpp-terminal-gui/TextCursor.cpp		cpp-terminal-gui/TextCursor.hpp
 	cpp-terminal-gui/CommandLine.cpp	cpp-terminal-gui/CommandLine.hpp
 	cpp-terminal-gui/Label.cpp			cpp-terminal-gui/Label.hpp
 	
