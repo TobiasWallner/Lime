@@ -17,54 +17,120 @@
 
 namespace utf8{
 
-using string_view = std::basic_string_view<Char>;
+inline std::basic_string_view<Char>::difference_type parse_uint32(std::basic_string_view<Char>::iterator first, std::basic_string_view<Char>::iterator last, std::uint32_t* value) {
+	auto itr = first;
+	std::int32_t acc = 0;
+	for(; itr != last; ++itr){
+		if(is_ascii_digit(*itr)){
+			acc = acc * 10 + (itr->to_int() - '0');
+		}else{
+			break;
+		}
+	}
+	*value = acc;
+	return std::distance(first, itr);
+}
 
-inline bool operator == (const string_view& lhs, const char* rhs){
-	auto lhsItr = lhs.cbegin();
-	const auto lhsEnd = lhs.cend();
-	auto rhsItr = rhs;
+inline std::basic_string_view<Char>::difference_type parse_int32(std::basic_string_view<Char>::iterator first, std::basic_string_view<Char>::iterator last, std::int32_t* value) {
+	auto itr = first;
+	if(itr == last){
+		*value = 0;
+		return 0;
+	}
 	
-	for(; lhsItr != lhsEnd && *rhsItr != '\0'; ++lhsItr){
-		Char rhsElem;
-		Char lhsElem = *lhsItr;
-		auto nextItr = rhsElem.assign(rhsItr);
+	bool sign = false;
+	if(*itr == '+'){
+		++itr;
+	}else if(*itr == '-'){
+		++itr;
+		sign = true;
+	}
+	
+	std::int32_t acc = 0;
+	
+	for(; itr != last; ++itr){
+		if(is_ascii_digit(*itr)){
+			acc = acc * 10 + (itr->to_int() - '0');
+		}else{
+			break;
+		}
+	}
+	
+	*value = sign ? -acc : acc;
+	return std::distance(first, itr);
+}
+
+class string_view : public std::basic_string_view<Char>{
+public:
+	constexpr string_view() noexcept : std::basic_string_view<Char>(){}
+	constexpr string_view( const string_view& other ) noexcept = default;
+	constexpr string_view( const std::basic_string_view<Char>& other ) noexcept : std::basic_string_view<Char>(other){}
+	constexpr string_view( const Char* s, size_type count ) : std::basic_string_view<Char>(s, count){}
+	constexpr string_view( const Char* s ) : std::basic_string_view<Char>(s){}
+	template< class It, class End > constexpr string_view( It first, End last ) : std::basic_string_view<Char>(first, last){}
+	
+	inline size_t c_string_size() const {
+		size_t sum = 0;
+		for(const Char c : *this){
+			sum += c.size();
+		}
+		return sum;
+	}
+
+	inline std::string to_std_string() const {
+		std::string result;
+		result.reserve(this->c_string_size());
+		for(const Char c : *this){
+			result += c.to_std_string_view();
+		}
+		return result;
+	}
+	
+	difference_type parse_uint32(std::uint32_t* value) const {
+		const auto result = utf8::parse_uint32(this->begin(), this->end(), value);
+		return result;
+	}
+	
+	/// writes the result into the value and returns the number of read characters
+	difference_type parse_int32(std::int32_t* value) const {
+		const auto result = utf8::parse_int32(this->begin(), this->end(), value);
+		return result;
+	}
+
+	friend inline bool operator == (const string_view& lhs, const char* rhs) {
+		auto lhsItr = lhs.cbegin();
+		const auto lhsEnd = lhs.cend();
+		auto rhsItr = rhs;
 		
-		if(nextItr == rhsItr){
-			//error
-			return false;
-		}else if(lhsElem != rhsElem){
-			return false;
+		for(; lhsItr != lhsEnd && *rhsItr != '\0'; ++lhsItr){
+			Char rhsElem;
+			Char lhsElem = *lhsItr;
+			auto nextItr = rhsElem.assign(rhsItr);
+			
+			if(nextItr == rhsItr){
+				//error
+				return false;
+			}else if(lhsElem != rhsElem){
+				return false;
+			}
+			
+			rhsItr = nextItr;
 		}
 		
-		rhsItr = nextItr;
+		const auto lhs_at_end = lhsItr == lhsEnd;
+		const auto rhs_at_end = *rhsItr == '\0';
+		const bool result = lhs_at_end && rhs_at_end;
+		return result;
 	}
-	
-	const auto lhs_at_end = lhsItr == lhsEnd;
-	const auto rhs_at_end = *rhsItr == '\0';
-	const bool result = lhs_at_end && rhs_at_end;
-	return result;
-}
 
-inline bool operator == (const char* lhs, const string_view& rhs){return rhs == lhs;}
-inline bool operator != (const string_view& lhs, const char* rhs){return !(lhs == rhs);}
-inline bool operator != (const char* lhs, const string_view& rhs){return !(lhs == rhs);}
+	friend inline bool operator == (const char* lhs, const string_view& rhs){return rhs == lhs;}
+	friend inline bool operator != (const string_view& lhs, const char* rhs){return !(lhs == rhs);}
+	friend inline bool operator != (const char* lhs, const string_view& rhs){return !(lhs == rhs);}
+};
 
-inline size_t c_string_size(string_view stringView){
-	size_t sum = 0;
-	for(const Char c : stringView){
-		sum += c.size();
-	}
-	return sum;
-}
 
-inline std::string to_std_string(string_view stringView){
-	std::string result;
-	result.reserve(c_string_size(stringView));
-	for(const Char c : stringView){
-		result += c.to_std_string_view();
-	}
-	return result;
-}
+
+
 
 /// BaseString that stores utf8::Char types 
 ///
@@ -77,6 +143,7 @@ public:
 	using CharT = Char;
 	using base_class = std::basic_string<Char, Traits, Allocator>;
 	using size_type = typename base_class::size_type;
+	using difference_type = typename base_class::difference_type;
 	using iterator = typename base_class::iterator;
 	using const_iterator = typename base_class::const_iterator;
 	using reference = typename base_class::reference;
@@ -339,6 +406,17 @@ public:
 		return stream;
 	}
 	
+	difference_type parse_uint32(std::uint32_t* value) const {
+		const auto result = utf8::parse_uint32(this->begin(), this->end(), value);
+		return result;
+	}
+	
+	/// writes the result into the value and returns the number of read characters
+	difference_type parse_int32(std::int32_t* value) const {
+		const auto result = utf8::parse_int32(this->begin(), this->end(), value);
+		return result;
+	}
+	
 	/// inserts one element at the position given by the index
 	inline BaseString& insert(size_type index, Char c){this->base_class::insert(index, 1, c); return *this;}
 	inline BaseString& insert(size_type index, char c){this->base_class::insert(index, 1, Char(c)); return *this;}
@@ -348,6 +426,10 @@ public:
 	
 	/// removes coint many elements or until the string-end at the position given by the index
 	inline BaseString& erase(size_type index, size_type count){this->base_class::erase(index, count); return *this;}
+	
+	inline operator string_view (){
+		return string_view(this->begin(), this->end());
+	}
 
 };
 
