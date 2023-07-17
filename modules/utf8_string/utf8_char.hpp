@@ -425,12 +425,12 @@ inline constexpr bool is_ascii_alpha(Char c){
 	return is_ascii_lower_alpha(c) || is_ascii_upper_alpha(c);
 }
 
-inline constexpr bool is_ascii_number(Char c){
+inline constexpr bool is_ascii_digit(Char c){
 	return ('0' <= c && c <= '9');
 }
 
 inline constexpr bool is_ascii_alnum(Char c){
-	return is_ascii_alpha(c) || is_ascii_number(c);
+	return is_ascii_alpha(c) || is_ascii_digit(c);
 }
 
 inline constexpr bool is_basic_latin(Char c){
