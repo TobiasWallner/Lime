@@ -517,6 +517,8 @@ void Lime::command_line_callback(utf8::string_view commands){
 		this->save();
 	}else if(commandList[0] == "open"){
 		this->open(commandList);
+	}else if(commandList[0] == "set"){
+		this->set(commandList);
 	}else{
 		this->topMessageBar.assign("Unsupported Command: ").append(commands);
 	}
@@ -526,10 +528,39 @@ void Lime::command_line_callback(utf8::string_view commands){
 	this->deactivate_command_line();
 }
 
+void Lime::set(const std::vector<utf8::string_view>& commands){
+	if(commands.size() < 3){
+		this->topMessageBar.assign("Error: the set command needs 2 parameters: set <value_name> <new_value>.");
+		return;
+	}
+	if(commands[1] != "tab-size"){
+		this->topMessageBar.assign("Error: unsupported set value name.");
+		return;
+	}
+	std::int32_t value = 0;
+	const auto read = commands[2].parse_int32(&value);
+	if(read == 0){
+		this->topMessageBar.assign("Error: tab size has to be an intager number.");
+		return;
+	}
+	if(value < 0){
+		this->topMessageBar.assign("Error: tab size has to be positive.");
+		return;
+	}
+	if(value == 0){
+		this->topMessageBar.assign("Error: tab size has to be greater than zero.");
+		return;
+	}
+	
+	this->activeEditor->tab_size(value);
+	this->topMessageBar.assign("Set tab size to ").append(std::to_string(value));
+}
+
 void Lime::save(){
 	const bool successful_write = this->textEditor.save();
 	if (successful_write) {
 		this->topMessageBar.assign("Sussessfully saved file");
+		return;
 	}else{
 		this->topMessageBar.assign("Error: could not write file");
 	}
@@ -537,19 +568,19 @@ void Lime::save(){
 
 void Lime::save_as(const std::vector<utf8::string_view>& commands){
 	//TODO: Check if the filename already exists and ask wether or not the file should be overridden.
-	if(commands.size() >= 2){
-		this->textEditor.save_as(utf8::to_std_string(commands[1]));
-	}else{
+	if(commands.size() < 2){
 		this->topMessageBar.assign("Error: the command open needs a filename");
+		return;
 	}
+	this->textEditor.save_as(commands[1].to_std_string());
 }
 
 void Lime::open(const std::vector<utf8::string_view>& commands){
-	if(commands.size() >= 2){
-		this->textEditor.open(utf8::to_std_string(commands[1]));
-	}else{
+	if(commands.size() < 2){
 		this->topMessageBar.assign("Error: the command open needs a filename");
+		return;
 	}
+	this->textEditor.open(commands[1].to_std_string());
 }
 
 void Lime::render(std::string& outputString) const{

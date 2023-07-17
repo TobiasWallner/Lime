@@ -28,7 +28,7 @@ class Lime{
 	
 	TermGui::CommandLine<Lime> commandLine;
 	
-	TermGui::EditTrait * activeEditor = nullptr;
+	TermGui::TextEditor * activeEditor = nullptr;
 	TermGui::EditTrait * activeCursor = nullptr;
 	
 	char input_buffer[input_buffer_len] = {'\0'};
@@ -183,4 +183,6 @@ private:
 	
 	/// opens the file at the specified location and loads it into a new or empty and unnamed editor that is in focus
 	void open(const std::vector<utf8::string_view>& commands);
+	
+	void set(const std::vector<utf8::string_view>& commands);
 };
