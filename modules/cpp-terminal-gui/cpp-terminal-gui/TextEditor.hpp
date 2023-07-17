@@ -54,7 +54,7 @@ private:
 	const_iterator renderLineStartItr;
 	size_type renderColumnStart;
 	
-	uint8_t tabSize = 4;
+	std::int32_t tabSize = 4;
 	static constexpr utf8::Char lineWrapSymbol = "→";
 	
 	//TODO: bool lineWrapping = false;
@@ -66,19 +66,25 @@ public:
 
 	TextEditor(std::filesystem::path filename = "", ScreenPosition screenPosition=ScreenPosition{0,0}, ScreenWidth screenWidth=ScreenWidth{0,0});
 	
+	inline std::int32_t tab_size() const {return this->tabSize;}
+	void tab_size(std::int32_t newTabSize);
+	
+	inline bool show_cursor() const {return this->showCursor;}
+	void show_cursor(bool logic) override;
+	
 	/// returns true if there are no lines in the text or if there is one and it is empty
 	bool empty() const;
 	void clear() override;
 	
 	inline iterator un_const(const_iterator constIterator) {return this->_text.erase(constIterator, constIterator);}
 	
-	iterator begin(){return this->_text.begin();}
-	const_iterator begin() const {return this->_text.cbegin();}
-	const_iterator cbegin() const {return this->_text.cbegin();}
+	inline iterator begin(){return this->_text.begin();}
+	inline const_iterator begin() const {return this->_text.cbegin();}
+	inline const_iterator cbegin() const {return this->_text.cbegin();}
 	
-	iterator end(){return this->_text.end();}
-	const_iterator end() const {return this->_text.cend();}
-	const_iterator cend() const {return this->_text.cend();}
+	inline iterator end(){return this->_text.end();}
+	inline const_iterator end() const {return this->_text.cend();}
+	inline const_iterator cend() const {return this->_text.cend();}
 	
 	inline reference front(){return this->_text.front();}
 	inline const_reference front() const {return this->_text.front();}
@@ -87,7 +93,7 @@ public:
 	inline const_reference back() const {return this->_text.back();}
 	
 	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
-	inline size_type number_of_lines() const {return this->_text.size();}
+	inline size_type size() const {return this->_text.size();}
 	
 	/// inserts a character at the current cursor position into the string
 	void insert(utf8::Char c) override;
@@ -110,8 +116,6 @@ public:
 	/// character cannot be a special character like a line break or a backspace
 	/// simply inserts the character at the current cursor position without any prozessing.
 	void insert_naive(utf8::Char character);
-	
-	inline void show_cursor(bool on_off) override { this->showCursor = on_off; }
 	
 	/// inserts a new line before the current cursor position
 	inline void insert_line_before(){this->_text.insert(this->_cursor.line_iterator(), Line());}

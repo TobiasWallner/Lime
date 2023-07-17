@@ -15,7 +15,7 @@
 
 TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition screenPosition, ScreenWidth screenWidth) :
 		_text(1),
-		_cursor(&this->_text),
+		_cursor(this),
 		_filename(filename),
 		screenPosition(screenPosition),
 		screenWidth(screenWidth),
@@ -23,6 +23,12 @@ TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition s
 		renderLineStartItr(this->_text.begin()),
 		renderColumnStart(0){}
 
+void TermGui::TextEditor::tab_size(std::int32_t newTabSize){
+	this->tabSize = newTabSize;
+	this->_cursor.update_tab_size();
+}
+
+void TermGui::TextEditor::show_cursor(bool logic) {this->showCursor = logic;}
 
 bool TermGui::TextEditor::empty() const{
 	if(this->_text.empty()){
@@ -107,7 +113,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	for(; screenLineNumber < this->screenWidth.y && lineItr != this->cend(); ++lineItr, (void)++lineNumber, (void)++screenLineNumber){
 		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
 		
-		TextCursor renderCursor(&this->_text, lineItr, lineNumber, 0, 0, this->tabSize);
+		TextCursor renderCursor(this, lineItr, lineNumber);
 		renderCursor.move_to_screen_column_after(this->renderColumnStart);
 		
 		// print styles until start of render
@@ -137,7 +143,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 													static_cast<size_type>(screenColumnEnd - renderCursor.screen_column()));
 				outputString.append(tabs_to_print, ' ');
 			}else if(renderCursor.get_char() == '\t'){
-				const auto tabs_to_print = std::min(static_cast<size_type>(4), 
+				const auto tabs_to_print = std::min(static_cast<size_type>(this->tabSize),
 													static_cast<size_type>(screenColumnEnd - renderCursor.screen_column()));
 				outputString.append(tabs_to_print, ' ');
 			}else if(print_cursor) {
@@ -291,7 +297,7 @@ void TermGui::TextEditor::clear() {
 	if(!this->empty()){
 		this->_text.clear();
 		this->_text.emplace_back();
-		this->_cursor = TextCursor(&this->_text);
+		this->_cursor = TextCursor(this);
 		this->renderLineStart = 0;
 		this->renderLineStartItr = this->_text.begin();
 		this->renderColumnStart = 0;
@@ -300,7 +306,7 @@ void TermGui::TextEditor::clear() {
 }
 
 bool TermGui::operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs){
-	if(lhs.number_of_lines() == rhs.number_of_lines()){
+	if(lhs.size() == rhs.size()){
 		auto lhsItr = lhs.cbegin();
 		auto rhsItr = rhs.cbegin();
 		for(; lhsItr != lhs.cend() && rhsItr != rhs.cend(); ++lhsItr, ++rhsItr){
