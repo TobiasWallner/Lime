@@ -19,24 +19,20 @@ public:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
 	using Text = std::list<Line>;	// list of lines
 	
-	const Text* pText;
+	const TextEditor* pEditor;
 	Text::const_iterator lineIterator;
 	std::int32_t lineIndex;
 	std::int32_t columnIndex;
-
 	std::int32_t screenColumn;
-
-	std::int32_t tabSize = 4;
 public:
 	
-	TextCursor(const Text* pText,
+	TextCursor(const TextEditor* pEditor,
 				Text::const_iterator lineIterator,
 				std::int32_t lineIndex,
 				std::int32_t columnIndex = 0,
-				std::int32_t screenColumn = 0,
-				std::int32_t tabSize = 4);
+				std::int32_t screenColumn = 0);
 	
-	explicit inline TextCursor(const Text* pText) : TextCursor(pText, pText->begin(), 0){}
+	explicit TextCursor(const TextEditor* pEditor);
 	
 	
 	TextCursor(const TextCursor& other) = default;
@@ -50,19 +46,21 @@ public:
 	
 	inline bool is_start_of_line() const {return this->columnIndex == 0;}
 	inline bool is_end_of_line() const {return this->columnIndex == lineIterator->size();}
-	inline bool is_first_line() const {return this->lineIterator == this->pText->begin();}
-	inline bool is_last_line() const {return this->lineIterator == --this->pText->end();}
-	inline bool is_start_of_file() const {return this->is_first_line() && this->is_start_of_line();}
-	inline bool is_end_of_file() const {return this->is_last_line() && this->is_end_of_line();}
+	bool is_first_line() const;
+	bool is_last_line() const;
+	bool is_start_of_file() const;
+	bool is_end_of_file() const;
 
 	void move_forward();
 	void move_back();
-	void move_up_to_start_of_line();
-	void move_down_to_start_of_line();
+	
+	inline void move_up_to_start_of_line(){--this->lineIterator; --this->lineIndex; this->columnIndex = 0; this->screenColumn = 0;}
+	inline void move_down_to_start_of_line(){++this->lineIterator; ++this->lineIndex; this->columnIndex = 0; this->screenColumn = 0;}
+	
 	void move_up(std::int32_t n = 1);
 	void move_down(std::int32_t n = 1);
 	
-	void move_to_start_of_line();
+	inline void move_to_start_of_line(){this->lineIndex = 0; this->columnIndex = 0; this->screenColumn = 0;}
 	void move_to_end_of_line();
 	void move_to_start_of_file();
 	void move_to_end_of_file();
@@ -72,6 +70,8 @@ public:
 	
 	inline utf8::Char get_char(){return lineIterator->empty() ? utf8::Char('\0') : this->lineIterator->at(this->columnIndex);}
 	
+	void update_tab_size();
+
 	friend inline bool operator==(const TextCursor& l, const TextCursor& r){
 		return l.lineIterator == r.lineIterator && l.columnIndex == r.columnIndex;
 	}
