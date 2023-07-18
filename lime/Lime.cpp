@@ -328,9 +328,9 @@ void Lime::insert_from_clipboard(){
 
 void Lime::prozess_key_event(Term::Key keyEvent){
 	// get analyse input
-	const auto character_32 = static_cast<int32_t>(keyEvent);
+	const char32_t utf32 = static_cast<char32_t>(keyEvent);
 	
-	switch(character_32){
+	switch(utf32){
 		//---- basics -----
 		case Term::Key::CTRL_Q : this->quit(); break;
 		case Term::Key::ESC : this->toggle_command_line(); break;
@@ -371,59 +371,9 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		
 		default:{
 			if(!keyEvent.isALT() && !keyEvent.isCTRL()){
-				// ------- setup and key identification ------
-				const auto character_8 = static_cast<char>(character_32);
-				const auto utf8_id = utf8::identify(character_8);
-				// print status message: mostly for debugging
-				this->topMessageBar.assign("Key press: ").append(character_32).append(" utf8: ").append(utf8::to_string(utf8::identify(character_8)));
-				
-				// insert event into the input buffer
-				if(this->input_buffer_count < this->input_buffer_len){
-					this->input_buffer[this->input_buffer_count++] = character_8;
-				}else{
-					this->topMessageBar.append(" Error: non standard utf8 character. utf8 character is longer than the standard specifies.\n");
-					this->input_buffer_count = 0;
-					return;
-				}
-				const auto expected_utf8_bytes = static_cast<int32_t>(utf8::identify(this->input_buffer[0]));
-				
-				// ------- key insertions ----------
-				if(this->input_buffer_count == 1){
-					if(utf8_id == utf8::Identifier::Bytes1){
-						this->activeCursor->insert(character_8);
-						this->input_buffer_count = 0;
-					}else if(utf8_id == utf8::Identifier::NotFirst){
-						this->topMessageBar.append(" Error: first character in input stream is not the first of an utf8 character");
-						this->input_buffer_count = 0;
-					}else if(utf8_id == utf8::Identifier::Unsupported){
-						this->topMessageBar.append(" Error: first character in input stream is not an utf8 character");
-						this->input_buffer_count = 0;
-					}else{
-						// wait for more characters in the input buffer
-					}
-				}else if(static_cast<int32_t>(this->input_buffer_count) < expected_utf8_bytes){
-					if(utf8_id == utf8::Identifier::NotFirst){
-						// wait for more characters in the input buffer
-					}else{
-						this->topMessageBar.append(" Error: utf8 character ended prematurely");
-						this->input_buffer_count = 0;
-					}
-				}else if(this->input_buffer_count == expected_utf8_bytes){
-					if(utf8_id == utf8::Identifier::NotFirst){
-						auto first = this->input_buffer;
-						auto last = this->input_buffer + this->input_buffer_count;
-						utf8::Char c(first, last);
-						this->input_buffer_count = 0;
-						this->activeCursor->insert(c);
-					}else{
-						this->topMessageBar.append(" Error: utf8 character ended prematurely");
-						this->input_buffer_count = 0;
-					}
-						
-				}else{
-					this->topMessageBar.append(" Error: This is a very bad and unsave state, the text editor should never be here.");
-					this->input_buffer_count = 0;
-				}
+				const utf8::Char input(utf32);
+				this->activeCursor->insert(input);
+				this->topMessageBar.assign("Key press: ").append(input.to_std_string_view());
 			}
 		}break;	
 	}

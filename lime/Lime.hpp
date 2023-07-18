@@ -31,8 +31,6 @@ class Lime{
 	TermGui::TextEditor * activeEditor = nullptr;
 	TermGui::EditTrait * activeCursor = nullptr;
 	
-	char input_buffer[input_buffer_len] = {'\0'};
-	unsigned int input_buffer_count = 0;
 	bool main_loop_continue = true;
 	
 public:
