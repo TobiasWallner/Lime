@@ -9,7 +9,6 @@
 #include <cinttypes>
 
 namespace utf8{
-	
 
 enum class Identifier : std::int8_t{
 	Unsupported = -1,
@@ -85,6 +84,9 @@ constexpr Identifier identify(char c){
 	
 */
 class Char{
+
+
+	
 private:
 	char utf8[4];
 	
@@ -112,6 +114,30 @@ public:
 	constexpr inline Char(char ascii) : utf8{ascii, 0, 0, 0} {}
 	
 	constexpr inline Char(const char* character) : utf8{0} {this->assign(character);}
+	
+	constexpr inline Char(char32_t utf32) : utf8{0} {
+		// First code point 	Last code point 	Byte 1 		Byte 2 		Byte 3 		Byte 4
+		// U+0000 				U+007F 				0xxxxxxx 	
+		// U+0080 				U+07FF 				110xxxxx 	10xxxxxx 	
+		// U+0800 				U+FFFF 				1110xxxx 	10xxxxxx 	10xxxxxx 	
+		// U+10000 				U+10FFFF 			11110xxx 	10xxxxxx 	10xxxxxx 	10xxxxxx
+		if(utf32 <= 0x0000'007FL){
+			// it is just an ascii character
+			this->utf8[0] = static_cast<char>(utf32);
+		}else if(utf32 <= 0x0000'07FFL){
+			this->utf8[1] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
+			this->utf8[0] = static_cast<char>((utf32 >> 6) & 0b00011111L) | 0b11000000;
+		}else if(utf32 <= 0x0000'FFFFL){
+			this->utf8[2] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
+			this->utf8[1] = static_cast<char>((utf32 >> 6) & 0b00111111L) | 0b10000000;
+			this->utf8[0] = static_cast<char>((utf32 >> 12) & 0b00001111) | 0b11100000; 
+		}else if(utf32 <= 0x0010'FFFFL){
+			this->utf8[3] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
+			this->utf8[2] = static_cast<char>((utf32 >> 6) & 0b00111111L) | 0b10000000;
+			this->utf8[1] = static_cast<char>((utf32 >> 12) & 0b00111111L) | 0b10000000;
+			this->utf8[0] = static_cast<char>((utf32 >> 18) & 0b00000111L) | 0b11110000;
+		}
+	}
 	
 	/// reads one utf8 character from the range and stores it in the char
 	template<class CharItr>
@@ -397,6 +423,7 @@ public:
 	template<class Range> friend constexpr inline bool operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
 	template<class Range> friend constexpr inline bool operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
 };
+
 
 
 inline constexpr bool is_control(Char c){
