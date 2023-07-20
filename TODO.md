@@ -7,11 +7,11 @@ Issues
 	filename.
 + moveing backwards at the end of a line does not move the cursor to the end of the 
 	previous line.
-+ There is an empty line at the end of the text field.
 + moveing the cursor  
 + Change movement with to the top and end of the file to top(alt+t) and end(alt+e)
 	that makes it more consistent and then 
 + Moving the cursor to the end of the screen makes the cursor dissappear
++ Sometimes when resizeing the console (larger), characters appear at the very right of the screen
 
 TODOs
 -----
