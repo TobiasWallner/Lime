@@ -191,10 +191,8 @@ void TermGui::TextEditor::move_to_end_of_file() {
 }
 
 void TermGui::TextEditor::render(std::string& outputString) const {
-	size_type screenLineNumber = 0;
-	
 	// render file name and saved status
-	outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+	outputString += Term::cursor_move(this->header_position().y, this->header_position().x);
 	outputString += to_string(TermGui::FontStyle::Reversed::ON);
 	outputString += (this->saved) ? ' ' : '*';
 	const std::string filename = this->_filename.filename().empty() ? std::string("%Unnamed") : this->_filename.filename().string();
@@ -206,16 +204,14 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	}
 	outputString += to_string(TermGui::FontStyle::Reversed::OFF);
 	
-	++screenLineNumber;
 	
 	
 	// render text field
+	size_type screenLineNumber = 0;
 	TextEditor::const_iterator lineItr = this->renderLineStartItr;
-	
 	TextCursor renderCursor = this->topScreenLine;
-	
 	for(; screenLineNumber < this->text_height() && lineItr != this->cend(); ++lineItr, (void)++screenLineNumber, (void)renderCursor.move_down_to_start_of_line()){
-		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+		outputString += Term::cursor_move(this->text_position().y + screenLineNumber, this->text_position().x);
 		
 		renderCursor.move_to_screen_column_after(this->screenColumn);
 		
@@ -281,7 +277,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	if(screenLineNumber < this->text_height()){
 		outputString += TermGui::to_string(TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]));
 		for(;screenLineNumber < this->text_height(); ++screenLineNumber){
-			outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+			outputString += outputString += Term::cursor_move(this->text_position().y + screenLineNumber, this->text_position().x);
 			outputString += '~';
 			outputString.append(this->text_width() - 1, ' ');
 		}
@@ -290,7 +286,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	
 	// render text footer
 	std::int32_t column = 0;
-	outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+	outputString += Term::cursor_move(this->footer_position().y, this->footer_position().x);
 	outputString += to_string(TermGui::FontStyle::Reversed::ON);
 	{	
 		if(column + sizeof("Line: ")-1 > this->text_width()) goto BREAK;

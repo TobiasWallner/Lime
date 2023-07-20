@@ -102,8 +102,22 @@ public:
 	inline bool is_above_margin(const TextCursor& cursor) const {return cursor.line_index() > this->topMarginLine.line_index();}
 	inline bool is_below_margin(const TextCursor& cursor) const {return cursor.line_index() < this->bottomMarginLine.line_index();}
 	
-	inline std::int32_t text_width() const {return this->screenWidth.x;}
-	inline std::int32_t text_height() const {return this->screenWidth.y - 2;}
+	inline ScreenWidth::size_type text_width() const {return this->screenWidth.x;}
+	inline ScreenWidth::size_type text_height() const {return this->screenWidth.y - 2;}
+	inline ScreenWidth::size_type header_height() const {return 1;}
+	inline ScreenWidth::size_type footer_height() const {return 1;}
+	
+	inline ScreenPosition header_position() const {return this->screenPosition;}
+	inline ScreenPosition text_position() const {
+		const ScreenPosition::size_type x = this->screenPosition.x;
+		const ScreenPosition::size_type y = this->screenPosition.y + this->header_height();
+		return ScreenPosition{.x = x, .y = y};
+	}
+	inline ScreenPosition footer_position() const {
+		const ScreenPosition::size_type x = this->screenPosition.x;
+		const ScreenPosition::size_type y = this->screenPosition.y + this->header_height() + this->text_height();
+		return ScreenPosition{.x = x, .y = y};
+	}
 	
 	/// moves the screen down by one screen line
 	void move_screen_up();
