@@ -56,7 +56,6 @@ void TermGui::VerticalGrid::render(std::string& outputString) const{
 			outputString.append(this->screenWidth.x, ' ');
 		}
 	}else {
-		
 		const auto total_clear_height = this->screenWidth.y - this->accumulate_cell_height();
 		{// clear lines before the first cell
 			const auto clearLineStart = this->screenPosition.y;
