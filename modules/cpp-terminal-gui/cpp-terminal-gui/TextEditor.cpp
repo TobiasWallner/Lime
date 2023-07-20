@@ -21,8 +21,6 @@ TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition s
 		_filename(filename),
 		screenPosition(screenPosition),
 		screenWidth(screenWidth),
-		renderLineStart(0),
-		renderLineStartItr(this->_text.begin()),
 		screenColumn(0),
 		topScreenLine(this),
 		topMarginLine(this),
@@ -204,20 +202,17 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	}
 	outputString += to_string(TermGui::FontStyle::Reversed::OFF);
 	
-	
-	
 	// render text field
 	size_type screenLineNumber = 0;
-	TextEditor::const_iterator lineItr = this->renderLineStartItr;
 	TextCursor renderCursor = this->topScreenLine;
-	for(; screenLineNumber < this->text_height() && lineItr != this->cend(); ++lineItr, (void)++screenLineNumber, (void)renderCursor.move_down_to_start_of_line()){
+	for(; screenLineNumber < this->text_height() && renderCursor.line_iterator() != this->cend(); (void)++screenLineNumber, (void)renderCursor.move_down_to_start_of_line()){
 		outputString += Term::cursor_move(this->text_position().y + screenLineNumber, this->text_position().x);
 		
 		renderCursor.move_to_screen_column_after(this->screenColumn);
 		
 		// print styles until start of render
-		auto stylesItr = lineItr->style_list_cbegin();
-		for(; (stylesItr != lineItr->style_list_cend()) && (stylesItr->index < renderCursor.column_index()); ++stylesItr){
+		auto stylesItr = renderCursor.line_iterator()->style_list_cbegin();
+		for(; (stylesItr != renderCursor.line_iterator()->style_list_cend()) && (stylesItr->index < renderCursor.column_index()); ++stylesItr){
 			stylesItr->render(outputString);
 		}
 		
@@ -226,7 +221,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		// print characters until the end of the screen has been reached
 		const size_type screenColumnEnd = this->screenColumn + this->text_width();
 		for(; renderCursor.screen_column() < screenColumnEnd && !renderCursor.is_end_of_line(); renderCursor.move_forward()){
-			if (stylesItr != lineItr->style_list_cend()) {
+			if (stylesItr != renderCursor.line_iterator()->style_list_cend()) {
 				if (stylesItr->index == renderCursor.column_index()) {
 					stylesItr->render(outputString);
 					++stylesItr;
@@ -265,7 +260,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		}
 		
 		// print styles until the end of the string
-		for(; (stylesItr != lineItr->style_list_cend()); ++stylesItr){
+		for(; (stylesItr != renderCursor.line_iterator()->style_list_cend()); ++stylesItr){
 			stylesItr->render(outputString);
 		}
 		
@@ -277,7 +272,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	if(screenLineNumber < this->text_height()){
 		outputString += TermGui::to_string(TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]));
 		for(;screenLineNumber < this->text_height(); ++screenLineNumber){
-			outputString += outputString += Term::cursor_move(this->text_position().y + screenLineNumber, this->text_position().x);
+			outputString += Term::cursor_move(this->text_position().y + screenLineNumber, this->text_position().x);
 			outputString += '~';
 			outputString.append(this->text_width() - 1, ' ');
 		}
@@ -319,7 +314,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	
 }
 
-bool TermGui::TextEditor::save() const{
+bool TermGui::TextEditor::save() {
 	if(this->_filename.empty()){
 		return false;
 	}
@@ -331,6 +326,7 @@ bool TermGui::TextEditor::save() const{
 	}
 	
 	if(this->empty()){
+		this->saved = true;
 		return true;
 	}
 	
@@ -340,6 +336,7 @@ bool TermGui::TextEditor::save() const{
 		file << "\n" << *iterator;
 	}
 	
+	this->saved = true;
 	return true;
 }
 
@@ -432,8 +429,10 @@ void TermGui::TextEditor::clear() {
 		this->_text.clear();
 		this->_text.emplace_back();
 		this->_cursor = TextCursor(this);
-		this->renderLineStart = 0;
-		this->renderLineStartItr = this->_text.begin();
+		this->topScreenLine.move_to_start_of_file();		// is placed at the first column of the first line that is visible on the screen
+		this->topMarginLine.move_to_start_of_file();	// is placed at the first column of the upper line margin. If an insertion cursor is above this line the screen will get moved up
+		this->bottomMarginLine.move_to_start_of_file(); // is placed at the end of the bottom margin line. If an insertion cursor is below that the screen will get moved down
+		this->bottomScreenLine.move_to_start_of_file();
 		this->screenColumn = 0;
 		this->saved = false;
 	}

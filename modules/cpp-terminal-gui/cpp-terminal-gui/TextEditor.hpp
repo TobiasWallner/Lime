@@ -48,10 +48,6 @@ private:
 	ScreenPosition screenPosition;
 	ScreenWidth screenWidth;
 	
-	size_type renderLineStart;
-	const_iterator renderLineStartItr;
-	size_type renderColumnStart;
-	
 	TextCursor topScreenLine;		// is placed at the first column of the first line that is visible on the screen
 	TextCursor topMarginLine;	// is placed at the first column of the upper line margin. If an insertion cursor is above this line the screen will get moved up
 	TextCursor bottomMarginLine; // is placed at the end of the bottom margin line. If an insertion cursor is below that the screen will get moved down
@@ -202,7 +198,7 @@ public:
 	/// does not expect a clear screen
 	void render(std::string& outputString) const override;
 	
-	bool save() const;
+	bool save();
 	bool save_as(std::filesystem::path newFilename);
 	bool open(std::filesystem::path filename);
 	
