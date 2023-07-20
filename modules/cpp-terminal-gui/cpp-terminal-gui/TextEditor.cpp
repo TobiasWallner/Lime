@@ -13,6 +13,8 @@
 #include "TextEditor.hpp"
 #include "ColorThemes.hpp"
 
+// +++++++++++++++++++++++ TextEditor ++++++++++++++++++++++++
+
 TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition screenPosition, ScreenWidth screenWidth) :
 		_text(1),
 		_cursor(this),
@@ -21,14 +23,88 @@ TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition s
 		screenWidth(screenWidth),
 		renderLineStart(0),
 		renderLineStartItr(this->_text.begin()),
-		renderColumnStart(0){}
+		screenColumn(0),
+		topScreenLine(this),
+		topMarginLine(this),
+		bottomMarginLine(this),
+		bottomScreenLine(this){}
+
+
+void TermGui::TextEditor::move_screen_up(){
+	if(this->topScreenLine.is_first_line()) return;
+	this->topScreenLine.move_up_to_start_of_line();		
+		
+	if(this->topMarginLine.line_index() - this->topScreenLine.line_index() < this->margin) return;
+	this->topMarginLine.move_up_to_start_of_line();	
+		
+	if(this->bottomMarginLine.line_index() - this->topScreenLine.line_index() < this->text_height() - this->margin) return;
+	this->bottomMarginLine.move_up_to_start_of_line();
+				
+	if(this->bottomScreenLine.line_index() - this->topScreenLine.line_index() < this->text_height()) return;
+	this->bottomScreenLine.move_up_to_start_of_line();
+}
+
+void TermGui::TextEditor::move_screen_down(){
+	if(this->bottomScreenLine.is_last_line()){
+		// contraction
+		if(this->topScreenLine.is_last_line()) return;
+		this->topScreenLine.move_down_to_start_of_line();
+		
+		if(this->topMarginLine.is_last_line()) return;
+		this->topMarginLine.move_down_to_start_of_line();
+		
+		if(this->bottomMarginLine.is_last_line()) return;
+		this->bottomMarginLine.move_down_to_start_of_line();
+		
+	}else{
+		// expansion
+		this->bottomScreenLine.move_down_to_start_of_line();
+		
+		if(this->bottomScreenLine.line_index() - this->bottomMarginLine.line_index() < this->margin) return;
+		this->bottomMarginLine.move_down_to_start_of_line();
+		
+		if(this->bottomScreenLine.line_index() - this->topMarginLine.line_index() < this->text_height() - this->margin) return;
+		this->topMarginLine.move_down_to_start_of_line();
+		
+		if(this->bottomScreenLine.line_index() - this->topScreenLine.line_index() < this->text_height()) return;
+		this->topScreenLine.move_down_to_start_of_line();
+	}
+}
+
+void TermGui::TextEditor::move_screen_right(std::int32_t n){
+	this->screenColumn = (this->screenColumn > n) ? this->screenColumn - n : 0;
+}
+
+void TermGui::TextEditor::move_screen_left(std::int32_t n){
+	this->screenColumn += n;
+}
+
+void TermGui::TextEditor::move_screen_to_cursor(const TextCursor& cursor){
+	this->move_screen_lines_to_cursor(cursor);
+	this->move_screen_column_to_cursor(cursor);
+}
+
+void TermGui::TextEditor::move_screen_lines_to_cursor(const TextCursor& cursor){
+	while(this->is_above_margin(cursor) && !this->is_screen_at_top()) this->move_screen_up();
+	while(this->is_below_margin(cursor) && !this->is_screen_at_bottom()) this->move_screen_down();
+}
+
+void TermGui::TextEditor::move_screen_column_to_cursor(const TextCursor& cursor){
+	if(cursor.screen_column() < this->screenColumn + this->margin){
+		this->screenColumn = (cursor.screen_column() < this->margin) ? 0 : cursor.screen_column() - this->margin;
+	}else if(cursor.screen_column() > this->screenColumn + this->text_width() - this->margin){
+		this->screenColumn = cursor.screen_column() - this->text_width() + this->margin;
+	}
+}
 
 void TermGui::TextEditor::tab_size(std::int32_t newTabSize){
 	this->tabSize = newTabSize;
 	this->_cursor.update_tab_size();
 }
 
-void TermGui::TextEditor::show_cursor(bool logic) {this->showCursor = logic;}
+void TermGui::TextEditor::show_cursor(bool logic) {
+	this->showCursor = logic;
+}
 
 bool TermGui::TextEditor::empty() const{
 	if(this->_text.empty()){
@@ -76,45 +152,72 @@ void TermGui::TextEditor::insert(utf8::Char c){
 
 void TermGui::TextEditor::move_forward(){
 	this->_cursor.move_forward();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_back(){
 	this->_cursor.move_back();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_up(){
 	this->_cursor.move_up();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_down(){
 	this->_cursor.move_down();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_to_start_of_line() { 
 	this->_cursor.move_to_start_of_line();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_to_start_of_file() {
 	this->_cursor.move_to_start_of_file();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_to_end_of_line() {
 	this->_cursor.move_to_end_of_line();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::move_to_end_of_file() {
 	this->_cursor.move_to_end_of_file();
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 void TermGui::TextEditor::render(std::string& outputString) const {
-	TextEditor::const_iterator lineItr = this->renderLineStartItr;
-	size_type lineNumber = this->renderLineStart;
 	size_type screenLineNumber = 0;
-	for(; screenLineNumber < this->screenWidth.y && lineItr != this->cend(); ++lineItr, (void)++lineNumber, (void)++screenLineNumber){
+	
+	// render file name and saved status
+	outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+	outputString += to_string(TermGui::FontStyle::Reversed::ON);
+	outputString += (this->saved) ? ' ' : '*';
+	const std::string filename = this->_filename.filename().empty() ? std::string("%Unnamed") : this->_filename.filename().string();
+	if(filename.size() <= (this->text_width() - 1)){
+		outputString += filename;
+		outputString.append(this->text_width() - 1 - filename.size(), ' ');
+	}else{
+		outputString.append(filename.begin(), filename.begin() + this->text_width() - 1);
+	}
+	outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+	
+	++screenLineNumber;
+	
+	
+	// render text field
+	TextEditor::const_iterator lineItr = this->renderLineStartItr;
+	
+	TextCursor renderCursor = this->topScreenLine;
+	
+	for(; screenLineNumber < this->text_height() && lineItr != this->cend(); ++lineItr, (void)++screenLineNumber, (void)renderCursor.move_down_to_start_of_line()){
 		outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
 		
-		TextCursor renderCursor(this, lineItr, lineNumber);
-		renderCursor.move_to_screen_column_after(this->renderColumnStart);
+		renderCursor.move_to_screen_column_after(this->screenColumn);
 		
 		// print styles until start of render
 		auto stylesItr = lineItr->style_list_cbegin();
@@ -122,10 +225,10 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 			stylesItr->render(outputString);
 		}
 		
-		outputString.append(renderCursor.screen_column() - this->renderColumnStart, ' ');
+		outputString.append(renderCursor.screen_column() - this->screenColumn, ' ');
 		
 		// print characters until the end of the screen has been reached
-		const size_type screenColumnEnd = this->renderColumnStart + this->screenWidth.x;
+		const size_type screenColumnEnd = this->screenColumn + this->text_width();
 		for(; renderCursor.screen_column() < screenColumnEnd && !renderCursor.is_end_of_line(); renderCursor.move_forward()){
 			if (stylesItr != lineItr->style_list_cend()) {
 				if (stylesItr->index == renderCursor.column_index()) {
@@ -173,16 +276,51 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		// override characters until the end of the provided screen
 		outputString.append(screenColumnEnd - renderCursor.screen_column(), ' ');
 	}
+	
 	//override lines until the end of the provided screen
-	if(screenLineNumber < this->screenWidth.y){
+	if(screenLineNumber < this->text_height()){
 		outputString += TermGui::to_string(TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]));
-		for(;screenLineNumber < this->screenWidth.y; ++screenLineNumber){
+		for(;screenLineNumber < this->text_height(); ++screenLineNumber){
 			outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
 			outputString += '~';
-			outputString.append(this->screenWidth.x - 1, ' ');
+			outputString.append(this->text_width() - 1, ' ');
 		}
 		outputString += TermGui::to_string(TermGui::default_fg_color());
 	}
+	
+	// render text footer
+	std::int32_t column = 0;
+	outputString += Term::cursor_move(this->screenPosition.y + screenLineNumber, this->screenPosition.x);
+	outputString += to_string(TermGui::FontStyle::Reversed::ON);
+	{	
+		if(column + sizeof("Line: ")-1 > this->text_width()) goto BREAK;
+		outputString += "Line: ";
+		column += sizeof("Line: ")-1;
+
+
+		const auto lineIndexStr = std::to_string(this->_cursor.line_index());
+		if(column + lineIndexStr.size() > this->text_width()) goto BREAK;
+		outputString += lineIndexStr;
+		column += lineIndexStr.size();
+
+		if(column + sizeof("  Column: ")-1 > this->text_width())  goto BREAK;
+		outputString += "  Column: ";
+		column += sizeof("  Column: ")-1;
+
+		const auto columnIndexStr = std::to_string(this->_cursor.column_index());
+		if(column + columnIndexStr.size() > this->text_width()) goto BREAK;
+		outputString += columnIndexStr;
+		column += columnIndexStr.size();
+
+		if(column + sizeof("  UTF-8")-1 > this->text_width()) goto BREAK;
+		outputString += "  UTF-8";
+		column += sizeof("  UTF-8")-1;
+	}BREAK:
+
+	
+	outputString.append(this->text_width() - column, ' ');
+	outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+	
 }
 
 bool TermGui::TextEditor::save() const{
@@ -300,7 +438,7 @@ void TermGui::TextEditor::clear() {
 		this->_cursor = TextCursor(this);
 		this->renderLineStart = 0;
 		this->renderLineStartItr = this->_text.begin();
-		this->renderColumnStart = 0;
+		this->screenColumn = 0;
 		this->saved = false;
 	}
 }

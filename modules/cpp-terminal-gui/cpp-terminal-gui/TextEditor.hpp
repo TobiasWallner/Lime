@@ -38,8 +38,6 @@ public:
 	using pointer = Text::pointer;
 	using const_pointer = Text::const_pointer;
 
-	// TODO: simulate the screen cursor and use this screen cursor as an indicator for scrowling (render frame placement)
-
 private:
 	
 	Text _text; // stores the text data
@@ -54,8 +52,15 @@ private:
 	const_iterator renderLineStartItr;
 	size_type renderColumnStart;
 	
+	TextCursor topScreenLine;		// is placed at the first column of the first line that is visible on the screen
+	TextCursor topMarginLine;	// is placed at the first column of the upper line margin. If an insertion cursor is above this line the screen will get moved up
+	TextCursor bottomMarginLine; // is placed at the end of the bottom margin line. If an insertion cursor is below that the screen will get moved down
+	TextCursor bottomScreenLine;		// is placed at the end of the last visible line on the screen.
+	std::int32_t screenColumn = 0;	// marks the screen column at which characters on the screen will be displayed
+	
+	inline static constexpr std::int32_t margin = 4;
+	
 	std::int32_t tabSize = 4;
-	static constexpr utf8::Char lineWrapSymbol = "→";
 	
 	//TODO: bool lineWrapping = false;
 	bool showCursor = false;
@@ -91,6 +96,36 @@ public:
 	
 	inline reference back(){return this->_text.back();}
 	inline const_reference back() const {return this->_text.back();}
+	
+	inline bool is_screen_at_top() const {return this->topScreenLine.line_iterator() == this->_text.begin();}
+	inline bool is_screen_at_bottom() const {return this->topScreenLine.line_iterator() == --this->_text.end();}
+	inline bool is_above_margin(const TextCursor& cursor) const {return cursor.line_index() > this->topMarginLine.line_index();}
+	inline bool is_below_margin(const TextCursor& cursor) const {return cursor.line_index() < this->bottomMarginLine.line_index();}
+	
+	inline std::int32_t text_width() const {return this->screenWidth.x;}
+	inline std::int32_t text_height() const {return this->screenWidth.y - 2;}
+	
+	/// moves the screen down by one screen line
+	void move_screen_up();
+	
+	/// moves the screen up by one screen line
+	void move_screen_down();
+	
+	/// moves the screen to the right by one column
+	void move_screen_right(std::int32_t n = 1);
+	
+	/// moves the screen to the left by one column
+	void move_screen_left(std::int32_t n = 1);
+	
+	/// moves the screen to the cursor by iterating over lines
+	/// reccomended usage: when the cursor is close to the screen - line distance is smaller than the screen visible screen lines
+	void move_screen_to_cursor(const TextCursor& cursor);
+	void move_screen_lines_to_cursor(const TextCursor& cursor);
+	void move_screen_column_to_cursor(const TextCursor& cursor);
+	
+	/// jumps the screen to the cursor by placing all screen edges and margins at the cursor position and then itteratively increasing the screen size.
+	/// reccomended usage: when the cursor is far away from the screen - line distance is greater that then the visible screen lines
+	//void jump_screen_to_cursor(const TextCursor& cursor);
 	
 	/// returns the number of all lines in the file. corresponds to the number of line breaks + 1
 	inline size_type size() const {return this->_text.size();}
