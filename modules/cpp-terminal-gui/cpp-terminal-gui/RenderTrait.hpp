@@ -19,7 +19,7 @@ namespace TermGui{
 */
 
 struct ScreenPosition{
-	using size_type = std::uint16_t;
+	using size_type = std::int32_t;
 	
 	size_type x = 0;
 	size_type y = 0;
@@ -27,7 +27,7 @@ struct ScreenPosition{
 
 
 struct ScreenWidth{
-	using size_type = std::uint16_t;
+	using size_type = std::int32_t;
 	
 	size_type x = 0;
 	size_type y = 0;
