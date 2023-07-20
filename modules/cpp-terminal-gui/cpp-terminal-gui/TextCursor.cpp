@@ -30,9 +30,9 @@ bool TermGui::TextCursor::is_last_line() const {return this->lineIterator == --t
 bool TermGui::TextCursor::is_start_of_file() const {return this->is_first_line() && this->is_start_of_line();}
 bool TermGui::TextCursor::is_end_of_file() const {return this->is_last_line() && this->is_end_of_line();}
 
-void TermGui::TextCursor::move_forward(){
+TermGui::TextCursor& TermGui::TextCursor::move_forward(){
 	if(this->is_end_of_file()){
-		return;
+		return *this;
 	}else if(this->is_end_of_line()){
 		this->move_down_to_start_of_line();
 	}else{
@@ -40,11 +40,12 @@ void TermGui::TextCursor::move_forward(){
 		this->screenColumn += (this->get_char() == '\t') ? tabSize : 1;
 		++this->columnIndex;
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_back(){
+TermGui::TextCursor& TermGui::TextCursor::move_back(){
 	if(this->is_start_of_file()){
-		return;
+		return *this;
 	}else if(this->is_start_of_line()){
 		this->move_up_to_start_of_line();
 	}else{
@@ -52,11 +53,12 @@ void TermGui::TextCursor::move_back(){
 		const auto tabSize = this->pEditor->tab_size();
 		this->screenColumn -= (this->get_char() == '\t') ? tabSize : 1;
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_up(std::int32_t n){
+TermGui::TextCursor& TermGui::TextCursor::move_up(std::int32_t n){
 	if(this->is_start_of_file()){
-		return;
+		return *this;
 	}else if(this->is_first_line()){
 		this->move_to_start_of_line();
 	}else{
@@ -66,11 +68,12 @@ void TermGui::TextCursor::move_up(std::int32_t n){
 		}
 		move_to_screen_column_before(prevScreenColumn);
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_down(std::int32_t n){
+TermGui::TextCursor& TermGui::TextCursor::move_down(std::int32_t n){
 	if(this->is_end_of_file()){
-		return;
+		return *this;
 	}else if(this->is_last_line()){
 		this->move_to_end_of_line();
 	}else{
@@ -80,9 +83,10 @@ void TermGui::TextCursor::move_down(std::int32_t n){
 		}
 		move_to_screen_column_before(prevScreenColumn);
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_to_screen_column_before(std::int32_t wantedScreenColumn){
+TermGui::TextCursor& TermGui::TextCursor::move_to_screen_column_before(std::int32_t wantedScreenColumn){
 	// move foreward
 	const auto tabSize = this->pEditor->tab_size();
 	while(!this->is_end_of_line() && this->screenColumn < wantedScreenColumn){	
@@ -95,9 +99,10 @@ void TermGui::TextCursor::move_to_screen_column_before(std::int32_t wantedScreen
 		--this->columnIndex;
 		this->screenColumn -= (this->get_char() == '\t') ? tabSize : 1;
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_to_screen_column_after(std::int32_t wantedScreenColumn){
+TermGui::TextCursor& TermGui::TextCursor::move_to_screen_column_after(std::int32_t wantedScreenColumn){
 	// move backward
 	const auto tabSize = this->pEditor->tab_size();
 	while(!this->is_start_of_line() && this->screenColumn > wantedScreenColumn){	
@@ -110,36 +115,41 @@ void TermGui::TextCursor::move_to_screen_column_after(std::int32_t wantedScreenC
 		this->screenColumn += (this->get_char() == '\t') ? tabSize : 1;
 		++this->columnIndex;
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_to_end_of_line(){
+TermGui::TextCursor& TermGui::TextCursor::move_to_end_of_line(){
 	const auto tabSize = this->pEditor->tab_size();
 	while(!this->is_end_of_line()){
 		this->screenColumn += (this->get_char() == '\t') ? tabSize : 1;
 		++this->columnIndex;
 	}
+	return *this;
 }
 
-void TermGui::TextCursor::move_to_start_of_file(){
+TermGui::TextCursor& TermGui::TextCursor::move_to_start_of_file(){
 	this->lineIterator = this->pEditor->begin(); 
 	this->lineIndex = 0; 
 	this->columnIndex = 0; 
 	this->screenColumn = 0;
+	return *this;
 }
 
-void TermGui::TextCursor::move_to_end_of_file(){
+TermGui::TextCursor& TermGui::TextCursor::move_to_end_of_file(){
 	// TODO: change once line wrapping becomes a thing
 	this->lineIterator = --this->pEditor->begin();
 	this->lineIndex = this->pEditor->size() - 1;
 	this->columnIndex = 0;
 	this->screenColumn = 0;
 	this->move_to_end_of_line();
+	return *this;
 }
 
-void TermGui::TextCursor::update_tab_size(){
+TermGui::TextCursor& TermGui::TextCursor::update_tab_size(){
 	this->screenColumn = 0;
 	const auto tabSize = this->pEditor->tab_size();
 	for(std::int32_t i = 0; i < this->columnIndex; ++i){
 		this->screenColumn += (this->lineIterator->at(i) == '\t') ? tabSize : 1;
 	}
+	return *this;
 }

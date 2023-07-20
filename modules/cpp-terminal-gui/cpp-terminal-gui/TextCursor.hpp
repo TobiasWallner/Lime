@@ -51,26 +51,46 @@ public:
 	bool is_start_of_file() const;
 	bool is_end_of_file() const;
 
-	void move_forward();
-	void move_back();
+	TextCursor& move_forward();
+	TextCursor& move_back();
 	
-	inline void move_up_to_start_of_line(){--this->lineIterator; --this->lineIndex; this->columnIndex = 0; this->screenColumn = 0;}
-	inline void move_down_to_start_of_line(){++this->lineIterator; ++this->lineIndex; this->columnIndex = 0; this->screenColumn = 0;}
+	inline TextCursor& move_up_to_start_of_line(){
+		--this->lineIterator; 
+		--this->lineIndex; 
+		this->columnIndex = 0; 
+		this->screenColumn = 0;
+		return *this;
+	}
+		
+	inline TextCursor& move_down_to_start_of_line(){
+		++this->lineIterator; 
+		++this->lineIndex; 
+		this->columnIndex = 0; 
+		this->screenColumn = 0;
+		return *this;
+	}
 	
-	void move_up(std::int32_t n = 1);
-	void move_down(std::int32_t n = 1);
+	TextCursor& move_up(std::int32_t n = 1);
+	TextCursor& move_down(std::int32_t n = 1);
 	
-	inline void move_to_start_of_line(){this->lineIndex = 0; this->columnIndex = 0; this->screenColumn = 0;}
-	void move_to_end_of_line();
-	void move_to_start_of_file();
-	void move_to_end_of_file();
+	inline TextCursor& move_to_start_of_line(){
+		this->lineIndex = 0; 
+		this->columnIndex = 0; 
+		this->screenColumn = 0;
+		return *this;
+	}
+	TextCursor& move_to_end_of_line();
+	TextCursor& move_to_start_of_file();
+	TextCursor& move_to_end_of_file();
 	
-	void move_to_screen_column_before(std::int32_t wantedScreenColumn);
-	void move_to_screen_column_after(std::int32_t wantedScreenColumn);
+	TextCursor& move_to_screen_column_before(std::int32_t wantedScreenColumn);
+	TextCursor& move_to_screen_column_after(std::int32_t wantedScreenColumn);
 	
-	inline utf8::Char get_char(){return lineIterator->empty() ? utf8::Char('\0') : this->lineIterator->at(this->columnIndex);}
+	inline utf8::Char get_char(){
+		return lineIterator->empty() ? utf8::Char('\0') : this->lineIterator->at(this->columnIndex);
+	}
 	
-	void update_tab_size();
+	TextCursor& update_tab_size();
 
 	friend inline bool operator==(const TextCursor& l, const TextCursor& r){
 		return l.lineIterator == r.lineIterator && l.columnIndex == r.columnIndex;
