@@ -3,14 +3,11 @@ Issues
 + If the cursor is at the end of the line the following line dissappears. 
 	probably a rendering error.
 + Ctrl+E does not move the cursor to the end of the file, only the line number advances.
-+ saveing a file with Ctrl+S does not remove the save indicator '*' in front of the 
-	filename.
 + moveing backwards at the end of a line does not move the cursor to the end of the 
 	previous line.
 + moveing the cursor  
 + Change movement with to the top and end of the file to top(alt+t) and end(alt+e)
-	that makes it more consistent and then 
-+ Moving the cursor to the end of the screen makes the cursor dissappear
+	that makes it more consistent
 + Sometimes when resizeing the console (larger), characters appear at the very right of the screen
 
 TODOs
