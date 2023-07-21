@@ -21,6 +21,7 @@ class Lime{
 	TermGui::HorizontalGrid textEditorGrid;
 	
 	TermGui::Label topMessageBar;
+	TermGui::Label bottomMessageBar;
 	
 	TermGui::TextEditor textEditor;
 	
@@ -168,7 +169,7 @@ private:
 	void render(std::string& outputString) const;
 	
 	/// clears the screen and draws the output string onto the screen
-	void draw(const std::string& outputString) const;
+	void draw(const std::string& outputString);
 	
 	/// inserts the content from the clipboard into the current active editor.
 	void insert_from_clipboard();

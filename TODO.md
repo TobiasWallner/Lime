@@ -1,6 +1,8 @@
 Issues
 ------
-+ Ctrl+E does not move the cursor to the end of the file, only the line number advances.
++ the topMessageBar will not be drawn correctly or overridden when the bottomMessageBar gets drawn. 
+	probably some error in the distribution function of the grid. --> debug and fix it.
++ Ctrl+E does not move the cursor to the end of the file, only the line number advances. and the cursor disappears
 + moveing backwards at the end of a line does not move the cursor to the end of the 
 	previous line.
 + moveing the cursor  
@@ -10,6 +12,7 @@ Issues
 
 TODOs
 -----
++ when resizeing the screen the screen should move to the cursor if the cursor would otherwise disappear
 + implement line cursors for screen boundaries and margin boundaries for automatic scrowling
 	of the rendered screen. 
 + cpp-terminal has implemented a new way for handling utf8 codes -> download the newes version and update Lime

@@ -10,11 +10,12 @@
 #include <iostream>
 #include <cctype>
 #include <cstdint>
+#include <chrono>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
 #include <cpp-terminal/input.hpp>
-#include <cpp-terminal/io.hpp>
+#include <cpp-terminal/iostream.hpp>
 #include <cpp-terminal/key.hpp>
 #include <cpp-terminal/options.hpp>
 #include <cpp-terminal/screen.hpp>
@@ -60,6 +61,7 @@ Lime::Lime() :
 	this->mainGrid.push_back_relative(&this->textEditorGrid);
 	this->mainGrid.push_back_absolute(&this->infoText, 6);
 	this->mainGrid.push_back_absolute(&this->commandLine, 1);
+	this->mainGrid.push_back_absolute(&this->bottomMessageBar, 1);
 	
 	this->textEditorGrid.push_back_relative(&this->textEditor, 0, 100); // set the maximal width to 80
 	this->textEditorGrid.set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
@@ -534,6 +536,12 @@ void Lime::render(std::string& outputString) const{
 	this->mainGrid.render(outputString);
 }
 
-void Lime::draw(const std::string& outputString) const{
-	Term::terminal << Term::cursor_move(0, 0) << outputString << std::flush;
+void Lime::draw(const std::string& outputString) {
+	auto start = std::chrono::high_resolution_clock::now();
+	
+	Term::cout << Term::cursor_move(0, 0) << outputString << std::flush;
+	
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = duration_cast<std::chrono::microseconds>(stop - start);
+	this->bottomMessageBar.assign("draw time: ").append(std::to_string(duration.count())).append("us");
 }
