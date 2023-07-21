@@ -1,7 +1,5 @@
 Issues
 ------
-+ If the cursor is at the end of the line the following line dissappears. 
-	probably a rendering error.
 + Ctrl+E does not move the cursor to the end of the file, only the line number advances.
 + moveing backwards at the end of a line does not move the cursor to the end of the 
 	previous line.
