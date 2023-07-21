@@ -136,9 +136,6 @@ int Lime::run(){
 			Term::Option::Raw			// get the raw and unprozessed io data from the console buffers
 	);
 	
-	
-	
-	
 	// Entering the Program loop: get inputs -> prozess inputs -> display/save changes
 	
 	this->run_main_loop();
@@ -538,6 +535,5 @@ void Lime::render(std::string& outputString) const{
 }
 
 void Lime::draw(const std::string& outputString) const{
-	std::cout 	<< Term::cursor_move(0, 0) 
-				<< outputString << std::flush;
+	Term::terminal << Term::cursor_move(0, 0) << outputString << std::flush;
 }
