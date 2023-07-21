@@ -47,7 +47,7 @@ TermGui::TextCursor& TermGui::TextCursor::move_back(){
 	if(this->is_start_of_file()){
 		return *this;
 	}else if(this->is_start_of_line()){
-		this->move_up_to_start_of_line();
+		this->move_up_to_start_of_line().move_to_end_of_line();
 	}else{
 		--this->columnIndex;
 		const auto tabSize = this->pEditor->tab_size();
