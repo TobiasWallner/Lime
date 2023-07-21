@@ -49,9 +49,6 @@ private:
 	ScreenWidth screenWidth;
 	
 	TextCursor topScreenLine;		// is placed at the first column of the first line that is visible on the screen
-	TextCursor topMarginLine;	// is placed at the first column of the upper line margin. If an insertion cursor is above this line the screen will get moved up
-	TextCursor bottomMarginLine; // is placed at the end of the bottom margin line. If an insertion cursor is below that the screen will get moved down
-	TextCursor bottomScreenLine;		// is placed at the end of the last visible line on the screen.
 	std::int32_t screenColumn = 0;	// marks the screen column at which characters on the screen will be displayed
 	
 	inline static constexpr std::int32_t margin = 4;
@@ -95,8 +92,8 @@ public:
 	
 	inline bool is_screen_at_top() const {return this->topScreenLine.line_iterator() == this->_text.begin();}
 	inline bool is_screen_at_bottom() const {return this->topScreenLine.line_iterator() == --this->_text.end();}
-	inline bool is_above_margin(const TextCursor& cursor) const {return cursor.line_index() > this->topMarginLine.line_index();}
-	inline bool is_below_margin(const TextCursor& cursor) const {return cursor.line_index() < this->bottomMarginLine.line_index();}
+	inline bool is_above_margin(const TextCursor& cursor) const {return cursor.line_index() < this->topScreenLine.line_index() + this->margin;}
+	inline bool is_below_margin(const TextCursor& cursor) const {return cursor.line_index() >= this->topScreenLine.line_index() + this->text_height() - this->margin;}
 	
 	inline ScreenWidth::size_type text_width() const {return this->screenWidth.x;}
 	inline ScreenWidth::size_type text_height() const {return this->screenWidth.y - 2;}
