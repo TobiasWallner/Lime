@@ -137,7 +137,7 @@ TermGui::TextCursor& TermGui::TextCursor::move_to_start_of_file(){
 
 TermGui::TextCursor& TermGui::TextCursor::move_to_end_of_file(){
 	// TODO: change once line wrapping becomes a thing
-	this->lineIterator = --this->pEditor->begin();
+	this->lineIterator = --this->pEditor->end();
 	this->lineIndex = this->pEditor->size() - 1;
 	this->columnIndex = 0;
 	this->screenColumn = 0;
