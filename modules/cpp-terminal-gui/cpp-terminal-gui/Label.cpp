@@ -4,8 +4,8 @@
 
 void TermGui::Label::render(std::string& outputString) const {
 	auto string = this->string_cbegin();
-	auto styleItr = style_list_cbegin();
-	const auto styleEnd = style_list_cend();
+	auto styleItr = this->style_list_cbegin();
+	const auto styleEnd = this->style_list_cend();
 	
 	size_type index = 0;
 	size_type columnNumber = 0;
@@ -43,16 +43,21 @@ void TermGui::Label::render(std::string& outputString) const {
 		}
 	}
 
+	// end last line
+	if (lineNumber < this->screenWidth.y) {
+		outputString.append(this->screenWidth.x - columnNumber, ' ');
+		++lineNumber;
+	}
+
 	// there could be one last style (probably for resetting styles) after the last character
-	if(styleItr != styleEnd){
-		if(styleItr->index == index){
-			styleItr->render(outputString);
-			++styleItr;
-		}
+	while(styleItr != styleEnd){
+		styleItr->render(outputString);
+		++styleItr;
 	}
 
 	// clear until end of screen
 	for(; lineNumber < this->screenWidth.y; ++lineNumber){
+		outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
 		outputString.append(this->screenWidth.x, ' ');
 	}
 }
