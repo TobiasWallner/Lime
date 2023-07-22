@@ -57,15 +57,17 @@ Lime::Lime() :
 	infoText(),										
 	commandLine(this, &Lime::command_line_callback)
 {   
-	this->mainGrid.push_back_absolute(&this->topMessageBar, 1);
-	this->mainGrid.push_back_relative(&this->textEditorGrid);
-	this->mainGrid.push_back_absolute(&this->infoText, 6);
-	this->mainGrid.push_back_absolute(&this->commandLine, 1);
-	this->mainGrid.push_back_absolute(&this->bottomMessageBar, 1);
+	this->mainGrid.push_back_absolute_nodist(&this->topMessageBar, 1);
+	this->mainGrid.push_back_relative_nodist(&this->textEditorGrid);
+	this->mainGrid.push_back_absolute_nodist(&this->infoText, 6);
+	this->mainGrid.push_back_absolute_nodist(&this->commandLine, 1);
+	this->mainGrid.push_back_absolute_nodist(&this->bottomMessageBar, 1);
+	this->mainGrid.distribute_cells();
 	
-	this->textEditorGrid.push_back_relative(&this->textEditor, 0, 100); // set the maximal width to 80
-	this->textEditorGrid.set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
-	
+	this->textEditorGrid.push_back_relative_nodist(&this->textEditor, 0, 100); // set the maximal width to 80
+	this->textEditorGrid.set_centering_nodist(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
+	this->textEditorGrid.distribute_cells();
+
 	/*TODO: figure out dynamic height ... re-distribution before every render? ... element stores a callback function to the grid and tells it its size when it changes*/
 
 	activeEditor = &(this->textEditor);
@@ -179,17 +181,21 @@ void Lime::quit(){
 }
 
 void Lime::run_main_loop(){
-	std::string outputString; 	//reuse string memory
-	outputString.reserve(1024 * 2); // reserve 2kB of memory in advance
+	// reserve memory in advance
+	std::string outputString; 	
+	outputString.reserve(1024 * 10); 
+	
 	// initial render of the whole screen
 	this->render(outputString);
 	this->draw(outputString);
+	
+	// main loop
 	while(this->main_loop_continue){
 		auto event = Term::read_event();
 		this->prozess_event(std::move(event));
 		outputString.clear();
 		this->render(outputString);
-		this->draw(outputString);
+		this->draw(outputString); // <-- call to ::cout
 	}
 }
 
@@ -539,8 +545,8 @@ void Lime::render(std::string& outputString) const{
 void Lime::draw(const std::string& outputString) {
 	auto start = std::chrono::high_resolution_clock::now();
 	
-	Term::cout << Term::cursor_move(0, 0) << outputString << std::flush;
-	
+	Term::cout << outputString;
+
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = duration_cast<std::chrono::microseconds>(stop - start);
 	this->bottomMessageBar.assign("draw time: ").append(std::to_string(duration.count())).append("us");
