@@ -545,7 +545,7 @@ void Lime::render(std::string& outputString) const{
 void Lime::draw(const std::string& outputString) {
 	auto start = std::chrono::high_resolution_clock::now();
 	
-	Term::cout << outputString;
+	Term::cout << outputString << std::flush;
 
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = duration_cast<std::chrono::microseconds>(stop - start);
