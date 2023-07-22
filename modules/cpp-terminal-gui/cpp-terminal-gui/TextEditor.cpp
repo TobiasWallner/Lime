@@ -397,6 +397,7 @@ TermGui::ScreenPosition TermGui::TextEditor::get_screen_position() const {
 
 void TermGui::TextEditor::set_screen_width(TermGui::ScreenWidth width) {
 	this->screenWidth = width;
+	this->move_screen_to_cursor(this->_cursor);
 }
 
 TermGui::ScreenWidth TermGui::TextEditor::get_screen_width() const {
