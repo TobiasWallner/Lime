@@ -270,6 +270,13 @@ public:
 		this->distribute_cells();
 	}
 
+	inline void push_back_absolute_nodist(unique_pointer&& element, ScreenWidth::size_type width) {
+		this->gridCells.push_back(Cell(std::move(element), width));
+	}
+	inline void push_back_absolute_nodist(pointer element, ScreenWidth::size_type width) {
+		this->gridCells.push_back(Cell(element, width));
+	}
+
 
 	/// appends an element with a relative line number
 	inline void push_back_relative(unique_pointer&& element, Cell::size_type minimalWidth = 0, Cell::size_type maximalWidth = Cell::maximalWidthLimit, float width = 1.0f){
@@ -279,6 +286,13 @@ public:
 	inline void push_back_relative(pointer element, Cell::size_type minimalWidth = 0, Cell::size_type maximalWidth = Cell::maximalWidthLimit, float width = 1.0f){
 		this->gridCells.push_back(Cell(element, width, minimalWidth, maximalWidth));
 		this->distribute_cells();
+	}
+
+	inline void push_back_relative_nodist(unique_pointer&& element, Cell::size_type minimalWidth = 0, Cell::size_type maximalWidth = Cell::maximalWidthLimit, float width = 1.0f) {
+		this->gridCells.push_back(Cell(std::move(element), width, minimalWidth, maximalWidth));
+	}
+	inline void push_back_relative_nodist(pointer element, Cell::size_type minimalWidth = 0, Cell::size_type maximalWidth = Cell::maximalWidthLimit, float width = 1.0f) {
+		this->gridCells.push_back(Cell(element, width, minimalWidth, maximalWidth));
 	}
 		
 	
@@ -290,6 +304,13 @@ public:
 		this->gridCells.push_back(Cell(element, Cell::dynamicToken));
 		this->distribute_cells();
 	}
+
+	inline void push_back_dynamic_nodist(unique_pointer&& element) {
+		this->gridCells.push_back(Cell(std::move(element), Cell::dynamicToken));
+	}
+	inline void push_back_dynamic_nodist(pointer element) {
+		this->gridCells.push_back(Cell(element, Cell::dynamicToken));
+	}
 	
 	inline void set_centering(bool centering) { 
 		if(this->centering != centering){
@@ -298,6 +319,12 @@ public:
 		}
 	}
 	
+	inline void set_centering_nodist(bool centering) {
+		if (this->centering != centering) {
+			this->centering = centering;
+		}
+	}
+
 	inline bool is_centered() const { return this->centering; }
 	
 	void render(std::string& outputString) const override;
@@ -306,7 +333,8 @@ public:
 	void set_screen_width(ScreenWidth width) override;
 	ScreenWidth get_screen_width() const override;
 	
-	
+	void distribute_cells();
+
 private:
 
 	inline size_type accumulate_cell_width() const {
@@ -332,9 +360,6 @@ private:
 		}
 		return sum;
 	}
-	
-	void distribute_cells();
-	
 };
 	
 }
