@@ -180,6 +180,34 @@ void Lime::quit(){
 	this->main_loop_continue = false;
 }
 
+static bool is_ignore_event(const Term::Event& event){
+	switch(event.type()){
+		case Term::Event::Type::Empty : {
+			return true;
+		}break;
+		case Term::Event::Type::Key : {
+			const Term::Key key = event;
+			return key == Term::Key::ALT || key == Term::Key::NO_KEY || key == Term::Key::NUL;
+		}break;
+		case Term::Event::Type::Screen : {
+			const Term::Screen screen = event;
+			const auto columns = static_cast<TermGui::ScreenWidth::size_type>(screen.columns());
+			const auto rows = static_cast<TermGui::ScreenWidth::size_type>(screen.rows());
+			return !(columns > 1 && rows > 1);
+		}break;
+		case Term::Event::Type::Cursor : {
+			return true;
+		}break;
+		case Term::Event::Type::CopyPaste : {
+			// TODO: remove the static_cast as soon as cpp-terminal fixes the API of Term::Event
+			return static_cast<std::string>(event).size() == 0;
+		}break; 
+		default : {
+			return true;
+		}break;
+	}
+}
+
 void Lime::run_main_loop(){
 	// reserve memory in advance
 	std::string outputString; 	
@@ -191,11 +219,13 @@ void Lime::run_main_loop(){
 	
 	// main loop
 	while(this->main_loop_continue){
-		auto event = Term::read_event();
-		this->prozess_event(std::move(event));
-		outputString.clear();
-		this->render(outputString);
-		this->draw(outputString); // <-- call to ::cout
+		Term::Event event = Term::read_event();
+		if(!is_ignore_event(event)){
+			this->prozess_event(std::move(event));
+			outputString.clear();
+			this->render(outputString);
+			this->draw(outputString); // <-- call to ::cout
+		}
 	}
 }
 
