@@ -25,82 +25,43 @@ namespace TermGui{
 class FontStyle{
 public:
 	enum class Width : std::uint8_t{
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		NORMAL = static_cast<std::uint8_t>(Term::Style::RESET_BOLD_DIM),
-		#else
-		NORMAL = 22,
-		#endif
 		BOLD = static_cast<std::uint8_t>(Term::Style::BOLD),
 		DIM = static_cast<std::uint8_t>(Term::Style::DIM),
 	};
 	
-	
-	
 	enum class Italic : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::ITALIC),
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_ITALIC),
-		#else
-		OFF = 23,
-		#endif
 	};
-	
-	
 	
 	enum class Blink : std::uint8_t{
 		SLOW = static_cast<std::uint8_t>(Term::Style::BLINK),
 		FAST = static_cast<std::uint8_t>(Term::Style::BLINK_RAPID),
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_BLINKING),
-		#else
-		OFF = 25,
-		#endif
 	};
-	
-	
 	
 	enum class Reversed : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::REVERSED),
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_REVERSED),
-		#else
-		OFF = 27,
-		#endif
 	};
-	
 	
 	enum class Conceal : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::CONCEAL),
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_CONCEAL),
-		#else
-		OFF = 28,
-		#endif
 	};
-	
 	
 	enum class Crossed : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::CROSSED),
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_CROSSED),
-		#else
-		OFF = 29,
-		#endif
 	};
-	
 	
 	enum class Underline : std::uint8_t{
 		ON = static_cast<std::uint8_t>(Term::Style::UNDERLINE),
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_UNDERLINE),
-		#else
-		OFF = 24,
-		#endif
 	};
 	
-	
 	enum class Font : std::uint8_t{
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		F0 = static_cast<std::uint8_t>(Term::Style::FONT_0),
 		F1 = static_cast<std::uint8_t>(Term::Style::FONT_1),
 		F2 = static_cast<std::uint8_t>(Term::Style::FONT_2),
@@ -112,37 +73,16 @@ public:
 		F8 = static_cast<std::uint8_t>(Term::Style::FONT_8),
 		F9 = static_cast<std::uint8_t>(Term::Style::FONT_9),
 		F10 = static_cast<std::uint8_t>(Term::Style::FONT_10),
-		#else
-		F0 = 11,
-		F1 = 12,
-		F2 = 13,
-		F3 = 14,
-		F4 = 15,
-		F5 = 16,
-		F6 = 17,
-		F7 = 18,
-		F8 = 19,
-		F9 = 20,
-		F10 = 21,
-		#endif
 	};
 	
-	
 	enum class Bar : std::uint8_t{
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		LEFT = static_cast<std::uint8_t>(Term::Style::BAR_LEFT),
 		RIGHT = static_cast<std::uint8_t>(Term::Style::BAR_RIGHT),
 		OFF = static_cast<std::uint8_t>(Term::Style::RESET_BAR)
-		#else
-		LEFT = 63,
-		RIGHT = 60,
-		OFF = 65, 
-		#endif
 	};
 
 	struct Reset_t{};
 	static constexpr Reset_t Reset{}; // empty type used as a token
-	
 	
 	enum class Type : std::uint8_t{
 		reset, 
@@ -179,11 +119,7 @@ public:
 	}
 	
 	static inline FontStyle default_fg_color(){
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		return FontStyle(Type::Default, static_cast<std::uint8_t>(Term::Style::DEFAULT_FOREGROUND_COLOR));
-		#else
-		return FontStyle(Type::Default, static_cast<std::uint8_t>(39));
-		#endif
 	}
 	
 	//---- background color ----
@@ -192,11 +128,7 @@ public:
 	}
 	
 	static inline FontStyle default_bg_color(){
-		#ifdef NEW_CPP_TERMINAL_VERSION
 		return FontStyle(Type::Default, static_cast<std::uint8_t>(Term::Style::DEFAULT_BACKGROUND_COLOR));
-		#else
-		return FontStyle(Type::Default, static_cast<std::uint8_t>(49));
-		#endif
 	}
 
 	
@@ -245,7 +177,6 @@ inline std::string to_string(const FontStyle& style) {
 	style.render(str);
 	return str;
 }
-
 
 //---- foreground color ----
 inline FontStyle fg_color(std::uint8_t red, std::uint8_t green, std::uint8_t blue){return FontStyle::fg_color(red, green, blue);}
