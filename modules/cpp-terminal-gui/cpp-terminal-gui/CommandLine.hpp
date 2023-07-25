@@ -22,38 +22,36 @@ namespace TermGui{
 /// offers an editable string with a callback function that gets executed on enter.
 /// On construction offer a pointer to the object that should be notified and a 
 /// will move the command string into the provided method
-template<class CallbackObjectType>
 class CommandLine : public RenderTrait, public EditTrait{
 public:
 	using string_type = utf8::string;
 	using value_type = string_type::value_type;
 	using size_type = string_type::size_type;
-	using method_type = void(CallbackObjectType::*)(utf8::string_view);
+	using object_pointer = void*;
+	using method_type = void(*)(object_pointer self, utf8::string_view);
 	
 private:
 	string_type commandString;
-	CallbackObjectType* objectPtr; // pointer cannot be changed after construction
+	object_pointer objectPtr; // pointer cannot be changed after construction
 	method_type method; // method cannot be changed after construction
 	
 	ScreenPosition position;
 	ScreenWidth width;
 	
-	size_type cursorIndex = 0;
-	size_type renderStart = 0;
+	std::int32_t cursorIndex = 0;
+	std::int32_t cursorColumn = 0;
+	std::int32_t screenColumn = 0;
+	std::int32_t margin = 4;
 	bool showCursor = false;
 	
 	std::list<string_type> commandHistory;
 	std::list<string_type>::const_iterator historyItr = commandHistory.cend();
 	
+	std::string startSymbol = ":";
+	
 public:
 	
-	CommandLine(CallbackObjectType* objectPtr, method_type method, ScreenPosition position = {0,0}, ScreenWidth width = {0,0}) : 
-		commandString(), 
-		objectPtr(objectPtr),
-		method(method),
-		position(position),
-		width(width)
-		{}
+	CommandLine(object_pointer objectPtr, method_type method, ScreenPosition position = {0,0}, ScreenWidth width = {0,0});
 		
 	
 	CommandLine(const CommandLine&) = default;
@@ -62,201 +60,69 @@ public:
 	CommandLine& operator=(const CommandLine&) = default;
 	CommandLine& operator=(CommandLine&&) = default;
 	
-	inline void show_cursor(bool on_off) override { this->showCursor = on_off; }
+	inline void start_symbol(std::string_view startSymbol) {this->startSymbol = startSymbol;}
 	
-	inline void clear() override {
-		this->move_to_start_of_line();
-		this->commandString.clear();
-		historyItr = commandHistory.cend();
-	}
+	void show_cursor(bool on_off) override;
 	
-	inline void insert(utf8::Char c) override {
-		this->historyItr = this->commandHistory.cend();
-		if(c == '\n'){
-			this->enter();
-		}else if(c == '\b'){
-			this->Delete();
-		}else{
-			this->commandString.insert(cursorIndex, c);
-			this->move_forward();
-		}
-	}
+	void clear() override;
 	
+	void insert(utf8::Char c) override;
 	inline bool insert(const char* str){return this->EditTrait::insert(str);}
 	inline bool insert(const char* str, size_t size){return this->EditTrait::insert(str, size);}
 	
 	/// calls the provided method, passes the command string and clears the command line
-	inline void enter() override {
-		(objectPtr->*(method))(this->commandString);
-		if(this->commandHistory.empty()){
-			this->commandHistory.push_front(std::move(this->commandString));	
-		}else if(this->commandHistory.front() != this->commandString){
-			this->commandHistory.push_front(std::move(this->commandString));	
-		}
-		this->clear();
-	}
+	void enter() override;
+	void erase() override;
+	void Delete() override;
 	
-	inline void erase() override { 
-		if(!this->is_end_of_line()){
-			this->commandString.erase(this->cursorIndex); 
-		}
-	}
-	
-	inline void Delete() override {
-		if(!this->is_start_of_line()){
-			this->move_back();
-			this->commandString.erase(this->cursorIndex);
-		}
-	}
-	
-private:
-	
-	inline void scrowl_forward(){
-		const bool over_scrowl_protection = this->renderStart + this->line_width() < this->commandString.size();
-		const bool cursor_near_end = this->cursorIndex + 3 > this->line_width() + this->renderStart;
-		this->renderStart += over_scrowl_protection && cursor_near_end;
-	}
-	
-	inline void scrowl_back(){
-		const bool underscrowl_protection =  this->renderStart > 0;
-		const bool cursor_near_start = this->renderStart + 3 > this->cursorIndex;
-		this->renderStart -= underscrowl_protection && cursor_near_start;
-	}
-	
-public:
-	
+	void move_screen_to_cursor();
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
-	inline void move_forward() override { 
-		this->cursorIndex += !this->is_end_of_line();
-		this->scrowl_forward();
-	}
+	void move_forward() override;
 	
 	/// moves the cursor to the left, aka. decreases the column by one.
 	/// if the cursot is at the beginning of the file -> moves the cursor to the end of the previous line
-	inline void move_back() override { 
-		this->cursorIndex -= !this->is_start_of_line();
-		this->scrowl_back();
-	}
-
+	void move_back() override;
 
 	/// loads the previous command into the command line
-	inline void move_up() override {
-		// note that the cend() is the invalid state in the invalid state the command line will be empty
-		if(!this->commandHistory.empty()){
-			if(this->historyItr == this->commandHistory.cend()){
-				this->historyItr = this->commandHistory.cbegin();
-			}else{
-				++this->historyItr;
-				if(this->historyItr == this->commandHistory.cend()){
-					--this->historyItr;
-				}
-			}
-			if(this->historyItr != this->commandHistory.cend()){
-				this->commandString = *(this->historyItr);
-				this->move_to_end_of_line();
-			}
-		}
-	};
+	void move_up() override;
 	
 	/// loads the earlier command into the command line
-	inline void move_down() override {
-		// note that the cend() is the invalid state in the invalid state the command line will be empty
-		if(this->historyItr != this->commandHistory.cend()){
-			if(this->historyItr == this->commandHistory.cbegin()){
-				this->clear();
-				this->historyItr = this->commandHistory.cend();
-			}else{
-				--this->historyItr;
-			}
-			if(this->historyItr != this->commandHistory.cend()){
-				this->commandString = *(this->historyItr);
-				this->move_to_end_of_line();
-			}	
-		}		
-	};
+	void move_down() override;
 	
 	/// moves the cursor to the start of the line
-	inline void move_to_start_of_line() override { 
-		this->cursorIndex = 0; 
-		this->renderStart = 0;
-	}
+	void move_to_start_of_line() override;
 	
 	/// moves the cursor the the start of the line
-	inline void move_to_start_of_file() override { this->move_to_start_of_line(); }
+	void move_to_start_of_file() override;
 	
 	/// moves the cursor to the end of the line;
-	inline void move_to_end_of_line() override {
-		this->cursorIndex = this->commandString.size(); 
-		this->renderStart = (this->commandString.size() + 3 > this->line_width()) ? this->commandString.size() - (this->line_width() - 3): 0;
-	}
+	void move_to_end_of_line() override;
 	
-	inline void move_to_end_of_file() override { this->move_to_end_of_line(); }
+	void move_to_end_of_file() override;
 	
 	/// returns true if the cursor is at the start of the current line and false otherwise
-	inline bool is_start_of_line() const { return this->cursorIndex == 0; }
+	bool is_start_of_line() const;
 
 	/// returns true if the cursor is located at the very end of the current line
-	inline bool is_end_of_line() const { return this->cursorIndex == this->commandString.size(); }
+	bool is_end_of_line() const;
 	
 	/// sets the position of the object on the screen
-	inline void set_screen_position(ScreenPosition position) override {this->position = position;}
+	void set_screen_position(ScreenPosition position) override;
 	
 	/// get the position of the object on the screen
-	ScreenPosition get_screen_position() const override {return this->position;}
+	ScreenPosition get_screen_position() const override;
 	
 	/// sets the width of the object on the screen
-	void set_screen_width(ScreenWidth width) override {this->width = width;}
+	void set_screen_width(ScreenWidth width) override;
 	
 	/// get the render width of the object
-	ScreenWidth get_screen_width() const override{return this->width;}
+	ScreenWidth get_screen_width() const override;
 	
-	void render(std::string& outputString) const override {
-		if(this->width.y > 0){
-			outputString += Term::cursor_move(this->position.y, this->position.x);
-			outputString += ": ";
-			size_type column = this->renderStart;
-			const size_type columnEnd = this->commandString.size();
-			size_type screenColumn = 0;
-			const size_type screenColumnEnd = this->line_width();
-			for(; column < columnEnd && screenColumn < (screenColumnEnd - this->is_end_of_line()); ++column, (void)++screenColumn){
-				const size_type show_cursor = this->showCursor && column == this->cursorIndex;
-				if(this->commandString[column] == '\t' && show_cursor){
-					outputString += to_string(FontStyle::Reversed::ON);
-					outputString += ' ';
-					outputString += to_string(FontStyle::Reversed::OFF);
-					const size_type tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
-					outputString.append(tabs_to_print, ' ');
-					screenColumn += tabs_to_print;
-				}else if(this->commandString[column] == '\t'){
-					const size_type tabs_to_print = std::min(4ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
-					outputString.append(tabs_to_print, ' ');
-					screenColumn += tabs_to_print-1;
-				}else if(show_cursor && column == this->cursorIndex){
-					outputString += to_string(FontStyle::Reversed::ON);
-					outputString += this->commandString[column].to_std_string_view();
-					outputString += to_string(FontStyle::Reversed::OFF);				
-				}else{
-					outputString += this->commandString[column].to_std_string_view();
-				}
-			}
-			
-			if (this->showCursor && this->is_end_of_line()) {
-				outputString += to_string(FontStyle::Reversed::ON);
-				outputString += ' ';
-				outputString += to_string(FontStyle::Reversed::OFF);
-				++screenColumn;
-			}
-			outputString.append(screenColumnEnd - screenColumn, ' ');
-		}
-	}
+	void render(std::string& outputString) const override;
 
-private:
-
-	inline size_type line_width() const {
-		return (this->width.x - (sizeof(": ")-1));
-	}
+	inline size_type text_width() const {return (this->width.x - this->startSymbol.size());}
 
 };
 

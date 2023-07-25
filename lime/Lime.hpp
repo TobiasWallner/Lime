@@ -26,7 +26,7 @@ class Lime{
 	
 	TermGui::Label infoText;
 	
-	TermGui::CommandLine<Lime> commandLine;
+	TermGui::CommandLine commandLine;
 	
 	TermGui::TextEditor * activeEditor = nullptr;
 	TermGui::EditTrait * activeCursor = nullptr;
@@ -76,8 +76,8 @@ public:
 	void quit();
 	
 private:
-
-	void command_line_callback(utf8::string_view commands);
+	
+	static void command_line_callback(void* limePtr, utf8::string_view commands);
 
 	void activate_command_line();
 	

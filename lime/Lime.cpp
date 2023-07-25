@@ -449,30 +449,32 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view com
 
 
 
-void Lime::command_line_callback(utf8::string_view commands){
+void Lime::command_line_callback(void* limePtr, utf8::string_view commands){
+	Lime* This = reinterpret_cast<Lime*>(limePtr);
+	
 	// parse commands into list of commands
 	const std::vector<utf8::string_view> commandList = parse_command_string(commands);
 	if(commandList.empty()){
-		this->topMessageBar.assign("Error: empty command string");
+		This->topMessageBar.assign("Error: empty command string");
 		return;
 	}
 	
 	// prozess commanad
 	if(commandList[0] == "save-as"){
-		this->save_as(commandList);
+		This->save_as(commandList);
 	}else if(commandList[0] == "save"){
-		this->save();
+		This->save();
 	}else if(commandList[0] == "open"){
-		this->open(commandList);
+		This->open(commandList);
 	}else if(commandList[0] == "set"){
-		this->set(commandList);
+		This->set(commandList);
 	}else{
-		this->topMessageBar.assign("Unsupported Command: ").append(commands);
+		This->topMessageBar.assign("Unsupported Command: ").append(commands);
 	}
 	
 	// go back into the editor mode
-	this->toggle_command_line();
-	this->deactivate_command_line();
+	This->toggle_command_line();
+	This->deactivate_command_line();
 }
 
 void Lime::set(const std::vector<utf8::string_view>& commands){
