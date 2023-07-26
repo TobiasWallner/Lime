@@ -126,6 +126,23 @@ public:
 	friend inline bool operator == (const char* lhs, const string_view& rhs){return rhs == lhs;}
 	friend inline bool operator != (const string_view& lhs, const char* rhs){return !(lhs == rhs);}
 	friend inline bool operator != (const char* lhs, const string_view& rhs){return !(lhs == rhs);}
+	
+	friend inline bool operator < (const string_view& lhs, const string_view& rhs){
+		auto lhsItr = lhs.begin();
+		const auto lhsEnd = lhs.end();
+		auto rhsItr = rhs.begin();
+		const auto rhsEnd = rhs.end();
+		for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void) ++rhsItr){
+			if(!(*lhsItr < *rhsItr)){
+				return false;
+			}
+		}
+		return lhsItr == lhsEnd;
+	}
+	
+	friend inline bool operator > (const string_view& lhs, const string_view& rhs){return rhs < lhs;}
+	friend inline bool operator >= (const string_view& lhs, const string_view& rhs){return !(lhs < rhs);}
+	friend inline bool operator <= (const string_view& lhs, const string_view& rhs){return !(rhs < lhs);}
 };
 
 
@@ -427,7 +444,7 @@ public:
 	/// removes coint many elements or until the string-end at the position given by the index
 	inline BaseString& erase(size_type index, size_type count){this->base_class::erase(index, count); return *this;}
 	
-	inline operator string_view (){
+	inline operator string_view ()const{
 		return string_view(this->begin(), this->end());
 	}
 
