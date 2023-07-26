@@ -410,67 +410,27 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
-/// parses a utf8 view of a command string into a vector of string views
-/// returns a vector where each element holds one word or string ("..") of the command
-static std::vector<utf8::string_view> parse_command_string(utf8::string_view commandString){
-	std::vector<utf8::string_view> commandList;
-	auto itr = commandString.cbegin();
-	const auto end = commandString.cend();
-	while(itr != end){
-		//skip whitespaces
-		if(utf8::is_whitespace(*itr) || utf8::is_control(*itr)){
-			// go to next
-			++itr;
-		}else if(*itr == '"'){
-			// find next " or end
-			auto next = itr+1;
-			for (; next != end; ++next) {
-				if (*next == '"') break;
-			}
-			const bool has_quotation_marks = next != end;
-			const auto distance = std::distance(itr + 1, next);
-			const utf8::string_view::const_pointer pChar = &(*(itr + 1));
-			commandList.emplace_back(pChar, distance);
-			itr = next + has_quotation_marks;
-		}else{
-			// find next whitespaces
-			auto next = itr+1;
-			for (; next != end; ++next) {
-				if (utf8::is_whitespace(*next)) break;
-			}
-			const auto distance = std::distance(itr, next);
-			const utf8::string_view::const_pointer pChar = &(*itr);
-			commandList.emplace_back(pChar, distance);
-			itr = next;
-		}
-	}
-	return commandList;
-}
-
-
-
-void Lime::command_line_callback(void* limePtr, utf8::string_view commands){
+void Lime::command_line_callback(void* limePtr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(limePtr);
 	
-	// parse commands into list of commands
-	const std::vector<utf8::string_view> commandList = parse_command_string(commands);
-	if(commandList.empty()){
-		This->topMessageBar.assign("Error: empty command string");
-		return;
+	// prozess commanad
+	if(!commands.empty()){
+		if(commands[0] == "save-as"){
+			This->save_as(commands);
+		}else if(commands[0] == "save"){
+			This->save();
+		}else if(commands[0] == "open"){
+			This->open(commands);
+		}else if(commands[0] == "set"){
+			This->set(commands);
+		}else{
+			This->topMessageBar.assign("Unsupported Command: ").append(commands[0]);
+		}
+	}else{
+		This->topMessageBar.assign("Empty Command");
 	}
 	
-	// prozess commanad
-	if(commandList[0] == "save-as"){
-		This->save_as(commandList);
-	}else if(commandList[0] == "save"){
-		This->save();
-	}else if(commandList[0] == "open"){
-		This->open(commandList);
-	}else if(commandList[0] == "set"){
-		This->set(commandList);
-	}else{
-		This->topMessageBar.assign("Unsupported Command: ").append(commands);
-	}
+	
 	
 	// go back into the editor mode
 	This->toggle_command_line();
