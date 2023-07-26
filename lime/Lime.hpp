@@ -14,7 +14,6 @@
 #include <cpp-terminal-gui/Label.hpp>
 
 class Lime{
-	
 	static constexpr unsigned int input_buffer_len = 4;
 	
 	TermGui::VerticalGrid mainGrid;
@@ -77,7 +76,7 @@ public:
 	
 private:
 	
-	static void command_line_callback(void* limePtr, utf8::string_view commands);
+	static void command_line_callback(void* limePtr, const std::vector<utf8::string_view>& commands);
 
 	void activate_command_line();
 	
