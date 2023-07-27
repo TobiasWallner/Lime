@@ -1,18 +1,12 @@
 Issues
 ------
-+ Ctrl+E does not move the cursor to the end of the file, only the line number advances.
-+ moveing backwards at the end of a line does not move the cursor to the end of the 
-	previous line.
-+ moveing the cursor  
-+ Change movement with to the top and end of the file to top(alt+t) and end(alt+e)
-	that makes it more consistent
 + Sometimes when resizeing the console (larger), characters appear at the very right of the screen
++ when the console will get resized to small it crashes
+	probably the text editor and margins that maybe turn into negative numbers and maybe loops that then 
+	cause an segmentation fault
 
 TODOs
 -----
-+ implement line cursors for screen boundaries and margin boundaries for automatic scrowling
-	of the rendered screen. 
-+ cpp-terminal has implemented a new way for handling utf8 codes -> download the newes version and update Lime
 + Do not re-render the whole screen but only the parts that change
 + Do not trigger a render if Ctrl or Alt is pressed
 + When the cursor is moveing up and down it should stay at the current colum and not jump fom end 

@@ -10,11 +10,12 @@
 #include <iostream>
 #include <cctype>
 #include <cstdint>
+#include <chrono>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
 #include <cpp-terminal/input.hpp>
-#include <cpp-terminal/io.hpp>
+#include <cpp-terminal/iostream.hpp>
 #include <cpp-terminal/key.hpp>
 #include <cpp-terminal/options.hpp>
 #include <cpp-terminal/screen.hpp>
@@ -56,14 +57,17 @@ Lime::Lime() :
 	infoText(),										
 	commandLine(this, &Lime::command_line_callback)
 {   
-	this->mainGrid.push_back_absolute(&this->topMessageBar, 1);
-	this->mainGrid.push_back_relative(&this->textEditorGrid);
-	this->mainGrid.push_back_absolute(&this->infoText, 6);
-	this->mainGrid.push_back_absolute(&this->commandLine, 1);
+	this->mainGrid.push_back_absolute_nodist(&this->topMessageBar, 1);
+	this->mainGrid.push_back_relative_nodist(&this->textEditorGrid);
+	this->mainGrid.push_back_absolute_nodist(&this->infoText, 6);
+	this->mainGrid.push_back_absolute_nodist(&this->commandLine, 1);
+	this->mainGrid.push_back_absolute_nodist(&this->bottomMessageBar, 1);
+	this->mainGrid.distribute_cells();
 	
-	this->textEditorGrid.push_back_relative(&this->textEditor, 0, 100); // set the maximal width to 80
-	this->textEditorGrid.set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
-	
+	this->textEditorGrid.push_back_relative_nodist(&this->textEditor, 0, 100); // set the maximal width to 80
+	this->textEditorGrid.set_centering_nodist(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
+	this->textEditorGrid.distribute_cells();
+
 	/*TODO: figure out dynamic height ... re-distribution before every render? ... element stores a callback function to the grid and tells it its size when it changes*/
 
 	activeEditor = &(this->textEditor);
@@ -176,18 +180,52 @@ void Lime::quit(){
 	this->main_loop_continue = false;
 }
 
+static bool is_ignore_event(const Term::Event& event){
+	switch(event.type()){
+		case Term::Event::Type::Empty : {
+			return true;
+		}break;
+		case Term::Event::Type::Key : {
+			const Term::Key key = event;
+			return key == Term::Key::ALT || key == Term::Key::NO_KEY || key == Term::Key::NUL;
+		}break;
+		case Term::Event::Type::Screen : {
+			const Term::Screen screen = event;
+			const auto columns = static_cast<TermGui::ScreenWidth::size_type>(screen.columns());
+			const auto rows = static_cast<TermGui::ScreenWidth::size_type>(screen.rows());
+			return !(columns > 1 && rows > 1);
+		}break;
+		case Term::Event::Type::Cursor : {
+			return true;
+		}break;
+		case Term::Event::Type::CopyPaste : {
+			// TODO: remove the static_cast as soon as cpp-terminal fixes the API of Term::Event
+			return static_cast<std::string>(event).size() == 0;
+		}break; 
+		default : {
+			return true;
+		}break;
+	}
+}
+
 void Lime::run_main_loop(){
-	std::string outputString; 	//reuse string memory
-	outputString.reserve(1024 * 2); // reserve 2kB of memory in advance
+	// reserve memory in advance
+	std::string outputString; 	
+	outputString.reserve(1024 * 10); 
+	
 	// initial render of the whole screen
 	this->render(outputString);
 	this->draw(outputString);
+	
+	// main loop
 	while(this->main_loop_continue){
-		auto event = Term::read_event();
-		this->prozess_event(std::move(event));
-		outputString.clear();
-		this->render(outputString);
-		this->draw(outputString);
+		Term::Event event = Term::read_event();
+		if(!is_ignore_event(event)){
+			this->prozess_event(std::move(event));
+			outputString.clear();
+			this->render(outputString);
+			this->draw(outputString); // <-- call to ::cout
+		}
 	}
 }
 
@@ -496,6 +534,12 @@ void Lime::render(std::string& outputString) const{
 	this->mainGrid.render(outputString);
 }
 
-void Lime::draw(const std::string& outputString) const{
-	Term::terminal << Term::cursor_move(0, 0) << outputString << std::flush;
+void Lime::draw(const std::string& outputString) {
+	auto start = std::chrono::high_resolution_clock::now();
+	
+	Term::cout << outputString << std::flush;
+
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = duration_cast<std::chrono::microseconds>(stop - start);
+	this->bottomMessageBar.assign("draw time: ").append(std::to_string(duration.count())).append("us");
 }

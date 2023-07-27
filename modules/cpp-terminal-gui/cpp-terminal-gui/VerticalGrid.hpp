@@ -266,21 +266,27 @@ public:
 	}
 		
 	/// appends an element with an absolute line number
+	
 	inline void push_back_absolute(unique_pointer&& element, ScreenWidth::size_type height){
 		this->gridCells.push_back(Cell(std::move(element), height));
 		this->distribute_cells();
 	}
+	
 	inline void push_back_absolute(pointer element, ScreenWidth::size_type height){
 		this->gridCells.push_back(Cell(element, height));
 		this->distribute_cells();
 	}
 
+	
+
 
 	/// appends an element with a relative line number
+	
 	inline void push_back_relative(unique_pointer&& element, Cell::size_type minimalHeight = 0, Cell::size_type maximalHeight = Cell::maximalHeightLimit, float height = 1.0f){
 		this->gridCells.push_back(Cell(std::move(element), height, minimalHeight, maximalHeight));
 		this->distribute_cells();
 	}
+	
 	inline void push_back_relative(pointer element, Cell::size_type minimalHeight = 0, Cell::size_type maximalHeight = Cell::maximalHeightLimit, float height = 1.0f){
 		this->gridCells.push_back(Cell(element, height, minimalHeight, maximalHeight));
 		this->distribute_cells();
@@ -291,16 +297,32 @@ public:
 		this->gridCells.push_back(Cell(std::move(element), Cell::dynamicToken));
 		this->distribute_cells();
 	}
+	
 	inline void push_back_dynamic(pointer element){
 		this->gridCells.push_back(Cell(element, Cell::dynamicToken));
 		this->distribute_cells();
 	}
 	
+	inline void push_back_absolute_nodist(pointer element, ScreenWidth::size_type height) { this->gridCells.push_back(Cell(element, height)); }
+	inline void push_back_absolute_nodist(unique_pointer&& element, ScreenWidth::size_type height) { this->gridCells.push_back(Cell(std::move(element), height)); }
+	inline void push_back_relative_nodist(unique_pointer&& element, Cell::size_type minimalHeight = 0, Cell::size_type maximalHeight = Cell::maximalHeightLimit, float height = 1.0f) {
+		this->gridCells.push_back(Cell(std::move(element), height, minimalHeight, maximalHeight));
+	}
+	inline void push_back_relative_nodist(pointer element, Cell::size_type minimalHeight = 0, Cell::size_type maximalHeight = Cell::maximalHeightLimit, float height = 1.0f) {
+		this->gridCells.push_back(Cell(element, height, minimalHeight, maximalHeight));
+	}
+	inline void push_back_dynamic_nodist(unique_pointer&& element) {this->gridCells.push_back(Cell(std::move(element), Cell::dynamicToken));}
+	inline void push_back_dynamic_nodist(pointer element) {this->gridCells.push_back(Cell(element, Cell::dynamicToken));}
+
 	inline void set_centering(bool centering) { 
 		if(this->centering != centering){
 			this->centering = centering;
 			this->distribute_cells();
 		}
+	}
+
+	inline void set_centering_nodist(bool centering) {
+			this->centering = centering;
 	}
 	
 	inline bool is_centered() const { return this->centering; }
@@ -311,7 +333,8 @@ public:
 	void set_screen_width(ScreenWidth width) override;
 	ScreenWidth get_screen_width() const override;
 	
-	
+	void distribute_cells();
+
 private:
 
 	inline size_type accumulate_cell_height() const {
@@ -337,9 +360,6 @@ private:
 		}
 		return sum;
 	}
-	
-	void distribute_cells();
-	
 };
 
 }
