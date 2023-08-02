@@ -21,65 +21,16 @@
 
 namespace TermGui{
 
-struct Command;
-
-/// sorted list of commands
-class CommandList{
-	using list_type = std::vector<Command>;
-	list_type commandList;
-	
-public:
-	
-	using value_type = list_type::value_type;
-	using allocator_type = list_type::allocator_type;
-	using size_type = list_type::size_type;
-	using difference_type = list_type::difference_type;
-	using reference = list_type::reference;
-	using const_reference = list_type::const_reference;
-	using pointer = list_type::pointer;
-	using const_pointer = list_type::const_pointer;
-	using iterator = list_type::iterator;
-	using const_iterator = list_type::const_iterator;
-	
-	struct range{iterator first; iterator last;};
-	struct const_range{const_iterator first; const_iterator last;};
-	
-	inline iterator begin() {return this->commandList.begin();}
-	inline const_iterator begin() const {return this->commandList.begin();}
-	inline const_iterator cbegin() const {return this->commandList.cbegin();}
-	
-	inline iterator end() {return this->commandList.end();}
-	inline const_iterator end() const {return this->commandList.end();}
-	inline const_iterator cend() const {return this->commandList.cend();}
-	
-	bool empty() const;
-	size_type size() const;
-	
-	void reserve(size_type new_cap);
-	
-	void insert(const Command& command);
-	void insert(Command&& command);
-	
-	const_range find(const utf8::string_view& command) const;
-	const_range find(const std::vector<utf8::string_view>& commands) const;
-	
-};
-
 /// command element
 struct Command{
 	using object_pointer = void*;
 	using callback_type = void(*)(object_pointer self, const std::vector<utf8::string_view>& command);
+	struct Flag{ const utf8::string_view name; const utf8::string_view info; };
+	struct ConstFlagView(){ const Flag* begin; size_t count; };
 	
-	struct Flag{
-		utf8::string name;
-		ColorString info;
-	};
-	
-	utf8::string name;
-	ColorString info;
-	std::vector<Flag> Flags;
-	CommandList subCommands;
-	
+	const utf8::string_view name;
+	const utf8::string_view info;
+	const FlagView flags;
 	object_pointer objectPtr;
 	callback_type callbackFn;
 	
@@ -88,9 +39,10 @@ struct Command{
 	}
 };
 
+struct const_command_range { const Command* first, const Command* last};
 
-bool less(const Command &a, const utf8::string_view &b);
-bool greater(const utf8::string_view &a, const Command &b);
+/// searches a range of commands that starts with the provided command name in the sorted range of commands
+const_command_range find(const utf8::string_view& commandName, const_command_range sortedCommandRange);
 
 /// offers an editable string with a callback function that gets executed on enter.
 /// On construction offer a pointer to the object that should be notified and a 
@@ -100,32 +52,32 @@ public:
 	using string_type = utf8::string;
 	using value_type = string_type::value_type;
 	using size_type = string_type::size_type;
-	using object_pointer = void*;
-	using callback_type = void(*)(object_pointer self, const std::vector<utf8::string_view>& commands);
+	using object_pointer = Command::object_pointer;
+	using callback_type = Command::callback_type;
 
 private:
-	string_type commandString;
-	object_pointer objectPtr; // pointer cannot be changed after construction
-	callback_type enterCallback; // enterCallback cannot be changed after construction
-	
+	const_command_range commands;
 	ScreenPosition position;
 	ScreenWidth width;
 	
-	std::int32_t cursorIndex = 0;
-	std::int32_t cursorColumn = 0;
-	std::int32_t screenColumn = 0;
-	std::int32_t margin = 4;
-	bool showCursor = false;
+	const_range possibleCommandsForInfo = commands;
+	string_type inputString;
 	
 	std::list<string_type> commandHistory;
 	std::list<string_type>::const_iterator historyItr = commandHistory.cend();
 	
 	std::string startSymbol = ":";
 	
+	std::int32_t cursorIndex = 0;
+	std::int32_t cursorColumn = 0;
+	std::int32_t screenColumn = 0;
+	std::int32_t margin = 4;
+	
+	bool showCursor = false;
+	
 public:
 	
-	CommandLine(object_pointer objectPtr, callback_type enterCallback, ScreenPosition position = {0,0}, ScreenWidth width = {0,0});
-		
+	CommandLine(const_command_range commands, ScreenPosition position = {0,0}, ScreenWidth width = {0,0});
 	
 	CommandLine(const CommandLine&) = default;
 	CommandLine(CommandLine&&) = default;
