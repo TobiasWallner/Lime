@@ -55,7 +55,7 @@ public:
 		relativeLength(0.0f),
 		minimalLength(minimalLength),
 		maximalLength(maximalLength){}
-		
+
 	/// constructs a grid cell with a relative number of lines.
 	/// This means that the number of lines of this cell is proportional 
 	/// to other grid cells in the same grid
@@ -97,20 +97,26 @@ public:
 	
 	/// returns the absolute length wether it is valid or not
 	/// check is_absolute() to know if it is valid
-	inline ScreenWidth::size_type get_absolute_length() const {return this->screenWidth.y;}
+	inline ScreenWidth::size_type get_absolute_height() const {return this->screenWidth.y;}
+	inline ScreenWidth::size_type get_absolute_width() const {return this->screenWidth.x;}
 	
 	/// returns the relative length wether it is valid or not
 	/// check is_relative to know if it is valid
 	inline float get_relative_length() const {return this->relativeLength;}
 	
 	/// returns the absolute length of grid cell if the cell is an absolute cell and 0 otherwise
-	inline ScreenWidth::size_type get_length_if_absolute() const {return this->is_absolute() ? this->screenWidth.y : 0;}
+	inline ScreenWidth::size_type get_height_if_absolute() const {return this->is_absolute() ? this->screenWidth.y : 0;}
+	inline ScreenWidth::size_type get_width_if_absolute() const {return this->is_absolute() ? this->screenWidth.x : 0;}
 	
 	/// return the relatice length of the grid cell if the cell is a relatice cell and 0 otherwise
 	inline float get_length_if_relative() const {return this->is_relative() ? this->relativeLength : 0.0f;}
 	
 	/// makes the cell an absolute cell and sets the length
-	inline void set_absolute_length(ScreenWidth::size_type length){
+	inline void set_absolute_width(ScreenWidth::size_type length){
+		this->lengthType = LengthType::Absolute;
+		this->screenWidth.x = length;
+	}
+	inline void set_absolute_height(ScreenWidth::size_type length){
 		this->lengthType = LengthType::Absolute;
 		this->screenWidth.y = length;
 	}

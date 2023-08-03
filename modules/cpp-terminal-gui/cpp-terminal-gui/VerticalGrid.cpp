@@ -31,7 +31,7 @@ void TermGui::VerticalGrid::distribute_cells(){
 			relativeCellsHeight -= relativeHeight;
 			remainingScreenHeight -= assignedHeight;
 		}else if(cell.is_absolute()){
-			cell.set_screen_width(TermGui::ScreenWidth{this->screenWidth.x, cell.get_length_if_absolute()});
+			cell.set_screen_width(TermGui::ScreenWidth{this->screenWidth.x, cell.get_height_if_absolute()});
 		}
 		sum_height += cell.get_screen_width().y;
 	}

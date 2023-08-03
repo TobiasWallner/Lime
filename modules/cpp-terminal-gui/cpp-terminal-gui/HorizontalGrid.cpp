@@ -30,7 +30,7 @@ void TermGui::HorizontalGrid::distribute_cells(){
 			relativeCellsWidth -= relativeWidth;
 			remainingScreenWidth -= assignedWidth;
 		}else if(cell.is_absolute()){
-			cell.set_screen_width(TermGui::ScreenWidth{cell.get_length_if_absolute(), this->screenWidth.y});
+			cell.set_screen_width(TermGui::ScreenWidth{cell.get_width_if_absolute(), this->screenWidth.y});
 		}
 
 	}
