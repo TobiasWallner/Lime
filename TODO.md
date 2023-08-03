@@ -1,6 +1,5 @@
 Issues
 ------
-+ Horizontal grid elements no longer center correctly
 + Sometimes when resizeing the console (larger), characters appear at the very right of the screen
 + when the console will get resized to small it crashes
 	probably the text editor and margins that maybe turn into negative numbers and maybe loops that then 

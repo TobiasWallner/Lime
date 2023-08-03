@@ -7,7 +7,7 @@
 
 
 void TermGui::HorizontalGrid::distribute_cells(){
-	const TermGui::ScreenWidth::size_type absoluteCellWidth = this->accumulate_cell_width();
+	const TermGui::ScreenWidth::size_type absoluteCellWidth = this->accumulate_absolute_cell_width();
 	
 	float relativeCellsWidth = this->accumulate_relative_cell_width();
 	ScreenWidth::size_type remainingScreenWidth = this->screenWidth.x - absoluteCellWidth;
