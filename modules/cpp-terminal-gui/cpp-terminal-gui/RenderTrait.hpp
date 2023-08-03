@@ -40,11 +40,7 @@ class RenderTrait{
 	
 	virtual ~RenderTrait(){}
 	
-	/**
-		The object renders its content into existing memory
-		
-		The offset positions the label on the screen
-	*/
+	///The object renders its content into existing memory
 	virtual void render(std::string& outputString) const = 0;
 	
 	/// sets the position of the object on the screen

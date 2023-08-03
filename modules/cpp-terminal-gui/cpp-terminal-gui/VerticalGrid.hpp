@@ -26,9 +26,7 @@ class VerticalGrid : public RenderTrait{
 		
 	private:
 		
-		enum class HeightType{Absolute, Relative, Dynamic};
-		
-		struct DynamicToken{};
+		enum class HeightType{Absolute, Relative};
 		
 		unique_pointer ownedElement = nullptr; // optionally own the object
 		pointer element = nullptr;
@@ -44,7 +42,6 @@ class VerticalGrid : public RenderTrait{
 		/// sets the maximal height of the cell, only works if the cell is relative
 		size_type maximalHeight = std::numeric_limits<size_type>::max();
 	public:
-		static constexpr DynamicToken dynamicToken;
 		static constexpr size_type maximalHeightLimit = std::numeric_limits<size_type>::max();
 	
 		inline Cell(){}
@@ -96,31 +93,6 @@ class VerticalGrid : public RenderTrait{
 			relativeHeight(relativeHeight),
 			minimalHeight(minimalHeight),
 			maximalHeight(maximalHeight){}
-		
-		/// constructs a grid cell with a dynamic number of lines.
-		/// This means that the number of lines of an element in the cell is 
-		/// defined by the element itself.
-		inline Cell(unique_pointer&& element, DynamicToken dynamicToken, 
-					size_type minimalHeight = 0, size_type maximalHeight = std::numeric_limits<size_type>::max()) : 
-			ownedElement(std::move(element)), 
-			element(element.get()),
-			screenPosition(TermGui::ScreenPosition{.x = 0, .y = 0}),			
-			screenWidth(TermGui::ScreenWidth{.x = 0, .y = 0}),
-			heightType(HeightType::Absolute),
-			relativeHeight(0.0f),
-			minimalHeight(minimalHeight),
-			maximalHeight(maximalHeight){}
-			
-		inline Cell(pointer element, DynamicToken dynamicToken, 
-					size_type minimalHeight = 0, size_type maximalHeight = std::numeric_limits<size_type>::max()) : 
-			ownedElement(nullptr), 
-			element(element),
-			screenPosition(TermGui::ScreenPosition{.x = 0, .y = 0}),			
-			screenWidth(TermGui::ScreenWidth{.x = 0, .y = 0}),
-			heightType(HeightType::Absolute),
-			relativeHeight(0.0f),
-			minimalHeight(minimalHeight),
-			maximalHeight(maximalHeight){}
 			
 			
 		inline void set_maximal_height(size_type maximalHeight){ this->maximalHeight = maximalHeight;}
@@ -135,7 +107,6 @@ class VerticalGrid : public RenderTrait{
 		
 		inline bool is_relative() const {return this->heightType == HeightType::Relative;}
 		inline bool is_absolute() const {return this->heightType == HeightType::Absolute;}
-		inline bool is_dynamic() const {return this->heightType == HeightType::Dynamic;}
 		
 		/// returns the absolute height wether it is valid or not
 		/// check is_absolute() to know if it is valid
@@ -145,17 +116,11 @@ class VerticalGrid : public RenderTrait{
 		/// check is_relative to know if it is valid
 		inline float get_relative_height() const {return this->relativeHeight;}
 		
-		/// returns the height of the stored object
-		inline ScreenWidth::size_type get_dynamic_height() const {return this->element->get_screen_width().y;}
-		
 		/// returns the absolute height of grid cell if the cell is an absolute cell and 0 otherwise
 		inline ScreenWidth::size_type get_height_if_absolute() const {return this->is_absolute() ? this->screenWidth.y : 0;}
 		
 		/// return the relatice height of the grid cell if the cell is a relatice cell and 0 otherwise
 		inline float get_height_if_relative() const {return this->is_relative() ? this->relativeHeight : 0.0f;}
-		
-		/// return sthe dynamic height of the grid cell if the cell is a dynaic cell and 0 otherwise
-		inline ScreenWidth::size_type get_height_if_dynamic() const {return this->is_dynamic() ? this->element->get_screen_width().y : 0;}
 		
 		/// makes the cell an absolute cell and sets the height
 		inline void set_absolute_height(ScreenWidth::size_type height){
@@ -167,10 +132,6 @@ class VerticalGrid : public RenderTrait{
 		inline void set_relative_height(float height){
 			this->heightType = HeightType::Relative;
 			this->relativeHeight = height;
-		}
-		
-		inline void set_dynamic_height(){
-			this->heightType = HeightType::Dynamic;
 		}
 		
 		inline void render(std::string& output) const { this->element->render(output); }
@@ -247,26 +208,7 @@ public:
 		this->distribute_cells();
 	}
 	
-	
-	inline void insert_dynamic(const_iterator pos, unique_pointer&& element){
-		this->gridCells.insert(pos, Cell(std::move(element), Cell::dynamicToken));
-		this->distribute_cells();
-	}
-	void insert_dynamic(const_iterator pos, pointer&& element){
-		this->gridCells.insert(pos, Cell(element, Cell::dynamicToken));
-		this->distribute_cells();
-	}
-	void insert_dynamic(size_type pos, unique_pointer&& element){
-		this->gridCells.insert(this->gridCells.cbegin() + pos, Cell(std::move(element), Cell::dynamicToken));
-		this->distribute_cells();
-	}
-	void insert_dynamic(size_type pos, pointer&& element){
-		this->gridCells.insert(this->gridCells.cbegin() + pos, Cell(element, Cell::dynamicToken));
-		this->distribute_cells();
-	}
-		
 	/// appends an element with an absolute line number
-	
 	inline void push_back_absolute(unique_pointer&& element, ScreenWidth::size_type height){
 		this->gridCells.push_back(Cell(std::move(element), height));
 		this->distribute_cells();
@@ -292,17 +234,6 @@ public:
 		this->distribute_cells();
 	}
 		
-	
-	inline void push_back_dynamic(unique_pointer&& element){
-		this->gridCells.push_back(Cell(std::move(element), Cell::dynamicToken));
-		this->distribute_cells();
-	}
-	
-	inline void push_back_dynamic(pointer element){
-		this->gridCells.push_back(Cell(element, Cell::dynamicToken));
-		this->distribute_cells();
-	}
-	
 	inline void push_back_absolute_nodist(pointer element, ScreenWidth::size_type height) { this->gridCells.push_back(Cell(element, height)); }
 	inline void push_back_absolute_nodist(unique_pointer&& element, ScreenWidth::size_type height) { this->gridCells.push_back(Cell(std::move(element), height)); }
 	inline void push_back_relative_nodist(unique_pointer&& element, Cell::size_type minimalHeight = 0, Cell::size_type maximalHeight = Cell::maximalHeightLimit, float height = 1.0f) {
@@ -311,8 +242,6 @@ public:
 	inline void push_back_relative_nodist(pointer element, Cell::size_type minimalHeight = 0, Cell::size_type maximalHeight = Cell::maximalHeightLimit, float height = 1.0f) {
 		this->gridCells.push_back(Cell(element, height, minimalHeight, maximalHeight));
 	}
-	inline void push_back_dynamic_nodist(unique_pointer&& element) {this->gridCells.push_back(Cell(std::move(element), Cell::dynamicToken));}
-	inline void push_back_dynamic_nodist(pointer element) {this->gridCells.push_back(Cell(element, Cell::dynamicToken));}
 
 	inline void set_centering(bool centering) { 
 		if(this->centering != centering){
@@ -348,7 +277,7 @@ private:
 	inline size_type accumulate_absolute_cell_height() const{
 		ScreenWidth::size_type sum = 0;
 		for(const Cell& elem : this->gridCells){
-			sum += elem.get_height_if_absolute() + elem.get_height_if_dynamic();
+			sum += elem.get_height_if_absolute();
 		}
 		return sum;
 	}
