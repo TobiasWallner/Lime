@@ -22,7 +22,7 @@ class HorizontalGrid : public RenderTrait{
 		using size_type = TermGui::ScreenWidth::size_type;
 		
 	private:
-		enum class WidthType{Absolute, Relative, Dynamic};
+		enum class WidthType{Absolute, Relative};
 		struct DynamicToken{};
 		
 		unique_pointer ownedElement = nullptr; // optionally own the object
