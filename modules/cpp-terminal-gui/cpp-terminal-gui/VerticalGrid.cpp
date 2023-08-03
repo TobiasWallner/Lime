@@ -15,7 +15,7 @@ void TermGui::VerticalGrid::distribute_cells(){
 	
 	// +++++++++++++++++++ distribute the heights of all cells +++++++++++++++++
 	TermGui::ScreenWidth::size_type sum_height = 0;
-	for(Cell& cell : this->gridCells){
+	for(GridCell& cell : this->gridCells){
 		if(cell.is_relative()){
 			// calculate height of the relative cell
 			const float relativeHeight = cell.get_relative_height() / relativeCellsHeight;
@@ -42,7 +42,7 @@ void TermGui::VerticalGrid::distribute_cells(){
 		position.y += (this->screenWidth.y - sum_height) / 2;
 	}
 	
-	for(Cell& cell : this->gridCells){
+	for(GridCell& cell : this->gridCells){
 		cell.set_screen_position(position);
 		position.y += cell.get_screen_width().y;
 	}
@@ -67,7 +67,7 @@ void TermGui::VerticalGrid::render(std::string& outputString) const{
 		}
 
 		// render cells
-		for(const Cell& cell : this->gridCells){
+		for(const GridCell& cell : this->gridCells){
 			cell.render(outputString);
 		}
 
@@ -84,7 +84,7 @@ void TermGui::VerticalGrid::render(std::string& outputString) const{
 
 void TermGui::VerticalGrid::set_screen_position(TermGui::ScreenPosition position){
 	this->screenPosition = position;
-	for(Cell& cell : this->gridCells){
+	for(GridCell& cell : this->gridCells){
 		cell.set_screen_position(position);
 		position.y += cell.get_screen_width().y;
 	}

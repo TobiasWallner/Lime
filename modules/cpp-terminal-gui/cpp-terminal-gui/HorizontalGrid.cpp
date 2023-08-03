@@ -14,7 +14,7 @@ void TermGui::HorizontalGrid::distribute_cells(){
 	
 	// +++++++++++++++++++ distribute the width of all cells +++++++++++++++++
 
-	for(Cell& cell : this->gridCells){
+	for(GridCell& cell : this->gridCells){
 		if(cell.is_relative()){
 			// calculate width of the relative cell
 			const float relativeWidth = cell.get_relative_width() / relativeCellsWidth;
@@ -41,7 +41,7 @@ void TermGui::HorizontalGrid::distribute_cells(){
 		position.x += remainingScreenWidth / 2;
 	}
 	
-	for(Cell& cell : this->gridCells){
+	for(GridCell& cell : this->gridCells){
 		cell.set_screen_position(position);
 		position.x += cell.get_screen_width().x;
 	}
@@ -68,7 +68,7 @@ void TermGui::HorizontalGrid::render(std::string& outputString) const{
 			}
 		}
 		
-		for(const Cell& cell : this->gridCells){
+		for(const GridCell& cell : this->gridCells){
 			cell.render(outputString);
 		}
 		
@@ -90,7 +90,7 @@ void TermGui::HorizontalGrid::set_screen_position(TermGui::ScreenPosition positi
 	const long x_delta = static_cast<long>(position.x) - (this->screenPosition.x);
 	const long y_delta = static_cast<long>(position.y) - (this->screenPosition.y);
 	this->screenPosition = position;
-	for(Cell& cell : this->gridCells){
+	for(GridCell& cell : this->gridCells){
 		auto cellPosition = cell.get_screen_position();
 		cellPosition.x += x_delta;
 		cellPosition.y += y_delta;
