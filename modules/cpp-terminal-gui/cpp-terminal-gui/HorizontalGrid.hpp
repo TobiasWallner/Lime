@@ -10,7 +10,7 @@
 
 // Project
 #include "RenderTrait.hpp"
-#include "RenderTrait.hpp"
+#include "GridCell.hpp"
 
 namespace TermGui{
 
@@ -101,19 +101,19 @@ public:
 
 
 	/// appends an element with a relative line number
-	inline void push_back_relative(unique_pointer&& element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalWidthLimit, float width = 1.0f){
+	inline void push_back_relative(unique_pointer&& element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalLengthLimit, float width = 1.0f){
 		this->gridCells.push_back(GridCell(std::move(element), width, minimalWidth, maximalWidth));
 		this->distribute_cells();
 	}
-	inline void push_back_relative(pointer element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalWidthLimit, float width = 1.0f){
+	inline void push_back_relative(pointer element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalLengthLimit, float width = 1.0f){
 		this->gridCells.push_back(GridCell(element, width, minimalWidth, maximalWidth));
 		this->distribute_cells();
 	}
 
-	inline void push_back_relative_nodist(unique_pointer&& element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalWidthLimit, float width = 1.0f) {
+	inline void push_back_relative_nodist(unique_pointer&& element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalLengthLimit, float width = 1.0f) {
 		this->gridCells.push_back(GridCell(std::move(element), width, minimalWidth, maximalWidth));
 	}
-	inline void push_back_relative_nodist(pointer element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalWidthLimit, float width = 1.0f) {
+	inline void push_back_relative_nodist(pointer element, GridCell::size_type minimalWidth = 0, GridCell::size_type maximalWidth = GridCell::maximalLengthLimit, float width = 1.0f) {
 		this->gridCells.push_back(GridCell(element, width, minimalWidth, maximalWidth));
 	}
 		
@@ -145,7 +145,7 @@ private:
 	inline size_type accumulate_cell_width() const {
 		ScreenWidth::size_type sum = 0;
 		for(const GridCell& elem : this->gridCells){
-			sum += elem.get_absolute_width();
+			sum += elem.get_absolute_length();
 		}
 		return sum;
 	}
@@ -153,7 +153,7 @@ private:
 	inline size_type accumulate_absolute_cell_width() const{
 		ScreenWidth::size_type sum = 0;
 		for(const GridCell& elem : this->gridCells){
-			sum += elem.get_width_if_absolute();
+			sum += elem.get_length_if_absolute();
 		}
 		return sum;
 	}
@@ -161,7 +161,7 @@ private:
 	float accumulate_relative_cell_width() const{
 		float sum = 0;
 		for(const GridCell& elem : this->gridCells){
-			sum += elem.get_width_if_relative();
+			sum += elem.get_length_if_relative();
 		}
 		return sum;
 	}

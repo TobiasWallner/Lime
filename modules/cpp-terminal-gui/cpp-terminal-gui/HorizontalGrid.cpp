@@ -7,7 +7,7 @@
 
 
 void TermGui::HorizontalGrid::distribute_cells(){
-	const TermGui::ScreenWidth::size_type absoluteCellWidth = this->accumulate_absolute_cell_width();
+	const TermGui::ScreenWidth::size_type absoluteCellWidth = this->accumulate_cell_width();
 	
 	float relativeCellsWidth = this->accumulate_relative_cell_width();
 	ScreenWidth::size_type remainingScreenWidth = this->screenWidth.x - absoluteCellWidth;
@@ -17,10 +17,10 @@ void TermGui::HorizontalGrid::distribute_cells(){
 	for(GridCell& cell : this->gridCells){
 		if(cell.is_relative()){
 			// calculate width of the relative cell
-			const float relativeWidth = cell.get_relative_width() / relativeCellsWidth;
+			const float relativeWidth = cell.get_relative_length() / relativeCellsWidth;
 			const float absoluteWidth = remainingScreenWidth * relativeWidth;
 			const TermGui::ScreenWidth::size_type roundedWidth = static_cast<ScreenWidth::size_type>(std::round(absoluteWidth));
-			const TermGui::ScreenWidth::size_type clippedHeight = std::max(std::min(roundedWidth, cell.get_minimal_width()), cell.get_maximal_width());
+			const TermGui::ScreenWidth::size_type clippedHeight = std::max(std::min(roundedWidth, cell.get_minimal_length()), cell.get_maximal_length());
 			const TermGui::ScreenWidth::size_type assignedWidth = std::min(remainingScreenWidth, clippedHeight);
 			
 			// assign width
@@ -30,7 +30,7 @@ void TermGui::HorizontalGrid::distribute_cells(){
 			relativeCellsWidth -= relativeWidth;
 			remainingScreenWidth -= assignedWidth;
 		}else if(cell.is_absolute()){
-			cell.set_screen_width(TermGui::ScreenWidth{cell.get_width_if_absolute(), this->screenWidth.y});
+			cell.set_screen_width(TermGui::ScreenWidth{cell.get_length_if_absolute(), this->screenWidth.y});
 		}
 
 	}

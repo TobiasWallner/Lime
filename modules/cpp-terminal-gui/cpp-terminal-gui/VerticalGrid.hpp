@@ -98,22 +98,22 @@ public:
 
 	/// appends an element with a relative line number
 	
-	inline void push_back_relative(unique_pointer&& element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalHeightLimit, float height = 1.0f){
+	inline void push_back_relative(unique_pointer&& element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalLengthLimit, float height = 1.0f){
 		this->gridCells.push_back(GridCell(std::move(element), height, minimalHeight, maximalHeight));
 		this->distribute_cells();
 	}
 	
-	inline void push_back_relative(pointer element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalHeightLimit, float height = 1.0f){
+	inline void push_back_relative(pointer element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalLengthLimit, float height = 1.0f){
 		this->gridCells.push_back(GridCell(element, height, minimalHeight, maximalHeight));
 		this->distribute_cells();
 	}
 		
 	inline void push_back_absolute_nodist(pointer element, ScreenWidth::size_type height) { this->gridCells.push_back(GridCell(element, height)); }
 	inline void push_back_absolute_nodist(unique_pointer&& element, ScreenWidth::size_type height) { this->gridCells.push_back(GridCell(std::move(element), height)); }
-	inline void push_back_relative_nodist(unique_pointer&& element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalHeightLimit, float height = 1.0f) {
+	inline void push_back_relative_nodist(unique_pointer&& element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalLengthLimit, float height = 1.0f) {
 		this->gridCells.push_back(GridCell(std::move(element), height, minimalHeight, maximalHeight));
 	}
-	inline void push_back_relative_nodist(pointer element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalHeightLimit, float height = 1.0f) {
+	inline void push_back_relative_nodist(pointer element, GridCell::size_type minimalHeight = 0, GridCell::size_type maximalHeight = GridCell::maximalLengthLimit, float height = 1.0f) {
 		this->gridCells.push_back(GridCell(element, height, minimalHeight, maximalHeight));
 	}
 
@@ -143,7 +143,7 @@ private:
 	inline size_type accumulate_cell_height() const {
 		ScreenWidth::size_type sum = 0;
 		for(const GridCell& elem : this->gridCells){
-			sum += elem.get_absolute_height();
+			sum += elem.get_absolute_length();
 		}
 		return sum;
 	}
@@ -151,7 +151,7 @@ private:
 	inline size_type accumulate_absolute_cell_height() const{
 		ScreenWidth::size_type sum = 0;
 		for(const GridCell& elem : this->gridCells){
-			sum += elem.get_height_if_absolute();
+			sum += elem.get_length_if_absolute();
 		}
 		return sum;
 	}
@@ -159,7 +159,7 @@ private:
 	inline float accumulate_relative_cell_height() const{
 		float sum = 0;
 		for(const GridCell& elem : this->gridCells){
-			sum += elem.get_height_if_relative();
+			sum += elem.get_length_if_relative();
 		}
 		return sum;
 	}
