@@ -59,28 +59,37 @@ public:
 	
 	inline bool empty() const { return this->_string.empty(); }
 	inline size_type size() const { return this->_string.size(); }
-	inline void clear(){ this->_string.clear(); }
+	
+	inline void clear(){ 
+		this->internalHeight = 0;
+		this->internalWidth = 0;
+		this->insertLineWidth = 0;
+		this->_string.clear(); 
+	}
 	
 	template<class CharItr>
 	inline void update_wanted_screen_width_on_append(CharItr first, const CharItr last){
 		for(; first != last; ++first){
 			if(*first == '\n'){
-				++this->wantedHeight;
-				this->wantedWidth = std::max(this->wantedWidth, this->insertLineWidth);
+				if(this->internalHeight == 0) this->internalHeight = 1;
+				++this->internalHeight;
+				this->internalWidth = std::max(this->internalWidth, this->insertLineWidth);
 				this->insertLineWidth = 0;
 			}else if(*first == '\t'){
+				if(this->internalHeight == 0) this->internalHeight = 1;
 				this->insertLineWidth += this->tabsize;
 			}else{
+				if(this->internalHeight == 0) this->internalHeight = 1;
 				++this->insertLineWidth;
 			}
 		}
-		this->wantedWidth = std::max(this->wantedWidth, this->insertLineWidth);
+		this->internalWidth = std::max(this->internalWidth, this->insertLineWidth);
 	}
 	
 	template<class CharItr>
 	inline void update_wanted_screen_width_on_assign(CharItr first, const CharItr last){
-		this->wantedHeight = 0;
-		this->wantedWidth = 0;
+		this->internalHeight = 0;
+		this->internalWidth = 0;
 		this->insertLineWidth = 0;
 		update_wanted_screen_width_on_append(first, last);
 	}
@@ -88,8 +97,8 @@ public:
 	inline void update_wanted_screen_width_on_append(const char* first){
 		for(; *first != '\0'; ++first){
 			if(*first == '\n'){
-				++this->wantedHeight;
-				this->wantedWidth = std::max(this->wantedWidth, this->insertLineWidth);
+				++this->internalHeight;
+				this->internalWidth = std::max(this->internalWidth, this->insertLineWidth);
 				this->insertLineWidth = 0;
 			}else if(*first == '\t'){
 				this->insertLineWidth += this->tabsize;
@@ -97,12 +106,12 @@ public:
 				++this->insertLineWidth;
 			}
 		}
-		this->wantedWidth = std::max(this->wantedWidth, this->insertLineWidth);
+		this->internalWidth = std::max(this->internalWidth, this->insertLineWidth);
 	}
 	
 	inline void update_wanted_screen_width_on_assign(const char* first){
-		this->wantedHeight = 0;
-		this->wantedWidth = 0;
+		this->internalHeight = 0;
+		this->internalWidth = 0;
 		this->insertLineWidth = 0;
 		update_wanted_screen_width_on_append(first);
 	}
