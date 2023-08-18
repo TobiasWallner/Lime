@@ -3,9 +3,9 @@
 
 
 void TermGui::Label::render(std::string& outputString) const {
-	auto string = this->string_cbegin();
-	auto styleItr = this->style_list_cbegin();
-	const auto styleEnd = this->style_list_cend();
+	auto string = this->_string.string_cbegin();
+	auto styleItr = this->_string.style_list_cbegin();
+	const auto styleEnd = this->_string.style_list_cend();
 	
 	size_type index = 0;
 	size_type columnNumber = 0;
