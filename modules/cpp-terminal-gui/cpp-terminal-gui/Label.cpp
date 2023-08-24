@@ -7,11 +7,14 @@ void TermGui::Label::render(std::string& outputString) const {
 	auto styleItr = this->_string.style_list_cbegin();
 	const auto styleEnd = this->_string.style_list_cend();
 	
+	const auto screenPosition = GridCell::get_screen_position();
+	const auto screenWidth = GridCell::get_screen_width();
+
 	size_type index = 0;
 	size_type columnNumber = 0;
 	size_type lineNumber = 0;
-	outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
-	for(;index < this->size() && lineNumber < this->screenWidth.y; (void)++index, (void)++columnNumber){
+	outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
+	for(;index < this->size() && lineNumber < screenWidth.y; (void)++index, (void)++columnNumber){
 		// render styles
 		if(styleItr != styleEnd){
 			if(styleItr->index == index){
@@ -20,15 +23,15 @@ void TermGui::Label::render(std::string& outputString) const {
 			}
 		}
 
-		if (columnNumber < this->screenWidth.x) {
+		if (columnNumber < screenWidth.x) {
 			// print characters that can be seen on the screen
 			if (string[index] == '\n') {
-				outputString.append(this->screenWidth.x - columnNumber, ' '); // clear after end of line
+				outputString.append(screenWidth.x - columnNumber, ' '); // clear after end of line
 				++lineNumber;
 				columnNumber = 0;
-				outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
+				outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
 			}else if (string[index] == '\t') {
-				const auto tabs_to_print = std::min(4ULL, this->screenWidth.x - columnNumber);
+				const auto tabs_to_print = std::min(4ULL, screenWidth.x - columnNumber);
 				outputString.append(tabs_to_print, ' ');
 				columnNumber += tabs_to_print - 1;
 			}else{
@@ -39,13 +42,13 @@ void TermGui::Label::render(std::string& outputString) const {
 			// line break that cannot be seen on the screen
 			++lineNumber;
 			columnNumber = 0;
-			outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
+			outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
 		}
 	}
 
 	// end last line
-	if (lineNumber < this->screenWidth.y) {
-		outputString.append(this->screenWidth.x - columnNumber, ' ');
+	if (lineNumber < screenWidth.y) {
+		outputString.append(screenWidth.x - columnNumber, ' ');
 		++lineNumber;
 	}
 
@@ -56,28 +59,52 @@ void TermGui::Label::render(std::string& outputString) const {
 	}
 
 	// clear until end of screen
-	for(; lineNumber < this->screenWidth.y; ++lineNumber){
-		outputString += Term::cursor_move(this->screenPosition.y + lineNumber, this->screenPosition.x);
-		outputString.append(this->screenWidth.x, ' ');
+	for(; lineNumber < screenWidth.y; ++lineNumber){
+		outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
+		outputString.append(screenWidth.x, ' ');
 	}
 }
 
-
-void TermGui::Label::set_screen_position(TermGui::ScreenPosition position){
-	this->screenPosition = position;
+void TermGui::Label::update_on_append(const char* first){
+	TermGui::ScreenWidth targetWidth = GridCell::get_target_width();
+	if (*first == '\0') {
+		return;
+	}
+	if(targetWidth.y == 0) {
+		++targetWidth.y;
+	}
+	for(; *first != '\0'; ++first){
+		if(*first == '\n'){
+			++targetWidth.y;
+			targetWidth.x = std::max(targetWidth.x, this->insertLineWidth);
+			this->insertLineWidth = 0;
+		}else if(*first == '\t'){
+			this->insertLineWidth += this->tabsize;
+		}else{
+			++this->insertLineWidth;
+		}
+	}
+	targetWidth.x = std::max(targetWidth.x, this->insertLineWidth);
+	GridCell::set_target_width(targetWidth);
 }
 
-
-TermGui::ScreenPosition TermGui::Label::get_screen_position() const {
-	return this->screenPosition;
-}
-
-
-void TermGui::Label::set_screen_width(TermGui::ScreenWidth width){
-	this->screenWidth = width;
-}
-
-
-TermGui::ScreenWidth TermGui::Label::get_screen_width() const {
-	return this->screenWidth;
+void TermGui::Label::update_on_assign(const char* first){
+	this->insertLineWidth = 0;
+	TermGui::ScreenWidth targetWidth = TermGui::ScreenWidth{0,0};
+	if (*first != '\0') {
+		++targetWidth.y;
+	}
+	for(; *first != '\0'; ++first){
+		if(*first == '\n'){
+			++targetWidth.y;
+			targetWidth.x = std::max(targetWidth.x, this->insertLineWidth);
+			this->insertLineWidth = 0;
+		}else if(*first == '\t'){
+			this->insertLineWidth += this->tabsize;
+		}else{
+			++this->insertLineWidth;
+		}
+	}
+	targetWidth.x = std::max(targetWidth.x, this->insertLineWidth);
+	GridCell::set_target_width(targetWidth);
 }
