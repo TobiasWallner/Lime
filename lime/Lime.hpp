@@ -20,7 +20,7 @@ class Lime{
 	TermGui::VerticalGrid mainGrid;
 	TermGui::HorizontalGrid textEditorGrid;
 	
-	TermGui::Label topMessageBar;
+	TermGui::Label* topMessageBar;
 	TermGui::Label bottomMessageBar;
 	
 	TermGui::TextEditor textEditor;
