@@ -15,12 +15,11 @@
 
 // +++++++++++++++++++++++ TextEditor ++++++++++++++++++++++++
 
-TermGui::TextEditor::TextEditor(std::filesystem::path filename, ScreenPosition screenPosition, ScreenWidth screenWidth) :
+TermGui::TextEditor::TextEditor(std::filesystem::path filename) :
+		GridCell(1.f, 0, 100),
 		_text(1),
 		_cursor(this),
 		_filename(filename),
-		screenPosition(screenPosition),
-		screenWidth(screenWidth),
 		screenColumn(0),
 		topScreenLine(this){}
 
@@ -387,21 +386,9 @@ void TermGui::TextEditor::erase(){
 
 void TermGui::TextEditor::enter() {this->insert_new_line();}
 
-void TermGui::TextEditor::set_screen_position(TermGui::ScreenPosition position) {
-	this->screenPosition = position;
-}
-
-TermGui::ScreenPosition TermGui::TextEditor::get_screen_position() const {
-	return this->screenPosition;
-}
-
 void TermGui::TextEditor::set_screen_width(TermGui::ScreenWidth width) {
-	this->screenWidth = width;
+	GridCell::set_screen_width(width);
 	this->move_screen_to_cursor(this->_cursor);
-}
-
-TermGui::ScreenWidth TermGui::TextEditor::get_screen_width() const {
-	return this->screenWidth;
 }
 
 void TermGui::TextEditor::clear() { 

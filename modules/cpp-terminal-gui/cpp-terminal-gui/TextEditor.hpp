@@ -11,8 +11,8 @@
 #include <utf8_char.hpp>
 #include <utf8_string.hpp>
 
+#include "GridCell.hpp"
 #include "ColorString.hpp"
-#include "RenderTrait.hpp"
 #include "EditTrait.hpp"
 #include "TextCursor.hpp"
 
@@ -22,7 +22,7 @@ namespace TermGui{
 class TextEditor; // forward declaration
 bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
 	
-class TextEditor : public RenderTrait, public EditTrait{
+class TextEditor : public GridCell, public EditTrait{
 private:
 	using Line = ColorString;		// will be managed by this class in a way so that there are no linebraks in a line
 	using Text = std::list<Line>;	// list of lines
@@ -45,9 +45,6 @@ private:
 	
 	std::filesystem::path _filename;
 	
-	ScreenPosition screenPosition;
-	ScreenWidth screenWidth;
-	
 	TextCursor topScreenLine;		// is placed at the first column of the first line that is visible on the screen
 	std::int32_t screenColumn = 0;	// marks the screen column at which characters on the screen will be displayed
 	
@@ -62,7 +59,7 @@ private:
 
 public:
 
-	TextEditor(std::filesystem::path filename = "", ScreenPosition screenPosition=ScreenPosition{0,0}, ScreenWidth screenWidth=ScreenWidth{0,0});
+	TextEditor(std::filesystem::path filename = "");
 	
 	inline std::int32_t tab_size() const {return this->tabSize;}
 	void tab_size(std::int32_t newTabSize);
@@ -95,20 +92,20 @@ public:
 	inline bool is_above_margin(const TextCursor& cursor) const {return cursor.line_index() < this->topScreenLine.line_index() + this->margin;}
 	inline bool is_below_margin(const TextCursor& cursor) const {return cursor.line_index() >= this->topScreenLine.line_index() + this->text_height() - this->margin;}
 	
-	inline ScreenWidth::size_type text_width() const {return this->screenWidth.x;}
-	inline ScreenWidth::size_type text_height() const {return this->screenWidth.y - 2;}
+	inline ScreenWidth::size_type text_width() const {return this->GridCell::get_screen_width().x;}
+	inline ScreenWidth::size_type text_height() const {return this->GridCell::get_screen_width().y - 2;}
 	inline ScreenWidth::size_type header_height() const {return 1;}
 	inline ScreenWidth::size_type footer_height() const {return 1;}
 	
-	inline ScreenPosition header_position() const {return this->screenPosition;}
+	inline ScreenPosition header_position() const {return this->GridCell::get_screen_position();}
 	inline ScreenPosition text_position() const {
-		const ScreenPosition::size_type x = this->screenPosition.x;
-		const ScreenPosition::size_type y = this->screenPosition.y + this->header_height();
+		const ScreenPosition::size_type x = this->GridCell::get_screen_position().x;
+		const ScreenPosition::size_type y = this->GridCell::get_screen_position().y + this->header_height();
 		return ScreenPosition{.x = x, .y = y};
 	}
 	inline ScreenPosition footer_position() const {
-		const ScreenPosition::size_type x = this->screenPosition.x;
-		const ScreenPosition::size_type y = this->screenPosition.y + this->header_height() + this->text_height();
+		const ScreenPosition::size_type x = this->GridCell::get_screen_position().x;
+		const ScreenPosition::size_type y = this->GridCell::get_screen_position().y + this->header_height() + this->text_height();
 		return ScreenPosition{.x = x, .y = y};
 	}
 	
@@ -211,18 +208,8 @@ public:
 	/// inserts a new line
 	void enter() override;
 	
-	/// sets the position of the object on the screen
-	void set_screen_position(ScreenPosition position) override;
-	
-	/// get the position of the object on the screen
-	ScreenPosition get_screen_position() const override;
-	
 	/// sets the width of the object on the screen
 	void set_screen_width(ScreenWidth width) override;
-	
-	/// get the render width of the object
-	ScreenWidth get_screen_width() const override;
-
 };
 
 }
