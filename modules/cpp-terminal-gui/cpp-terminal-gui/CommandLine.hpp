@@ -47,7 +47,7 @@ private:
 public:
 	
 	CommandLine(CallbackObjectType* objectPtr, method_type method) : 
-		GridCell(ScreenWidth{1, 100}),
+		GridCell(ScreenWidth{100, 1}),
 		commandString(), 
 		objectPtr(objectPtr),
 		method(method)
