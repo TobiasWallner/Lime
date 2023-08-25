@@ -18,14 +18,14 @@ class Lime{
 	static constexpr unsigned int input_buffer_len = 4;
 	
 	TermGui::VerticalGrid mainGrid;
-	TermGui::HorizontalGrid textEditorGrid;
+	TermGui::HorizontalGrid* textEditorGrid = nullptr;
 	
-	TermGui::Label* topMessageBar;
-	TermGui::Label bottomMessageBar;
+	TermGui::Label* topMessageBar = nullptr;
+	TermGui::Label* bottomMessageBar = nullptr;
 	
-	TermGui::TextEditor textEditor;
+	TermGui::TextEditor* textEditor = nullptr;
 	
-	TermGui::Label infoText;
+	TermGui::Label* infoText = nullptr;
 	
 	TermGui::CommandLine<Lime> commandLine;
 	
@@ -88,19 +88,19 @@ private:
 		this->commandLine.show_cursor(false);
 		if(this->is_command_line_active()){
 			this->activeCursor = nullptr;
-			this->infoText.clear();
+			this->infoText->clear();
 		}
 	}
 	
 	void activate_text_editor();
 	
-	inline bool is_text_editor_active() const { return this->activeCursor == &this->textEditor; }
+	inline bool is_text_editor_active() const { return this->activeCursor == this->textEditor; }
 	
 	inline void deactivate_text_editor(){
-		this->textEditor.show_cursor(false);
+		this->textEditor->show_cursor(false);
 		if(this->is_text_editor_active()){
 			this->activeCursor = nullptr;	
-			this->infoText.clear();
+			this->infoText->clear();
 		}
 	}
 	

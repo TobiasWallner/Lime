@@ -57,24 +57,46 @@ Lime::Lime() :
 	infoText(),										
 	commandLine(this, &Lime::command_line_callback)
 {   
-	auto topMessageBarLabel = std::make_unique<TermGui::Label>();
-	this->topMessageBar = topMessageBarLabel.get();
-	this->mainGrid.push_back(std::move(topMessageBarLabel));
-	//this->mainGrid.push_back_relative_nodist(&this->textEditorGrid);
-	//this->mainGrid.push_back_absolute_nodist(&this->infoText, 6);
+	{// init top message bar
+		auto Label = std::make_unique<TermGui::Label>();
+		this->topMessageBar = Label.get();
+		this->mainGrid.push_back(std::move(Label));
+	}
+	
+	{// init text editor grid
+		auto hGrid = std::make_unique<TermGui::HorizontalGrid>(1.f);
+		this->textEditorGrid = hGrid.get();
+		this->mainGrid.push_back(std::move(hGrid));
+	}
+	
+	{// init info text
+		auto Label = std::make_unique<TermGui::Label>();
+		this->infoText = Label.get();
+		this->mainGrid.push_back(std::move(Label));
+	}
+
 	//this->mainGrid.push_back_absolute_nodist(&this->commandLine, 1);
-	//this->mainGrid.push_back_absolute_nodist(&this->bottomMessageBar, 1);
-	//this->mainGrid.distribute_cells();
+
+	{// init bottom Message Bar
+		auto Label = std::make_unique<TermGui::Label>();
+		this->bottomMessageBar = Label.get();
+		this->mainGrid.push_back(std::move(Label));
+	}
+
+	//this->mainGrid.push_back_absolute_nodist(&this->infoText, 6);
 	
 	this->topMessageBar->assign("Hallo :)\nthis is two lines long");
 	
-	//this->textEditorGrid.push_back_relative_nodist(&this->textEditor, 0, 100); // set the maximal width to 80
-	//this->textEditorGrid.set_centering_nodist(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
-	//this->textEditorGrid.distribute_cells();
+	{// init text editor
+		auto textEditor = std::make_unique<TermGui::TextEditor>();
+		this->textEditor = textEditor.get();
+		this->textEditorGrid->push_back(std::move(textEditor)); // set the maximal width to 80
+		this->textEditorGrid->set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
+	}
 
 	/*TODO: figure out dynamic height ... re-distribution before every render? ... element stores a callback function to the grid and tells it its size when it changes*/
 
-	activeEditor = &(this->textEditor);
+	activeEditor = this->textEditor;
 	this->deactivate_command_line();
 	this->activate_text_editor();
 }
@@ -84,28 +106,28 @@ inline void Lime::activate_command_line(){
 	this->activeCursor = &this->commandLine;
 	
 	// load infotext
-	this->infoText.clear();
+	this->infoText->clear();
 	
 	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
 	const auto default_fg = TermGui::default_fg_color();
 	
-	this->infoText  << lime_fg << "save" << default_fg << "  ...............  saves the current file\n"
+	*this->infoText  << lime_fg << "save" << default_fg << "  ...............  saves the current file\n"
 					<< lime_fg << "save-as <filename>" << default_fg << " ..  saves the current file under a new name\n"
 					<< lime_fg << "open <filename>" << default_fg << "  ....  opens the file under the provided name";
 	
 }
 
 void Lime::activate_text_editor(){
-	this->textEditor.show_cursor(true);
-	this->activeCursor = &this->textEditor;
+	this->textEditor->show_cursor(true);
+	this->activeCursor = this->textEditor;
 		
 		//load infotext
-	this->infoText.clear();
+	this->infoText->clear();
 	
 	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
 	const auto default_fg = TermGui::default_fg_color();
 	
-	this->infoText  
+	*this->infoText  
 		<< "Quit: " << lime_fg << "Ctrl + Q" << default_fg << "\t"
 		<< "Save: " << lime_fg << "Ctrl + S" << default_fg << "\t"
 		<< "Paste: " << lime_fg << "Ctrl + V" << default_fg << "\n"
@@ -166,7 +188,7 @@ int Lime::run(int numberOfArguments, const char* const* listOfArgumentStrings){
 		const char * const filepath = listOfArgumentStrings[0];
 		const bool file_exists = std::filesystem::is_regular_file(std::filesystem::status(filepath));
 		if(file_exists){
-			const bool successful_read = this->textEditor.open(filepath);
+			const bool successful_read = this->textEditor->open(filepath);
 			if(!successful_read){
 				std::cout << "Error: could not read file: " << filepath << std::endl;
 				return EXIT_FAILURE;
@@ -546,7 +568,7 @@ void Lime::set(const std::vector<utf8::string_view>& commands){
 }
 
 void Lime::save(){
-	const bool successful_write = this->textEditor.save();
+	const bool successful_write = this->textEditor->save();
 	if (successful_write) {
 		this->topMessageBar->assign("Sussessfully saved file");
 		return;
@@ -561,7 +583,7 @@ void Lime::save_as(const std::vector<utf8::string_view>& commands){
 		this->topMessageBar->assign("Error: the command open needs a filename");
 		return;
 	}
-	this->textEditor.save_as(commands[1].to_std_string());
+	this->textEditor->save_as(commands[1].to_std_string());
 }
 
 void Lime::open(const std::vector<utf8::string_view>& commands){
@@ -569,7 +591,7 @@ void Lime::open(const std::vector<utf8::string_view>& commands){
 		this->topMessageBar->assign("Error: the command open needs a filename");
 		return;
 	}
-	this->textEditor.open(commands[1].to_std_string());
+	this->textEditor->open(commands[1].to_std_string());
 }
 
 void Lime::render(std::string& outputString) const{
@@ -583,5 +605,5 @@ void Lime::draw(const std::string& outputString) {
 
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = duration_cast<std::chrono::microseconds>(stop - start);
-	this->bottomMessageBar.assign("draw time: ").append(std::to_string(duration.count())).append("us");
+	this->bottomMessageBar->assign("draw time: ").append(std::to_string(duration.count())).append("us");
 }
