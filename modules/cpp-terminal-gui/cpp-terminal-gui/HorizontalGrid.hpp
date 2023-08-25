@@ -25,17 +25,21 @@ public:
 	
 private:
 	list_type gridCells;
-	ScreenPosition screenPosition{0,0};
-	ScreenWidth screenWidth{0,0};
 	bool centering = false;
 	
 public:
 	inline HorizontalGrid(){}
 	
-	inline HorizontalGrid(ScreenPosition screenPosition, ScreenWidth screenWidth, bool centering = false) : 
+	
+	inline HorizontalGrid(ScreenWidth screenWidth = {0,0}, bool centering = false) : 
+		GridCell(screenWidth),
 		gridCells(),
-		screenPosition(screenPosition),
-		screenWidth(screenWidth),
+		centering(centering)
+	{}
+	
+	inline HorizontalGrid(float relativeWidth, bool centering = false) : 
+		GridCell(relativeWidth),
+		gridCells(),
 		centering(centering)
 	{}
 	
