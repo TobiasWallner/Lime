@@ -50,51 +50,43 @@ Lime::Lime() :
 			.x = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().columns()),
 			.y = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().rows())
 		}
-	),
-	textEditorGrid(),
-	topMessageBar(),
-	textEditor(),
-	infoText(),										
-	commandLine(this, &Lime::command_line_callback)
+	)								
 {   
 	{// init top message bar
 		auto Label = std::make_unique<TermGui::Label>();
 		this->topMessageBar = Label.get();
 		this->mainGrid.push_back(std::move(Label));
 	}
-	
 	{// init text editor grid
 		auto hGrid = std::make_unique<TermGui::HorizontalGrid>(1.f);
 		this->textEditorGrid = hGrid.get();
 		this->mainGrid.push_back(std::move(hGrid));
+		
+		{// init text editor
+			auto textEditor = std::make_unique<TermGui::TextEditor>();
+			this->textEditor = textEditor.get();
+			this->textEditorGrid->push_back(std::move(textEditor)); // set the maximal width to 80
+			this->textEditorGrid->set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
+		}
+		
 	}
-	
 	{// init info text
 		auto Label = std::make_unique<TermGui::Label>();
 		this->infoText = Label.get();
 		this->mainGrid.push_back(std::move(Label));
 	}
-
-	//this->mainGrid.push_back_absolute_nodist(&this->commandLine, 1);
-
+	{// init command line
+		auto commandLine = std::make_unique<TermGui::CommandLine<Lime>>(this, &Lime::command_line_callback);
+		this->commandLine = commandLine.get();
+		this->mainGrid.push_back(std::move(commandLine));
+	}
 	{// init bottom Message Bar
 		auto Label = std::make_unique<TermGui::Label>();
 		this->bottomMessageBar = Label.get();
 		this->mainGrid.push_back(std::move(Label));
 	}
-
-	//this->mainGrid.push_back_absolute_nodist(&this->infoText, 6);
 	
 	this->topMessageBar->assign("Hallo :)\nthis is two lines long");
-	
-	{// init text editor
-		auto textEditor = std::make_unique<TermGui::TextEditor>();
-		this->textEditor = textEditor.get();
-		this->textEditorGrid->push_back(std::move(textEditor)); // set the maximal width to 80
-		this->textEditorGrid->set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
-	}
-
-	/*TODO: figure out dynamic height ... re-distribution before every render? ... element stores a callback function to the grid and tells it its size when it changes*/
 
 	activeEditor = this->textEditor;
 	this->deactivate_command_line();
@@ -102,8 +94,8 @@ Lime::Lime() :
 }
 
 inline void Lime::activate_command_line(){
-	this->commandLine.show_cursor(true);
-	this->activeCursor = &this->commandLine;
+	this->commandLine->show_cursor(true);
+	this->activeCursor = this->commandLine;
 	
 	// load infotext
 	this->infoText->clear();

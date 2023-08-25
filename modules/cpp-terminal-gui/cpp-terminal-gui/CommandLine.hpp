@@ -8,7 +8,7 @@
 #include <list>
 
 //project
-#include "RenderTrait.hpp"
+#include "GridCell.hpp"
 #include "EditTrait.hpp"
 
 #include <cpp-terminal/cursor.hpp>
@@ -23,7 +23,7 @@ namespace TermGui{
 /// On construction offer a pointer to the object that should be notified and a 
 /// will move the command string into the provided method
 template<class CallbackObjectType>
-class CommandLine : public RenderTrait, public EditTrait{
+class CommandLine : public GridCell, public EditTrait{
 public:
 	using string_type = utf8::string;
 	using value_type = string_type::value_type;
@@ -35,8 +35,7 @@ private:
 	CallbackObjectType* objectPtr; // pointer cannot be changed after construction
 	method_type method; // method cannot be changed after construction
 	
-	ScreenPosition position;
-	ScreenWidth width;
+	GridTrait* grid = nullptr;
 	
 	size_type cursorIndex = 0;
 	size_type renderStart = 0;
@@ -47,12 +46,11 @@ private:
 	
 public:
 	
-	CommandLine(CallbackObjectType* objectPtr, method_type method, ScreenPosition position = {0,0}, ScreenWidth width = {0,0}) : 
+	CommandLine(CallbackObjectType* objectPtr, method_type method) : 
+		GridCell(ScreenWidth{1, 100}),
 		commandString(), 
 		objectPtr(objectPtr),
-		method(method),
-		position(position),
-		width(width)
+		method(method)
 		{}
 		
 	
@@ -200,21 +198,9 @@ public:
 	/// returns true if the cursor is located at the very end of the current line
 	inline bool is_end_of_line() const { return this->cursorIndex == this->commandString.size(); }
 	
-	/// sets the position of the object on the screen
-	inline void set_screen_position(ScreenPosition position) override {this->position = position;}
-	
-	/// get the position of the object on the screen
-	ScreenPosition get_screen_position() const override {return this->position;}
-	
-	/// sets the width of the object on the screen
-	void set_screen_width(ScreenWidth width) override {this->width = width;}
-	
-	/// get the render width of the object
-	ScreenWidth get_screen_width() const override{return this->width;}
-	
 	void render(std::string& outputString) const override {
-		if(this->width.y > 0){
-			outputString += Term::cursor_move(this->position.y, this->position.x);
+		if(GridCell::get_screen_width().y > 0){
+			outputString += Term::cursor_move(GridCell::get_screen_position().y, GridCell::get_screen_position().x);
 			outputString += ": ";
 			size_type column = this->renderStart;
 			const size_type columnEnd = this->commandString.size();
@@ -255,7 +241,7 @@ public:
 private:
 
 	inline size_type line_width() const {
-		return (this->width.x - (sizeof(": ")-1));
+		return (GridCell::get_screen_width().x - (sizeof(": ")-1));
 	}
 
 };

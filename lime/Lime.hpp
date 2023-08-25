@@ -27,7 +27,7 @@ class Lime{
 	
 	TermGui::Label* infoText = nullptr;
 	
-	TermGui::CommandLine<Lime> commandLine;
+	TermGui::CommandLine<Lime>* commandLine = nullptr;
 	
 	TermGui::TextEditor * activeEditor = nullptr;
 	TermGui::EditTrait * activeCursor = nullptr;
@@ -82,10 +82,10 @@ private:
 
 	void activate_command_line();
 	
-	inline bool is_command_line_active() const { return this->activeCursor == &this->commandLine; }
+	inline bool is_command_line_active() const { return this->activeCursor == this->commandLine; }
 	
 	inline void deactivate_command_line(){
-		this->commandLine.show_cursor(false);
+		this->commandLine->show_cursor(false);
 		if(this->is_command_line_active()){
 			this->activeCursor = nullptr;
 			this->infoText->clear();
