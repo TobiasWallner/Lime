@@ -35,7 +35,26 @@ private:
 	};
 	
 public:
-	inline GridCell() {}
+	/// creates an absolute grid cell with the given target width
+	inline GridCell(ScreenWidth targetWidth = ScreenWidth{0,0}) : 
+		_grid(nullptr),
+		screenPosition{0,0},
+		screenWidth{0,0},
+		lengthType(LengthType::Absolute),
+		targetWidth(targetWidth)
+		{}
+		
+	inline GridCell(float relativeLength, size_type minimalLength = 0, size_type maximalLength = std::numeric_limits<size_type>::max()) : 
+		_grid(nullptr),
+		screenPosition{0,0},
+		screenWidth{0,0},
+		lengthType(LengthType::Relative),
+		relativeLength(relativeLength),
+		minimalLength(minimalLength),
+		maximalLength(maximalLength)
+		{}
+		
+	
 	virtual ~GridCell(){}
 	
 	inline void grid(GridTrait* grid){ this->_grid = grid; }
