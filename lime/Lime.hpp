@@ -17,17 +17,13 @@ class Lime{
 	static constexpr unsigned int input_buffer_len = 4;
 	
 	TermGui::VerticalGrid mainGrid;
-	TermGui::HorizontalGrid textEditorGrid;
 	
-	TermGui::Label topMessageBar;
-	TermGui::Label bottomMessageBar;
-	
-	TermGui::TextEditor textEditor;
-	
-	TermGui::Label infoText;
-	
-	TermGui::CommandLine commandLine;
-	
+	TermGui::HorizontalGrid* textEditorGrid = nullptr;
+	TermGui::Label* topMessageBar = nullptr;
+	TermGui::Label* bottomMessageBar = nullptr;
+	TermGui::TextEditor* textEditor = nullptr;
+	TermGui::Label* infoText = nullptr;
+	TermGui::CommandLine* commandLine = nullptr;
 	TermGui::TextEditor * activeEditor = nullptr;
 	TermGui::EditTrait * activeCursor = nullptr;
 	
@@ -81,25 +77,25 @@ private:
 
 	void activate_command_line();
 	
-	inline bool is_command_line_active() const { return this->activeCursor == &this->commandLine; }
+	inline bool is_command_line_active() const { return this->activeCursor == this->commandLine; }
 	
 	inline void deactivate_command_line(){
-		this->commandLine.show_cursor(false);
+		this->commandLine->show_cursor(false);
 		if(this->is_command_line_active()){
 			this->activeCursor = nullptr;
-			this->infoText.clear();
+			this->infoText->clear();
 		}
 	}
 	
 	void activate_text_editor();
 	
-	inline bool is_text_editor_active() const { return this->activeCursor == &this->textEditor; }
+	inline bool is_text_editor_active() const { return this->activeCursor == this->textEditor; }
 	
 	inline void deactivate_text_editor(){
-		this->textEditor.show_cursor(false);
+		this->textEditor->show_cursor(false);
 		if(this->is_text_editor_active()){
 			this->activeCursor = nullptr;	
-			this->infoText.clear();
+			this->infoText->clear();
 		}
 	}
 	

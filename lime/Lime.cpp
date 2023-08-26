@@ -50,58 +50,76 @@ Lime::Lime() :
 			.x = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().columns()),
 			.y = static_cast<TermGui::ScreenWidth::size_type>(Term::screen_size().rows())
 		}
-	),
-	textEditorGrid(),
-	topMessageBar(),
-	textEditor(),
-	infoText(),										
-	commandLine(this, &Lime::command_line_callback)
+	)								
 {   
-	this->mainGrid.push_back_absolute_nodist(&this->topMessageBar, 1);
-	this->mainGrid.push_back_relative_nodist(&this->textEditorGrid);
-	this->mainGrid.push_back_absolute_nodist(&this->infoText, 6);
-	this->mainGrid.push_back_absolute_nodist(&this->commandLine, 1);
-	this->mainGrid.push_back_absolute_nodist(&this->bottomMessageBar, 1);
-	this->mainGrid.distribute_cells();
+	{// init top message bar
+		auto Label = std::make_unique<TermGui::Label>();
+		this->topMessageBar = Label.get();
+		this->mainGrid.push_back(std::move(Label));
+	}
+	{// init text editor grid
+		auto hGrid = std::make_unique<TermGui::HorizontalGrid>(1.f);
+		this->textEditorGrid = hGrid.get();
+		this->mainGrid.push_back(std::move(hGrid));
+		
+		{// init text editor
+			auto textEditor = std::make_unique<TermGui::TextEditor>();
+			this->textEditor = textEditor.get();
+			this->textEditorGrid->push_back(std::move(textEditor)); // set the maximal width to 80
+			this->textEditorGrid->set_centering(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
+		}
+		
+	}
+	{// init info text
+		auto Label = std::make_unique<TermGui::Label>();
+		this->infoText = Label.get();
+		this->mainGrid.push_back(std::move(Label));
+	}
+	{// init command line
+		auto commandLine = std::make_unique<TermGui::CommandLine<Lime>>(this, &Lime::command_line_callback);
+		this->commandLine = commandLine.get();
+		this->mainGrid.push_back(std::move(commandLine));
+	}
+	{// init bottom Message Bar
+		auto Label = std::make_unique<TermGui::Label>();
+		this->bottomMessageBar = Label.get();
+		this->mainGrid.push_back(std::move(Label));
+	}
 	
-	this->textEditorGrid.push_back_relative_nodist(&this->textEditor, 0, 100); // set the maximal width to 80
-	this->textEditorGrid.set_centering_nodist(true); //TODO: make min, max width/height and centering functions again that when set or changed trigger a re-distribution
-	this->textEditorGrid.distribute_cells();
+	this->topMessageBar->assign("Hallo :)\nthis is two lines long");
 
-	/*TODO: figure out dynamic height ... re-distribution before every render? ... element stores a callback function to the grid and tells it its size when it changes*/
-
-	activeEditor = &(this->textEditor);
+	activeEditor = this->textEditor;
 	this->deactivate_command_line();
 	this->activate_text_editor();
 }
 
 inline void Lime::activate_command_line(){
-	this->commandLine.show_cursor(true);
-	this->activeCursor = &this->commandLine;
+	this->commandLine->show_cursor(true);
+	this->activeCursor = this->commandLine;
 	
 	// load infotext
-	this->infoText.clear();
+	this->infoText->clear();
 	
 	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
 	const auto default_fg = TermGui::default_fg_color();
 	
-	this->infoText  << lime_fg << "save" << default_fg << "  ...............  saves the current file\n"
+	*this->infoText  << lime_fg << "save" << default_fg << "  ...............  saves the current file\n"
 					<< lime_fg << "save-as <filename>" << default_fg << " ..  saves the current file under a new name\n"
 					<< lime_fg << "open <filename>" << default_fg << "  ....  opens the file under the provided name";
 	
 }
 
 void Lime::activate_text_editor(){
-	this->textEditor.show_cursor(true);
-	this->activeCursor = &this->textEditor;
+	this->textEditor->show_cursor(true);
+	this->activeCursor = this->textEditor;
 		
 		//load infotext
-	this->infoText.clear();
+	this->infoText->clear();
 	
 	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
 	const auto default_fg = TermGui::default_fg_color();
 	
-	this->infoText  
+	*this->infoText  
 		<< "Quit: " << lime_fg << "Ctrl + Q" << default_fg << "\t"
 		<< "Save: " << lime_fg << "Ctrl + S" << default_fg << "\t"
 		<< "Paste: " << lime_fg << "Ctrl + V" << default_fg << "\n"
@@ -162,7 +180,7 @@ int Lime::run(int numberOfArguments, const char* const* listOfArgumentStrings){
 		const char * const filepath = listOfArgumentStrings[0];
 		const bool file_exists = std::filesystem::is_regular_file(std::filesystem::status(filepath));
 		if(file_exists){
-			const bool successful_read = this->textEditor.open(filepath);
+			const bool successful_read = this->textEditor->open(filepath);
 			if(!successful_read){
 				std::cout << "Error: could not read file: " << filepath << std::endl;
 				return EXIT_FAILURE;
@@ -357,7 +375,7 @@ void Lime::insert_from_clipboard(){
 	if(successfulRead){
 		this->activeCursor->insert(clipboardBuffer.c_str(), clipboardBuffer.size());
 	}else{
-		this->topMessageBar.assign("Bad Copy Paste Event");
+		this->topMessageBar->assign("Bad Copy Paste Event");
 	}
 }
 
@@ -394,42 +412,42 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::ALT + Term::Key::u : this->activeCursor->move_to_start_of_line(); break;
 		case Term::Key::ALT + Term::Key::o : this->activeCursor->move_to_end_of_line(); break;
 		
-		//case Term::Key::ALT + Term::Key::J : this->topMessageBar.assign("/*TODO: move one word left*/"); break;
-		//case Term::Key::ALT + Term::Key::I : this->topMessageBar.assign("/*move one paragraph/codeblock up*/"); break;
-		//case Term::Key::ALT + Term::Key::L : this->topMessageBar.assign("/*TODO: move one word right*/"); break; 
-		//case Term::Key::ALT + Term::Key::K : this->topMessageBar.assign("/*TODO: move one paragraph/codeblock down*/"); break;
+		//case Term::Key::ALT + Term::Key::J : this->topMessageBar->assign("/*TODO: move one word left*/"); break;
+		//case Term::Key::ALT + Term::Key::I : this->topMessageBar->assign("/*move one paragraph/codeblock up*/"); break;
+		//case Term::Key::ALT + Term::Key::L : this->topMessageBar->assign("/*TODO: move one word right*/"); break; 
+		//case Term::Key::ALT + Term::Key::K : this->topMessageBar->assign("/*TODO: move one paragraph/codeblock down*/"); break;
 		
 		// ------- editing -------
 		case Term::Key::CTRL_V : this->insert_from_clipboard(); break;
-		case Term::Key::CTRL_C : this->topMessageBar.assign("/* TODO: copy selection into clipboard */"); break;
-		case Term::Key::CTRL_X : this->topMessageBar.assign("/* TODO: cut selection into clipboard */"); break;
+		case Term::Key::CTRL_C : this->topMessageBar->assign("/* TODO: copy selection into clipboard */"); break;
+		case Term::Key::CTRL_X : this->topMessageBar->assign("/* TODO: cut selection into clipboard */"); break;
 		
 		default:{
 			if(!keyEvent.isALT() && !keyEvent.isCTRL()){
 				const utf8::Char input(utf32);
 				this->activeCursor->insert(input);
-				this->topMessageBar.assign("Key press: ").append(input.to_std_string_view());
+				this->topMessageBar->assign("Key press: ").append(input.to_std_string_view());
 			}
 		}break;	
 	}
 }
   
 void Lime::prozess_empty_event(){
-	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Empty' ");
+	this->topMessageBar->assign("Internal Error: Unhandeled Event type 'Empty' ");
 }
 
 void Lime::prozess_screen_event(Term::Screen screen){
 	
 	const auto columns = static_cast<TermGui::ScreenWidth::size_type>(screen.columns());
 	const auto rows = static_cast<TermGui::ScreenWidth::size_type>(screen.rows());
-	this->topMessageBar.assign("screen event : ").append(std::to_string(columns)).append(", ").append(std::to_string(rows));
+	this->topMessageBar->assign("screen event : ").append(std::to_string(columns)).append(", ").append(std::to_string(rows));
 	if (columns > 1 && rows > 1) {
 		this->mainGrid.set_screen_width(TermGui::ScreenWidth{ .x = columns, .y = rows });
 	}
 }
 
 void Lime::prozess_cursour_event(){
-	this->topMessageBar.assign("Internal Error: Unhandeled Event type 'Cursor' ");
+	this->topMessageBar->assign("Internal Error: Unhandeled Event type 'Cursor' ");
 }
 
 void Lime::prozess_copy_paste_event(Term::Event&& event){
@@ -445,12 +463,12 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	/*TODO: a way to display error messages that do not disturb the writeing prozess
 		For example by message windows or at a special place at the bottom of the screen
 	*/
-	this->topMessageBar.assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
+	this->topMessageBar->assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
+
 
 void Lime::command_line_callback(void* limePtr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(limePtr);
-	
 	// prozess commanad
 	if(!commands.empty()){
 		if(commands[0] == "save-as"){
@@ -477,57 +495,57 @@ void Lime::command_line_callback(void* limePtr, const std::vector<utf8::string_v
 
 void Lime::set(const std::vector<utf8::string_view>& commands){
 	if(commands.size() < 3){
-		this->topMessageBar.assign("Error: the set command needs 2 parameters: set <value_name> <new_value>.");
+		this->topMessageBar->assign("Error: the set command needs 2 parameters: set <value_name> <new_value>.");
 		return;
 	}
 	if(commands[1] != "tab-size"){
-		this->topMessageBar.assign("Error: unsupported set value name.");
+		this->topMessageBar->assign("Error: unsupported set value name.");
 		return;
 	}
 	std::int32_t value = 0;
 	const auto read = commands[2].parse_int32(&value);
 	if(read == 0){
-		this->topMessageBar.assign("Error: tab size has to be an intager number.");
+		this->topMessageBar->assign("Error: tab size has to be an intager number.");
 		return;
 	}
 	if(value < 0){
-		this->topMessageBar.assign("Error: tab size has to be positive.");
+		this->topMessageBar->assign("Error: tab size has to be positive.");
 		return;
 	}
 	if(value == 0){
-		this->topMessageBar.assign("Error: tab size has to be greater than zero.");
+		this->topMessageBar->assign("Error: tab size has to be greater than zero.");
 		return;
 	}
 	
 	this->activeEditor->tab_size(value);
-	this->topMessageBar.assign("Set tab size to ").append(std::to_string(value));
+	this->topMessageBar->assign("Set tab size to ").append(std::to_string(value));
 }
 
 void Lime::save(){
-	const bool successful_write = this->textEditor.save();
+	const bool successful_write = this->textEditor->save();
 	if (successful_write) {
-		this->topMessageBar.assign("Sussessfully saved file");
+		this->topMessageBar->assign("Sussessfully saved file");
 		return;
 	}else{
-		this->topMessageBar.assign("Error: could not write file");
+		this->topMessageBar->assign("Error: could not write file");
 	}
 }
 
 void Lime::save_as(const std::vector<utf8::string_view>& commands){
 	//TODO: Check if the filename already exists and ask wether or not the file should be overridden.
 	if(commands.size() < 2){
-		this->topMessageBar.assign("Error: the command open needs a filename");
+		this->topMessageBar->assign("Error: the command open needs a filename");
 		return;
 	}
-	this->textEditor.save_as(commands[1].to_std_string());
+	this->textEditor->save_as(commands[1].to_std_string());
 }
 
 void Lime::open(const std::vector<utf8::string_view>& commands){
 	if(commands.size() < 2){
-		this->topMessageBar.assign("Error: the command open needs a filename");
+		this->topMessageBar->assign("Error: the command open needs a filename");
 		return;
 	}
-	this->textEditor.open(commands[1].to_std_string());
+	this->textEditor->open(commands[1].to_std_string());
 }
 
 void Lime::render(std::string& outputString) const{
@@ -541,5 +559,5 @@ void Lime::draw(const std::string& outputString) {
 
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = duration_cast<std::chrono::microseconds>(stop - start);
-	this->bottomMessageBar.assign("draw time: ").append(std::to_string(duration.count())).append("us");
+	this->bottomMessageBar->assign("draw time: ").append(std::to_string(duration.count())).append("us");
 }

@@ -6,42 +6,46 @@
 #include "HorizontalGrid.hpp"
 
 
+
 void TermGui::HorizontalGrid::distribute_cells(){
-	const TermGui::ScreenWidth::size_type absoluteCellWidth = this->accumulate_absolute_cell_width();
-	
+	const TermGui::ScreenWidth::size_type absoluteCellWidth = this->accumulate_cell_target_width();
 	float relativeCellsWidth = this->accumulate_relative_cell_width();
-	ScreenWidth::size_type remainingScreenWidth = this->screenWidth.x - absoluteCellWidth;
+	
+	TermGui::ScreenWidth::size_type remainingAbsoluteScreenWidth = std::min(this->GridCell::get_screen_width().x, absoluteCellWidth);
+	TermGui::ScreenWidth::size_type remainingRelativeScreenWidth = this->GridCell::get_screen_width().x - remainingAbsoluteScreenWidth;
 	
 	// +++++++++++++++++++ distribute the width of all cells +++++++++++++++++
-
-	for(Cell& cell : this->gridCells){
+	for(TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+		GridCell& cell = *pcell.get();
 		if(cell.is_relative()){
 			// calculate width of the relative cell
-			const float relativeWidth = cell.get_relative_width() / relativeCellsWidth;
-			const float absoluteWidth = remainingScreenWidth * relativeWidth;
+			const float relativeWidth = cell.get_relative_length() / relativeCellsWidth;
+			const float absoluteWidth = remainingRelativeScreenWidth * relativeWidth;
 			const TermGui::ScreenWidth::size_type roundedWidth = static_cast<ScreenWidth::size_type>(std::round(absoluteWidth));
-			const TermGui::ScreenWidth::size_type clippedHeight = std::max(std::min(roundedWidth, cell.get_minimal_width()), cell.get_maximal_width());
-			const TermGui::ScreenWidth::size_type assignedWidth = std::min(remainingScreenWidth, clippedHeight);
+			const TermGui::ScreenWidth::size_type clippedWidth = std::max(std::min(roundedWidth, cell.minimal_length()), cell.maximal_length());
+			const TermGui::ScreenWidth::size_type assignedWidth = std::min(static_cast<size_type>(remainingRelativeScreenWidth), static_cast<size_type>(clippedWidth));
 			
 			// assign width
-			cell.set_screen_width(TermGui::ScreenWidth{assignedWidth, this->screenWidth.y});
+			cell.set_screen_width(TermGui::ScreenWidth{assignedWidth, this->GridCell::get_screen_width().y});
 			
 			// post - prozessing and preparation for the next iteration
 			relativeCellsWidth -= relativeWidth;
-			remainingScreenWidth -= assignedWidth;
+			remainingRelativeScreenWidth -= assignedWidth;
 		}else if(cell.is_absolute()){
-			cell.set_screen_width(TermGui::ScreenWidth{cell.get_width_if_absolute(), this->screenWidth.y});
+			const TermGui::ScreenWidth::size_type x = std::min(cell.get_target_width().x, remainingAbsoluteScreenWidth);
+			cell.set_screen_width(TermGui::ScreenWidth{x, this->GridCell::get_screen_width().y});
+			remainingAbsoluteScreenWidth -= x;
 		}
-
 	}
 	
 	// +++++++++++++++++++ distribute the position of all cells +++++++++++++++++
-	ScreenPosition position = this->screenPosition;
+	TermGui::ScreenPosition position = this->GridCell::get_screen_position();
 	if(this->centering){
-		position.x += remainingScreenWidth / 2;
+		position.x += remainingRelativeScreenWidth / 2;
 	}
 	
-	for(Cell& cell : this->gridCells){
+	for(TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+		GridCell& cell = *pcell.get();
 		cell.set_screen_position(position);
 		position.x += cell.get_screen_width().x;
 	}
@@ -50,35 +54,36 @@ void TermGui::HorizontalGrid::distribute_cells(){
 
 void TermGui::HorizontalGrid::render(std::string& outputString) const{
 	if(this->gridCells.empty()){
-		for(int line = 0; line < this->screenWidth.y; ++line){
-			outputString += Term::cursor_move(this->screenPosition.y + line, this->screenPosition.x);
-			outputString.append(this->screenWidth.x, ' ');
+		for(TermGui::ScreenPosition::size_type line = 0; line < this->GridCell::get_screen_width().y; ++line){
+			outputString += Term::cursor_move(this->GridCell::get_screen_position().y + line, this->GridCell::get_screen_position().x);
+			outputString.append(this->GridCell::get_screen_width().x, ' ');
 		}
 	}else {
 		
 		if(this->centering){// clear lines before the first cell
-			const auto x_from = this->screenPosition.x;
-			const auto x_to = this->gridCells.front().get_screen_position().x;
-			const auto clear_width = x_to - x_from;
+			const TermGui::ScreenPosition::size_type x_from = this->GridCell::get_screen_position().x;
+			const TermGui::ScreenPosition::size_type x_to = this->gridCells.front()->GridCell::get_screen_position().x;
+			const TermGui::ScreenPosition::size_type clear_width = x_to - x_from;
 			if (clear_width != 0) {
-				for (auto line = 0; line < this->screenWidth.y; ++line) {
-					outputString += Term::cursor_move(this->screenPosition.y + line, x_from);
+				for (auto line = 0; line < this->GridCell::get_screen_width().y; ++line) {
+					outputString += Term::cursor_move(this->GridCell::get_screen_position().y + line, x_from);
 					outputString.append(clear_width, ' ');
 				}
 			}
 		}
 		
-		for(const Cell& cell : this->gridCells){
+		for(const TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+			const GridCell& cell = *pcell.get();
 			cell.render(outputString);
 		}
 		
 		{// clear lines before the first cell
-			const auto x_from = this->gridCells.back().get_screen_position().x + this->gridCells.back().get_screen_width().x;
-			const auto x_to = this->screenPosition.x + this->screenWidth.x;
-			const auto clear_width = x_to - x_from;
+			const TermGui::ScreenPosition::size_type x_from = this->gridCells.back()->GridCell::get_screen_position().x + this->gridCells.back()->get_screen_width().x;
+			const TermGui::ScreenPosition::size_type x_to = this->GridCell::get_screen_position().x + this->GridCell::get_screen_width().x;
+			const TermGui::ScreenPosition::size_type clear_width = x_to - x_from;
 			if(clear_width != 0){
-				for(auto line = 0; line < this->screenWidth.y; ++line){
-					outputString += Term::cursor_move(this->screenPosition.y + line, x_from);
+				for(auto line = 0; line < this->GridCell::get_screen_width().y; ++line){
+					outputString += Term::cursor_move(this->GridCell::get_screen_position().y + line, x_from);
 					outputString.append(clear_width, ' ');
 				}	
 			}			
@@ -87,10 +92,11 @@ void TermGui::HorizontalGrid::render(std::string& outputString) const{
 }
 
 void TermGui::HorizontalGrid::set_screen_position(TermGui::ScreenPosition position){
-	const long x_delta = static_cast<long>(position.x) - (this->screenPosition.x);
-	const long y_delta = static_cast<long>(position.y) - (this->screenPosition.y);
-	this->screenPosition = position;
-	for(Cell& cell : this->gridCells){
+	const long x_delta = static_cast<long>(position.x) - (this->GridCell::get_screen_position().x);
+	const long y_delta = static_cast<long>(position.y) - (this->GridCell::get_screen_position().y);
+	this->GridCell::set_screen_position(position);
+	for(TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+		GridCell& cell = *pcell.get();
 		auto cellPosition = cell.get_screen_position();
 		cellPosition.x += x_delta;
 		cellPosition.y += y_delta;
@@ -98,15 +104,34 @@ void TermGui::HorizontalGrid::set_screen_position(TermGui::ScreenPosition positi
 	}
 }
 	
-TermGui::ScreenPosition TermGui::HorizontalGrid::get_screen_position() const{
-	return this->screenPosition;
-}
-
 void TermGui::HorizontalGrid::set_screen_width(TermGui::ScreenWidth width){
-	this->screenWidth = width;
+	this->GridCell::set_screen_width(width);
 	this->distribute_cells();
 }
 
-TermGui::ScreenWidth TermGui::HorizontalGrid::get_screen_width() const{
-	return this->screenWidth;
+TermGui::ScreenWidth::size_type TermGui::HorizontalGrid::accumulate_cell_screen_width() const {
+	ScreenWidth::size_type sum = 0;
+	for(const TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+		const GridCell& cell = *pcell.get();
+		sum += cell.get_screen_width().x;
+	}
+	return sum;
+}
+
+TermGui::ScreenWidth::size_type TermGui::HorizontalGrid::accumulate_cell_target_width() const{
+	ScreenWidth::size_type sum = 0;
+	for(const TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+		const GridCell& cell = *pcell.get();
+		sum += cell.get_target_width().x;
+	}
+	return sum;
+}
+	
+float TermGui::HorizontalGrid::accumulate_relative_cell_width() const{
+	float sum = 0;
+	for(const TermGui::HorizontalGrid::UniqueGridCell& pcell : this->gridCells){
+		const GridCell& cell = *pcell.get();
+		sum += cell.get_relative_length();
+	}
+	return sum;
 }

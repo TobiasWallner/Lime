@@ -9,7 +9,7 @@
 #include <vector>
 
 //project
-#include "RenderTrait.hpp"
+#include "GridCell.hpp"
 #include "EditTrait.hpp"
 #include "ColorString.hpp"
 
@@ -46,8 +46,8 @@ const_command_range find(const utf8::string_view& commandName, const_command_ran
 
 /// offers an editable string with a callback function that gets executed on enter.
 /// On construction offer a pointer to the object that should be notified and a 
-/// will move the command string into the provided enterCallback
-class CommandLine : public RenderTrait, public EditTrait{
+/// will move the command string into the provided method
+class CommandLine : public GridCell, public EditTrait{
 public:
 	using string_type = utf8::string;
 	using value_type = string_type::value_type;
@@ -59,7 +59,9 @@ private:
 	const_command_range commands;
 	ScreenPosition position;
 	ScreenWidth width;
-	
+	string_type commandString;
+	GridTrait* grid = nullptr;
+
 	const_range possibleCommandsForInfo = commands;
 	string_type inputString;
 	
@@ -76,8 +78,12 @@ private:
 	bool showCursor = false;
 	
 public:
-	
-	CommandLine(const_command_range commands, ScreenPosition position = {0,0}, ScreenWidth width = {0,0});
+	CommandLine(CallbackObjectType* objectPtr, method_type method) : 
+		GridCell(ScreenWidth{100, 1}),
+		commandString(), 
+		objectPtr(objectPtr),
+		method(method)
+		{}
 	
 	CommandLine(const CommandLine&) = default;
 	CommandLine(CommandLine&&) = default;
@@ -131,18 +137,6 @@ public:
 
 	/// returns true if the cursor is located at the very end of the current line
 	bool is_end_of_line() const;
-	
-	/// sets the position of the object on the screen
-	void set_screen_position(ScreenPosition position) override;
-	
-	/// get the position of the object on the screen
-	ScreenPosition get_screen_position() const override;
-	
-	/// sets the width of the object on the screen
-	void set_screen_width(ScreenWidth width) override;
-	
-	/// get the render width of the object
-	ScreenWidth get_screen_width() const override;
 	
 	void render(std::string& outputString) const override;
 

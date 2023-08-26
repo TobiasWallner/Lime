@@ -11,6 +11,7 @@ add_library(cpp-terminal-gui
 	cpp-terminal-gui/ColorString.cpp	cpp-terminal-gui/ColorString.hpp
 	
 	# ++++++ Grids and Layout ++++++
+	cpp-terminal-gui/GridCell.cpp		cpp-terminal-gui/GridCell.hpp
 	cpp-terminal-gui/VerticalGrid.cpp	cpp-terminal-gui/VerticalGrid.hpp
 	cpp-terminal-gui/HorizontalGrid.cpp	cpp-terminal-gui/HorizontalGrid.hpp
 	
