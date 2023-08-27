@@ -43,6 +43,38 @@
 #include <cstring>
 #endif
 
+const TermGui::Command Lime::commandList[]{
+	TermGui::Command{
+		.name = utf8::string("open"),
+		.info = utf8::string("+ <path> opens the specified file."),
+		.flags = std::vector<TermGui::Command::Flag>({
+			TermGui::Command::Flag{utf8::string("-r"), utf8::string("opens the file in read-only mode")},
+			TermGui::Command::Flag{utf8::string("-a"), utf8::string("opens the file in append-only mode")},  
+			TermGui::Command::Flag{utf8::string("-copy"), utf8::string("+ <path> makes a copy of the file and opens it")},  
+		}),
+		.callbackFn = &Lime::open,
+	},
+	TermGui::Command{
+		.name = utf8::string("quit"),
+		.info = utf8::string("quits the editor if there are no unsaved files"),
+		.flags = std::vector<TermGui::Command::Flag>({
+			TermGui::Command::Flag{utf8::string("-s"), utf8::string("saves all files before quitting")},
+			TermGui::Command::Flag{utf8::string("-f"), utf8::string("forces to quit and discards all unsaved changes")},  
+		}),
+		.callbackFn = &Lime::quit,
+	},
+	TermGui::Command{
+		.name = utf8::string("save"),
+		.info = utf8::string("saves the active file"),
+		.flags = std::vector<TermGui::Command::Flag>({
+			TermGui::Command::Flag{utf8::string("-as <path>"), utf8::string("changes the file to the provided 'path' and saves it. Cannot be used together with '-all'")},
+			TermGui::Command::Flag{utf8::string("-all"), utf8::string("saves all open files")},  
+			TermGui::Command::Flag{utf8::string("-copy <path>"), utf8::string("makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'")},  
+		}),
+		.callbackFn = &Lime::save,
+	},
+};
+
 Lime::Lime() : 
 	mainGrid(	
 		TermGui::ScreenPosition{.x = 1, .y = 1}, 
@@ -77,7 +109,8 @@ Lime::Lime() :
 	}
 	{// init command line
 		auto commandLine = std::make_unique<TermGui::CommandLine>(
-			TermGui::const_command_range{nullptr, nullptr}, 
+			this,
+			TermGui::const_command_range{Lime::commandList, Lime::commandList + sizeof(this->commandList)}, 
 			TermGui::CommandLine::string_type("Press 'Esc' to toggle into the command line"));
 		this->commandLine = commandLine.get();
 		this->mainGrid.push_back(std::move(commandLine));
@@ -468,33 +501,6 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar->assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
-
-void Lime::command_line_callback(void* limePtr, const std::vector<utf8::string_view>& commands){
-	Lime* This = reinterpret_cast<Lime*>(limePtr);
-	// prozess commanad
-	if(!commands.empty()){
-		if(commands[0] == "save-as"){
-			This->save_as(commands);
-		}else if(commands[0] == "save"){
-			This->save();
-		}else if(commands[0] == "open"){
-			This->open(commands);
-		}else if(commands[0] == "set"){
-			This->set(commands);
-		}else{
-			This->topMessageBar->assign("Unsupported Command: ").append(commands[0]);
-		}
-	}else{
-		This->topMessageBar->assign("Empty Command");
-	}
-	
-	
-	
-	// go back into the editor mode
-	This->toggle_command_line();
-	This->deactivate_command_line();
-}
-
 void Lime::set(const std::vector<utf8::string_view>& commands){
 	if(commands.size() < 3){
 		this->topMessageBar->assign("Error: the set command needs 2 parameters: set <value_name> <new_value>.");
@@ -523,31 +529,88 @@ void Lime::set(const std::vector<utf8::string_view>& commands){
 	this->topMessageBar->assign("Set tab size to ").append(std::to_string(value));
 }
 
-void Lime::save(){
+
+void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
+	Lime* This = reinterpret_cast<Lime*>(ptr);
+	switch(commands.size()){
+		case 1 : {
+			return (void)This->commandLine->message.assign("Error: the command open needs a filename");
+		}break;
+		case 2 : {
+			(void)This->open(commands[1].to_std_string());
+		}break;
+		case 3 : {
+			if(commands[2] == "-r"){
+				return (void)This->commandLine->message.assign("Error: open: -r flag is not supported yet");
+			}else if(commands[2] == "-a"){
+				return (void)This->commandLine->message.assign("Error: open: -a flag is not supported yet");
+			}else if(commands[2] == "-copy"){
+				return (void)This->commandLine->message.assign("Error: open: -copy flag is not supported yet");
+			}
+		}break;
+	}
+	This->commandLine->message.assign("Error: incorrect arguments");
+}
+
+bool Lime::open(const std::string& path){
+	const bool successfulRead = this->textEditor->open(path);
+	if (!successfulRead) {
+		this->commandLine->message.assign("Error: could not read file");
+	}
+	return successfulRead;
+}
+
+
+void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
+	Lime* This = reinterpret_cast<Lime*>(ptr);
+	switch(commands.size()){
+		case 1 : {
+			return (void)This->quit(); //TODO: -> save_quit();
+		}break;
+		case 2 : {
+			if(commands[2] == "-s"){
+				return (void)This->commandLine->message.assign("Error: open: -s flag is not supported yet");
+			}else if(commands[2] == "-f"){
+				return (void)This->quit(); //TODO: -> force_quit();
+			}
+		}break;
+	}
+	This->commandLine->message.assign("Error: incorrect arguments");
+}
+
+
+void Lime::save(void* ptr, const std::vector<utf8::string_view>& commands){
+	Lime* This = reinterpret_cast<Lime*>(ptr);
+	switch(commands.size()){
+		case 1 : {
+			return (void)This->save();
+		}break;
+		case 2 : {
+			if(commands[2] == "-all"){
+				return (void)This->commandLine->message.assign("Error: save: -all flag is not supported yet");
+			}
+		}break;
+		case 3 : {
+			if(commands[2] == "-as"){
+				return (void)This->save_as(commands[2].to_std_string());
+			}else if(commands[2] == "-copy"){
+				return (void)This->commandLine->message.assign("Error: save: -copy flag is not supported yet");
+			}
+		}break;
+	}
+	This->commandLine->message.assign("Error: incorrect arguments");
+}
+
+bool Lime::save(){
 	const bool successful_write = this->textEditor->save();
-	if (successful_write) {
-		this->topMessageBar->assign("Sussessfully saved file");
-		return;
-	}else{
-		this->topMessageBar->assign("Error: could not write file");
+	if (!successful_write) {
+		this->commandLine->message.assign("Error: could not write file");
 	}
+	return successful_write;
 }
 
-void Lime::save_as(const std::vector<utf8::string_view>& commands){
-	//TODO: Check if the filename already exists and ask wether or not the file should be overridden.
-	if(commands.size() < 2){
-		this->topMessageBar->assign("Error: the command open needs a filename");
-		return;
-	}
-	this->textEditor->save_as(commands[1].to_std_string());
-}
-
-void Lime::open(const std::vector<utf8::string_view>& commands){
-	if(commands.size() < 2){
-		this->topMessageBar->assign("Error: the command open needs a filename");
-		return;
-	}
-	this->textEditor->open(commands[1].to_std_string());
+bool Lime::save_as(const std::string& path){
+	return this->textEditor->save_as(path);
 }
 
 void Lime::render(std::string& outputString) const{

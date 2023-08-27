@@ -14,7 +14,8 @@
 #include <cpp-terminal-gui/Label.hpp>
 
 class Lime{
-	static constexpr unsigned int input_buffer_len = 4;
+	
+	static const TermGui::Command commandList[]; // sorted array of commans
 	
 	TermGui::VerticalGrid mainGrid;
 	
@@ -28,6 +29,8 @@ class Lime{
 	TermGui::EditTrait * activeCursor = nullptr;
 	
 	bool main_loop_continue = true;
+	
+	void init_command_list(); 
 	
 public:
 	
@@ -72,9 +75,6 @@ public:
 	void quit();
 	
 private:
-	
-	static void command_line_callback(void* limePtr, const std::vector<utf8::string_view>& commands);
-
 	void activate_command_line();
 	
 	inline bool is_command_line_active() const { return this->activeCursor == this->commandLine; }
@@ -169,14 +169,18 @@ private:
 	/// inserts the content from the clipboard into the current active editor.
 	void insert_from_clipboard();
 	
-	/// saves the currently focussed file at the currently specified filepath
-	void save();
-	
-	/// saves the currently focussed file at the provided file path and changes the filepath of that file to the new one
-	void save_as(const std::vector<utf8::string_view>& commands);
-	
 	/// opens the file at the specified location and loads it into a new or empty and unnamed editor that is in focus
-	void open(const std::vector<utf8::string_view>& commands);
+	static void open(void* ptr, const std::vector<utf8::string_view>& commands);
+	bool open(const std::string& path);
+	
+	static void quit(void* ptr, const std::vector<utf8::string_view>& commands);
+	
+	/// saves the currently focussed file at the currently specified filepath
+	static void save(void* ptr, const std::vector<utf8::string_view>& commands);
+	bool save();
+	bool save_as(const std::string& path);
+	
+	
 	
 	void set(const std::vector<utf8::string_view>& commands);
 };
