@@ -7,7 +7,8 @@
 #include "CommandLine.hpp"
 #include "FontStyle.hpp"
 
-TermGui::CommandLine::CommandLine(const_command_range commands, string_type inintMessage) : 
+TermGui::CommandLine::CommandLine(object_pointer objectPtr, const_command_range commands, string_type inintMessage) : 
+		objectPtr(objectPtr),
 		GridCell(ScreenWidth{100, 1}),
 		commands(commands),
 		possibleCommands(commands),
@@ -132,7 +133,7 @@ void TermGui::CommandLine::enter() {
 		this->message = "command does not have a callback function";
 	}else{
 		auto args = parse_command_string (this->inputString);
-		command->callbackFn(command->objectPtr, args);
+		command->callbackFn(objectPtr, args);
 	}
 	
 	if(this->commandHistory.empty()){

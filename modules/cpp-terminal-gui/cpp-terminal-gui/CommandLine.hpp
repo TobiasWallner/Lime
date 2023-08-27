@@ -15,25 +15,19 @@
 
 #include <cpp-terminal/cursor.hpp>
 
-/*
-	TODO: save command history
-*/
-
 namespace TermGui{
 
 /// command element
 struct Command{
 	using object_pointer = void*;
-	using callback_type = void(*)(object_pointer self, const std::vector<utf8::string_view>& command);
-	struct Flag{ const utf8::string_view name; const utf8::string_view info; };
-	struct ConstFlagView{ const Flag* begin; size_t count; };
+	using callback_function = void(*)(object_pointer self, const std::vector<utf8::string_view>& command);
+	struct Flag{ const utf8::string name; const utf8::string info; };
 	
-	const utf8::string_view name;
-	const utf8::string_view info;
-	const ConstFlagView flags;
-	
+	const utf8::string name;
+	const utf8::string info;
+	const std::vector<Flag> flags;
 	object_pointer objectPtr;
-	callback_type callbackFn;
+	callback_function callbackFn;
 };
 
 struct const_command_range { const Command* first; const Command* last;};
@@ -50,9 +44,10 @@ public:
 	using value_type = string_type::value_type;
 	using size_type = string_type::size_type;
 	using object_pointer = Command::object_pointer;
-	using callback_type = Command::callback_type;
+	using callback_function = Command::callback_function;
 
 private:
+	object_pointer objectPtr;
 	const_command_range commands;
 	const_command_range possibleCommands;
 	string_type inputString;
@@ -72,7 +67,7 @@ private:
 	bool showCursor = false;
 	
 public:
-	CommandLine(const_command_range commands, string_type inintMessage = string_type(""));
+	CommandLine(object_pointer objectPtr, const_command_range commands, string_type inintMessage = string_type(""));
 	CommandLine(const CommandLine&) = default;
 	CommandLine(CommandLine&&) = default;
 	CommandLine& operator=(const CommandLine&) = default;
