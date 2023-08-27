@@ -26,20 +26,17 @@ struct Command{
 	using object_pointer = void*;
 	using callback_type = void(*)(object_pointer self, const std::vector<utf8::string_view>& command);
 	struct Flag{ const utf8::string_view name; const utf8::string_view info; };
-	struct ConstFlagView(){ const Flag* begin; size_t count; };
+	struct ConstFlagView{ const Flag* begin; size_t count; };
 	
 	const utf8::string_view name;
 	const utf8::string_view info;
-	const FlagView flags;
+	const ConstFlagView flags;
+	
 	object_pointer objectPtr;
 	callback_type callbackFn;
-	
-	inline void call(const std::vector<utf8::string_view>& command) const { 
-		if(callbackFn != nullptr) callbackFn(objectPtr, command); 
-	}
 };
 
-struct const_command_range { const Command* first, const Command* last};
+struct const_command_range { const Command* first; const Command* last;};
 
 /// searches a range of commands that starts with the provided command name in the sorted range of commands
 const_command_range find(const utf8::string_view& commandName, const_command_range sortedCommandRange);
@@ -57,18 +54,15 @@ public:
 
 private:
 	const_command_range commands;
-	ScreenPosition position;
-	ScreenWidth width;
-	string_type commandString;
-	GridTrait* grid = nullptr;
-
-	const_range possibleCommandsForInfo = commands;
+	const_command_range possibleCommands;
 	string_type inputString;
 	
+public:
+	string_type message;
+	
+private:
 	std::list<string_type> commandHistory;
 	std::list<string_type>::const_iterator historyItr = commandHistory.cend();
-	
-	std::string startSymbol = ":";
 	
 	std::int32_t cursorIndex = 0;
 	std::int32_t cursorColumn = 0;
@@ -78,20 +72,11 @@ private:
 	bool showCursor = false;
 	
 public:
-	CommandLine(CallbackObjectType* objectPtr, method_type method) : 
-		GridCell(ScreenWidth{100, 1}),
-		commandString(), 
-		objectPtr(objectPtr),
-		method(method)
-		{}
-	
+	CommandLine(const_command_range commands, string_type inintMessage = string_type(""));
 	CommandLine(const CommandLine&) = default;
 	CommandLine(CommandLine&&) = default;
-	
 	CommandLine& operator=(const CommandLine&) = default;
 	CommandLine& operator=(CommandLine&&) = default;
-	
-	inline void start_symbol(std::string_view startSymbol) {this->startSymbol = startSymbol;}
 	
 	void show_cursor(bool on_off) override;
 	
@@ -139,8 +124,12 @@ public:
 	bool is_end_of_line() const;
 	
 	void render(std::string& outputString) const override;
+	void render_command(std::string& outputString) const;
+	void render_message(std::string& outputString) const;
 
-	inline size_type text_width() const {return (this->width.x - this->startSymbol.size());}
+	size_type text_width() const;
+	bool display_message() const;
+	char start_symbol() const;
 
 };
 
