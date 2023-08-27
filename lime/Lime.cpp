@@ -76,7 +76,9 @@ Lime::Lime() :
 		this->mainGrid.push_back(std::move(Label));
 	}
 	{// init command line
-		auto commandLine = std::make_unique<TermGui::CommandLine<Lime>>(this, &Lime::command_line_callback);
+		auto commandLine = std::make_unique<TermGui::CommandLine>(
+			TermGui::const_command_range{nullptr, nullptr}, 
+			TermGui::CommandLine::string_type("Press 'Esc' to toggle into the command line"));
 		this->commandLine = commandLine.get();
 		this->mainGrid.push_back(std::move(commandLine));
 	}
@@ -480,10 +482,10 @@ void Lime::command_line_callback(void* limePtr, const std::vector<utf8::string_v
 		}else if(commands[0] == "set"){
 			This->set(commands);
 		}else{
-			This->topMessageBar.assign("Unsupported Command: ").append(commands[0]);
+			This->topMessageBar->assign("Unsupported Command: ").append(commands[0]);
 		}
 	}else{
-		This->topMessageBar.assign("Empty Command");
+		This->topMessageBar->assign("Empty Command");
 	}
 	
 	
