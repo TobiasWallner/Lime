@@ -118,11 +118,18 @@ public:
 	/// returns true if the cursor is located at the very end of the current line
 	bool is_end_of_line() const;
 	
+	ScreenPosition info_position() const;
+	ScreenWidth info_width() const;
+	ScreenPosition command_line_position() const;
+	ScreenWidth command_line_width() const;
+	
 	void render(std::string& outputString) const override;
 	void render_command(std::string& outputString) const;
+	void render_command_info(std::string& outputString) const;
+	void render_command_line(std::string& outputString) const;
 	void render_message(std::string& outputString) const;
-
-	size_type text_width() const;
+	
+	size_type input_line_width() const;
 	bool display_message() const;
 	char start_symbol() const;
 

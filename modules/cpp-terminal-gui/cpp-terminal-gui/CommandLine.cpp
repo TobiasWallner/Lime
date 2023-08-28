@@ -94,10 +94,14 @@ TermGui::const_command_range find(const utf8::string_view& command, const TermGu
 }
 
 void TermGui::CommandLine::show_cursor(bool logic) { 
-	if(logic == true) this->message.clear();
 	this->showCursor = logic; 
+	if(logic == true){
+		this->message.clear();
+		this->GridCell::set_target_width(TermGui::ScreenWidth{.x = this->get_screen_width().x, .y = 2});
+	}else{
+		this->GridCell::set_target_width(TermGui::ScreenWidth{.x = this->get_screen_width().x, .y = 1});
+	}
 }
-
 
 void TermGui::CommandLine::clear() {
 	this->move_to_start_of_line();
@@ -161,8 +165,8 @@ void TermGui::CommandLine::Delete() {
 void TermGui::CommandLine::move_screen_to_cursor(){
 	if(this->cursorColumn < this->screenColumn + this->margin){
 		this->screenColumn = (this->cursorColumn < this->margin) ? 0 : this->cursorColumn - this->margin;
-	}else if(this->cursorColumn > this->screenColumn + this->text_width() - this->margin){
-		this->screenColumn = this->cursorColumn - this->text_width() + this->margin;
+	}else if(this->cursorColumn > this->screenColumn + this->input_line_width() - this->margin){
+		this->screenColumn = this->cursorColumn - this->input_line_width() + this->margin;
 	}
 }
 
@@ -225,7 +229,7 @@ void TermGui::CommandLine::move_to_start_of_file() {
 
 void TermGui::CommandLine::move_to_end_of_line() {
 	this->cursorIndex = this->inputString.size(); 
-	this->screenColumn = (this->inputString.size() + 3 > this->text_width()) ? this->inputString.size() - (this->text_width() - 3): 0;
+	this->screenColumn = (this->inputString.size() + 3 > this->input_line_width()) ? this->inputString.size() - (this->input_line_width() - 3): 0;
 }
 
 void TermGui::CommandLine::move_to_end_of_file() { 
@@ -240,9 +244,38 @@ bool TermGui::CommandLine::is_end_of_line() const {
 	return this->cursorIndex == this->inputString.size(); 
 }
 
+TermGui::ScreenPosition TermGui::CommandLine::info_position() const{
+	TermGui::ScreenPosition result = this->GridCell::get_screen_position();
+	return result;
+}
+
+TermGui::ScreenWidth TermGui::CommandLine::info_width() const{
+	const TermGui::ScreenWidth totalWidth = this->GridCell::get_screen_width();
+	const TermGui::ScreenWidth commandLineWidth = this->command_line_width();
+	const TermGui::ScreenWidth result{.x = totalWidth.x, .y = totalWidth.y - commandLineWidth.y};
+	return result;
+}
+
+TermGui::ScreenPosition TermGui::CommandLine::command_line_position() const{
+	TermGui::ScreenPosition infoPosition = this->info_position();
+	TermGui::ScreenWidth infoWidth = this->info_width();
+	TermGui::ScreenPosition result{.x = infoPosition.x, .y = infoPosition.y + infoWidth.y};
+	return result;
+}
+
+TermGui::ScreenWidth TermGui::CommandLine::command_line_width() const{
+	const TermGui::ScreenWidth result{.x = this->GridCell::get_screen_width().x, .y = std::min(this->GridCell::get_screen_width().y, 1)};
+	return result;
+}
+
+void TermGui::CommandLine::render_command(std::string& outputString) const {
+	render_command_info(outputString);
+	render_command_line(outputString);
+}
+
 void TermGui::CommandLine::render(std::string& outputString) const {
 	if(this->GridCell::get_screen_width().y > 0){
-		outputString += Term::cursor_move(this->GridCell::get_screen_position().y, this->GridCell::get_screen_position().x);
+		
 		if(this->display_message()){
 			this->render_message(outputString);
 		}else{
@@ -251,12 +284,36 @@ void TermGui::CommandLine::render(std::string& outputString) const {
 	}
 }
 
-void TermGui::CommandLine::render_command(std::string& outputString) const {
+void TermGui::CommandLine::render_command_info(std::string& outputString) const {
+	const auto infoWidth = this->info_width();
+	const auto infoPosition = this->info_position();
+	
+	if(infoWidth.y == 0) return;
+	
+	outputString += Term::cursor_move(infoPosition.y, infoPosition.x);
+	size_type screenColumn = 0;
+	size_type screenEnd = infoWidth.x;
+	
+	for(auto comItr = this->possibleCommands.first; comItr != this->possibleCommands.last && screenColumn != screenEnd; (void)++comItr){
+		for(auto nameItr = comItr->name.begin(); nameItr != comItr->name.end() && screenColumn != screenEnd; (void)++nameItr, (void)++screenColumn){
+			outputString += nameItr->to_std_string_view();
+		}
+		if(screenColumn != screenEnd){
+			outputString += ' ';
+			++screenColumn;
+		}
+	}
+	
+	outputString.append(screenEnd - screenColumn, ' ');
+}
+
+void TermGui::CommandLine::render_command_line(std::string& outputString) const {
+	outputString += Term::cursor_move(this->command_line_position().y, this->command_line_position().x);
 	outputString += ':';
 	size_type column = this->screenColumn;
 	const size_type columnEnd = this->inputString.size();
 	size_type screenColumn = 0;
-	const size_type screenColumnEnd = this->text_width();
+	const size_type screenColumnEnd = this->input_line_width();
 	
 	for(; column < columnEnd && screenColumn < (screenColumnEnd - this->is_end_of_line()); ++column, (void)++screenColumn){
 		const size_type show_cursor = this->showCursor && column == this->cursorIndex;
@@ -290,11 +347,12 @@ void TermGui::CommandLine::render_command(std::string& outputString) const {
 }
 
 void TermGui::CommandLine::render_message(std::string& outputString) const {
+	outputString += Term::cursor_move(this->GridCell::get_screen_position().y, this->GridCell::get_screen_position().x);
 	outputString += '>';
 	size_type column = 0;
 	const size_type columnEnd = this->message.size();
 	size_type screenColumn = 0;
-	const size_type screenColumnEnd = this->text_width();
+	const size_type screenColumnEnd = this->input_line_width();
 	
 	if(column < columnEnd && screenColumn < screenColumnEnd && this->showCursor){
 		// show cursor is true
@@ -327,6 +385,6 @@ void TermGui::CommandLine::render_message(std::string& outputString) const {
 	outputString.append(screenColumnEnd - screenColumn, ' ');
 }
 
-TermGui::CommandLine::size_type TermGui::CommandLine::text_width() const {return (this->GridCell::get_screen_width().x - 1 /* 1 is the size of the start symbol */);}
+TermGui::CommandLine::size_type TermGui::CommandLine::input_line_width() const {return (this->GridCell::get_screen_width().x - 1 /* 1 is the size of the start symbol */);}
 bool TermGui::CommandLine::display_message() const {return !message.empty();}
 char TermGui::CommandLine::start_symbol() const { return (this->display_message()) ? '>' : ':';}
