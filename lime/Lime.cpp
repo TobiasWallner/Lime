@@ -7,6 +7,7 @@
 #include <string.h>
 
 // C++ std
+#include <type_traits>
 #include <iostream>
 #include <cctype>
 #include <cstdint>
@@ -133,7 +134,7 @@ Lime::Lime() :
 	{// init command line
 		auto commandLine = std::make_unique<TermGui::CommandLine>(
 			this,
-			TermGui::const_command_range{Lime::commandList, Lime::commandList + sizeof(this->commandList)}, 
+			TermGui::const_command_range{Lime::commandList, Lime::commandList + sizeof(this->commandList) / sizeof(std::remove_all_extents<decltype(this->commandList)>::type)},
 			TermGui::CommandLine::string_type("Press 'Esc' to toggle into the command line"));
 		this->commandLine = commandLine.get();
 		this->mainGrid.push_back(std::move(commandLine));
