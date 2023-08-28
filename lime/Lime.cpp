@@ -102,11 +102,6 @@ Lime::Lime() :
 		}
 		
 	}
-	{// init info text
-		auto Label = std::make_unique<TermGui::Label>();
-		this->infoText = Label.get();
-		this->mainGrid.push_back(std::move(Label));
-	}
 	{// init command line
 		auto commandLine = std::make_unique<TermGui::CommandLine>(
 			this,
@@ -131,47 +126,11 @@ Lime::Lime() :
 inline void Lime::activate_command_line(){
 	this->commandLine->show_cursor(true);
 	this->activeCursor = this->commandLine;
-	
-	// load infotext
-	this->infoText->clear();
-	
-	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
-	const auto default_fg = TermGui::default_fg_color();
-	
-	*this->infoText  << lime_fg << "save" << default_fg << "  ...............  saves the current file\n"
-					<< lime_fg << "save-as <filename>" << default_fg << " ..  saves the current file under a new name\n"
-					<< lime_fg << "open <filename>" << default_fg << "  ....  opens the file under the provided name";
-	
 }
 
 void Lime::activate_text_editor(){
 	this->textEditor->show_cursor(true);
 	this->activeCursor = this->textEditor;
-		
-		//load infotext
-	this->infoText->clear();
-	
-	const auto lime_fg = TermGui::fg_color(LimeTheme::green[0], LimeTheme::green[1], LimeTheme::green[2]);
-	const auto default_fg = TermGui::default_fg_color();
-	
-	*this->infoText  
-		<< "Quit: " << lime_fg << "Ctrl + Q" << default_fg << "\t"
-		<< "Save: " << lime_fg << "Ctrl + S" << default_fg << "\t"
-		<< "Paste: " << lime_fg << "Ctrl + V" << default_fg << "\n"
-			   
-		<< "Move Left: " << lime_fg << "Alt + J" << default_fg << "\t"
-		<< "Move Up: " << lime_fg << "Alt + I" << default_fg << "\t"
-		<< "Move Right: " << lime_fg << "Alt + L" << default_fg << "\t"
-		<< "Move Down: " << lime_fg << "Alt + K" << default_fg << "\n"
-			   
-		<< "Move to Line Start: " << lime_fg << "Alt + U" << default_fg << "\t"
-		<< "Move to Line End: " << lime_fg << "Alt + O" << default_fg << "\n"
-		   
-		<< "Move to File Start: " << lime_fg << "Ctrl + T" << default_fg << "\t"
-		<< "Move to File End: " << lime_fg << "Ctrl + E" << default_fg << "\n"
-		
-		<< "Toggle Command Line: " << lime_fg << "Esc" << default_fg;
-		
 }
 
 int Lime::run(){

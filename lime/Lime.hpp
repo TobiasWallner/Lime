@@ -23,7 +23,6 @@ class Lime{
 	TermGui::Label* topMessageBar = nullptr;
 	TermGui::Label* bottomMessageBar = nullptr;
 	TermGui::TextEditor* textEditor = nullptr;
-	TermGui::Label* infoText = nullptr;
 	TermGui::CommandLine* commandLine = nullptr;
 	TermGui::TextEditor * activeEditor = nullptr;
 	TermGui::EditTrait * activeCursor = nullptr;
@@ -83,7 +82,6 @@ private:
 		this->commandLine->show_cursor(false);
 		if(this->is_command_line_active()){
 			this->activeCursor = nullptr;
-			this->infoText->clear();
 		}
 	}
 	
@@ -95,7 +93,6 @@ private:
 		this->textEditor->show_cursor(false);
 		if(this->is_text_editor_active()){
 			this->activeCursor = nullptr;	
-			this->infoText->clear();
 		}
 	}
 	
