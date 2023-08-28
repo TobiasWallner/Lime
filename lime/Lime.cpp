@@ -43,8 +43,8 @@
 #include <cstring>
 #endif
 
-const TermGui::Command Lime::commandList[]{
-	TermGui::Command{
+static TermGui::Command generate_open_command(){
+	TermGui::Command result{
 		.name = utf8::string("open"),
 		.info = utf8::string("+ <path> opens the specified file."),
 		.flags = std::vector<TermGui::Command::Flag>({
@@ -53,8 +53,12 @@ const TermGui::Command Lime::commandList[]{
 			TermGui::Command::Flag{utf8::string("-copy"), utf8::string("+ <path> makes a copy of the file and opens it")},  
 		}),
 		.callbackFn = &Lime::open,
-	},
-	TermGui::Command{
+	};
+	return result;
+}
+
+static TermGui::Command generate_quit_command(){
+	TermGui::Command result{
 		.name = utf8::string("quit"),
 		.info = utf8::string("quits the editor if there are no unsaved files"),
 		.flags = std::vector<TermGui::Command::Flag>({
@@ -62,17 +66,41 @@ const TermGui::Command Lime::commandList[]{
 			TermGui::Command::Flag{utf8::string("-f"), utf8::string("forces to quit and discards all unsaved changes")},  
 		}),
 		.callbackFn = &Lime::quit,
-	},
-	TermGui::Command{
+	};
+	return result;
+}
+
+static TermGui::Command generate_save_command(){
+	TermGui::Command result{
 		.name = utf8::string("save"),
 		.info = utf8::string("saves the active file"),
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::string("-as <path>"), utf8::string("changes the file to the provided 'path' and saves it. Cannot be used together with '-all'")},
+			TermGui::Command::Flag{utf8::string("-as"), utf8::string("+ <path>, changes the file to the provided 'path' and saves it. Cannot be used together with '-all'")},
 			TermGui::Command::Flag{utf8::string("-all"), utf8::string("saves all open files")},  
-			TermGui::Command::Flag{utf8::string("-copy <path>"), utf8::string("makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'")},  
+			TermGui::Command::Flag{utf8::string("-copy"), utf8::string("+ <path>, makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'")},  
 		}),
 		.callbackFn = &Lime::save,
-	},
+	};
+	return result;
+}
+
+static TermGui::Command generate_set_command(){
+	TermGui::Command result{
+		.name = utf8::string("set"),
+		.info = utf8::string("<value_name> <new_value> sets a value to the provided one"),
+		.flags = std::vector<TermGui::Command::Flag>({
+			TermGui::Command::Flag{utf8::string("tabsize"), utf8::string("+ <number>, sets the tabsize")}
+		}),
+		.callbackFn = &Lime::set,
+	};
+	return result;
+}
+
+const TermGui::Command Lime::commandList[]{
+	generate_open_command(),
+	generate_quit_command(),
+	generate_save_command(),
+	generate_set_command(),
 };
 
 Lime::Lime() : 
@@ -460,34 +488,35 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar->assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
-void Lime::set(const std::vector<utf8::string_view>& commands){
-	if(commands.size() < 3){
-		this->topMessageBar->assign("Error: the set command needs 2 parameters: set <value_name> <new_value>.");
-		return;
+void Lime::set(void* ptr, const std::vector<utf8::string_view>& commands){
+	Lime* This = reinterpret_cast<Lime*>(ptr);
+	if(commands.size() == 3){
+		//error
+		This->commandLine->message.assign("Error: the set command needs 2 parameters: set <value_name> <new_value>.");
+	}else if(commands[1] == "tabsize"){
+		This->set_tab_size(commands[2]);
+	}else{
+		//error
+		This->commandLine->message.assign("Error: unsupported set value name.");
 	}
-	if(commands[1] != "tab-size"){
-		this->topMessageBar->assign("Error: unsupported set value name.");
-		return;
-	}
-	std::int32_t value = 0;
-	const auto read = commands[2].parse_int32(&value);
-	if(read == 0){
-		this->topMessageBar->assign("Error: tab size has to be an intager number.");
-		return;
-	}
-	if(value < 0){
-		this->topMessageBar->assign("Error: tab size has to be positive.");
-		return;
-	}
-	if(value == 0){
-		this->topMessageBar->assign("Error: tab size has to be greater than zero.");
-		return;
-	}
-	
-	this->activeEditor->tab_size(value);
-	this->topMessageBar->assign("Set tab size to ").append(std::to_string(value));
 }
 
+void Lime::set_tab_size(utf8::string_view tabSize){
+	std::int32_t value = 0;
+	const auto read = tabSize.parse_int32(&value);
+	if(read == 0){
+		//error
+		this->commandLine->message.assign("Error: tab size has to be an intager number.");
+	}else if(value < 0){
+		//error
+		this->commandLine->message.assign("Error: tab size has to be positive.");
+	}else if(value == 0){
+		//error
+		this->commandLine->message.assign("Error: tab size has to be greater than zero.");
+	}else{
+		this->activeEditor->tab_size(value);
+	}
+}
 
 void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);

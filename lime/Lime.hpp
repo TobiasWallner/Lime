@@ -73,7 +73,7 @@ public:
 	*/
 	void quit();
 	
-private:
+//private:
 	void activate_command_line();
 	
 	inline bool is_command_line_active() const { return this->activeCursor == this->commandLine; }
@@ -177,7 +177,6 @@ private:
 	bool save();
 	bool save_as(const std::string& path);
 	
-	
-	
-	void set(const std::vector<utf8::string_view>& commands);
+	static void set(void* ptr, const std::vector<utf8::string_view>& commands);
+	void set_tab_size(utf8::string_view tabSize);
 };
