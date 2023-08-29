@@ -85,11 +85,42 @@ TermGui::const_command_range TermGui::find(const utf8::string_view& command, con
 
 void TermGui::CommandLine::show_cursor(bool logic) { 
 	this->showCursor = logic; 
-	if(logic == true){
-		this->message.clear();
-		this->GridCell::set_target_width(TermGui::ScreenWidth{.x = this->get_screen_width().x, .y = 2});
+	if(logic == true) this->message.clear();
+	this->update_height();
+}
+
+TermGui::ScreenWidth::size_type TermGui::CommandLine::get_target_info_height(){
+	if(this->showCursor){
+			if(this->possibleCommands.first == nullptr || this->possibleCommands.last == nullptr){
+				return 0;
+			}else if(this->possibleCommands.last - this->possibleCommands.first <= 0){
+				return 0;
+			}else if(this->possibleCommands.last - this->possibleCommands.first == 1){
+				const TermGui::ScreenWidth::size_type nameHeight = 1;
+				const TermGui::ScreenWidth::size_type infoHeight = 1;
+				const TermGui::ScreenWidth::size_type flagsHeight = this->possibleCommands.first->flags.size();
+				return nameHeight + infoHeight + flagsHeight;
+			}else{
+				return 1;
+			}
 	}else{
-		this->GridCell::set_target_width(TermGui::ScreenWidth{.x = this->get_screen_width().x, .y = 1});
+		return 0;
+	}
+}
+
+void TermGui::CommandLine::update_height(){
+	const TermGui::ScreenWidth::size_type commandLineHeight = 1;
+	const TermGui::ScreenWidth targetWidth = this->GridCell::get_target_width();
+	if(this->showCursor == false){
+		if(commandLineHeight != targetWidth.y){
+			this->GridCell::set_target_width(TermGui::ScreenWidth{.x = targetWidth.x, .y = commandLineHeight});
+		}
+	}else{
+		const TermGui::ScreenWidth::size_type infoHeight = get_target_info_height();
+		const TermGui::ScreenWidth::size_type totalHeight = commandLineHeight + infoHeight;
+		if(totalHeight != targetWidth.y){
+			this->GridCell::set_target_width(TermGui::ScreenWidth{.x = targetWidth.x, .y = totalHeight});
+		}
 	}
 }
 
@@ -133,14 +164,19 @@ void TermGui::CommandLine::enter() {
 	
 	this->clear();
 
+	//update info
 	this->possibleCommands = this->commands;
+	this->update_height();
 }
 
 void TermGui::CommandLine::erase() { 
 	if(!this->is_end_of_line()){
 		this->inputString.erase(this->cursorIndex); 
 	}
+	
+	//update info
 	this->select_possible_commands();
+	this->update_height();
 }
 
 void TermGui::CommandLine::Delete() {
@@ -148,13 +184,20 @@ void TermGui::CommandLine::Delete() {
 		this->move_back();
 		this->inputString.erase(this->cursorIndex);
 	}
+	
+	//update info
 	this->select_possible_commands();
+	this->update_height();
 }
 
 void TermGui::CommandLine::naive_insert(utf8::Char c) {
 	this->inputString.insert(cursorIndex, c);
 	this->move_forward();
 	this->select_possible_commands();
+	
+	//update info
+	this->select_possible_commands();
+	this->update_height();
 }
 
 void TermGui::CommandLine::select_possible_commands(){
@@ -283,6 +326,119 @@ void TermGui::CommandLine::render(std::string& outputString) const {
 }
 
 void TermGui::CommandLine::render_command_info(std::string& outputString) const {
+	if(this->possibleCommands.first == nullptr || this->possibleCommands.last == nullptr){
+		// do nothing
+	}else if(this->possibleCommands.last - this->possibleCommands.first < 1){
+		// do nothing
+	}else if(this->possibleCommands.last - this->possibleCommands.first == 1){
+		this->render_single_command_info(outputString);
+	}else{
+		this->render_multiple_command_info(outputString);
+	}
+}
+
+long TermGui::max_flag_size(const std::vector<TermGui::Command::Flag>& flags){
+	long max = 0;
+	for(const auto& flag : flags){
+		if(flag.name.size() > max){
+			max = flag.name.size();
+		}
+	}
+	return max;
+}
+
+void TermGui::CommandLine::render_single_command_info(std::string& outputString) const {
+	if(this->possibleCommands.first == nullptr || this->possibleCommands.last == nullptr){
+		return;
+	}
+	
+	const TermGui::ScreenWidth infoWidth = this->info_width();
+	const TermGui::ScreenPosition infoPosition = this->info_position();
+	
+	const TermGui::Command* command = this->possibleCommands.first;
+	
+	TermGui::ScreenWidth::size_type lineItr = 0;
+	TermGui::ScreenWidth::size_type lineEnd = infoWidth.y;
+	
+	if(lineItr != lineEnd){// print name
+		outputString += Term::cursor_move(infoPosition.y + lineItr, infoPosition.x);
+		
+		const utf8::string& name = command->name;
+		utf8::string::const_iterator itr = name.begin();
+		const utf8::string::const_iterator end = name.end();
+		TermGui::ScreenWidth::size_type columnItr = 0;
+		const TermGui::ScreenWidth::size_type columnEnd = infoWidth.x;
+		
+		for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
+			outputString.append(itr->to_std_string_view());
+		}
+		
+		outputString.append(columnEnd - columnItr, ' ');
+		
+		++lineItr;
+	}
+	if(lineItr != lineEnd){// print info
+		outputString += Term::cursor_move(infoPosition.y + lineItr, infoPosition.x);
+		
+		const utf8::string& info = command->info;
+		utf8::string::const_iterator itr = info.begin();
+		const utf8::string::const_iterator end = info.end();
+		TermGui::ScreenWidth::size_type columnItr = 0;
+		const TermGui::ScreenWidth::size_type columnEnd = infoWidth.x;
+		
+		for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
+			outputString.append(itr->to_std_string_view());
+		}
+		
+		outputString.append(columnEnd - columnItr, ' ');
+		
+		++lineItr;
+	}
+	if(lineItr != lineEnd){// print flags
+		const std::vector<TermGui::Command::Flag>& flags = command->flags;
+		auto flagItr = flags.begin();
+		const auto flagEnd = flags.end();
+		
+		const ScreenWidth::size_type maxFlagWidth = static_cast<ScreenWidth::size_type>(max_flag_size(flags));
+		
+		for(; flagItr != flagEnd && lineItr != lineEnd; (void)++flagItr, (void)++lineItr){
+			outputString += Term::cursor_move(infoPosition.y + lineItr, infoPosition.x);
+	
+			TermGui::ScreenWidth::size_type columnItr = 0;
+			const ScreenWidth::size_type columnEnd = infoWidth.x;
+			
+			{// print flag name
+				const utf8::string& name = flagItr->name;
+				utf8::string::const_iterator itr = name.begin();
+				const utf8::string::const_iterator end = name.end();
+				
+				for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
+					outputString.append(itr->to_std_string_view());
+				}
+				
+				const ScreenWidth::size_type spaceing = 2;
+				outputString.append(std::min(spaceing + maxFlagWidth - columnItr, columnEnd - columnItr), ' ');
+			}
+			{// print flag info
+				const utf8::string& info = flagItr->info;
+				utf8::string::const_iterator itr = info.begin();
+				const utf8::string::const_iterator end = info.end();
+				
+				for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
+					outputString.append(itr->to_std_string_view());
+				}
+				
+				outputString.append(columnEnd - columnItr, ' ');
+			}
+		}
+	}
+}
+
+void TermGui::CommandLine::render_multiple_command_info(std::string& outputString) const {
+	if(this->possibleCommands.first == nullptr || this->possibleCommands.last == nullptr){
+		return;
+	}
+	
 	const auto infoWidth = this->info_width();
 	const auto infoPosition = this->info_position();
 	

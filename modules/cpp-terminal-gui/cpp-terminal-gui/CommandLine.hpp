@@ -30,6 +30,8 @@ struct Command{
 	callback_function callbackFn;
 };
 
+long max_flag_size(const std::vector<Command::Flag>& flags);
+
 struct const_command_range { const Command* first; const Command* last;};
 
 /// searches a range of commands that starts with the provided command name in the sorted range of commands
@@ -74,6 +76,9 @@ public:
 	CommandLine& operator=(CommandLine&&) = default;
 	
 	void show_cursor(bool on_off) override;
+	
+	ScreenWidth::size_type get_target_info_height();
+	void update_height();
 	
 	void clear() override;
 	
@@ -128,6 +133,8 @@ public:
 	void render(std::string& outputString) const override;
 	void render_command(std::string& outputString) const;
 	void render_command_info(std::string& outputString) const;
+	void render_single_command_info(std::string& outputString) const;
+	void render_multiple_command_info(std::string& outputString) const;
 	void render_command_line(std::string& outputString) const;
 	void render_message(std::string& outputString) const;
 	
