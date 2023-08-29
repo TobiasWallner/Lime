@@ -53,43 +53,33 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 	return commandList;
 }
 
+static bool less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+	auto rhsItr = rhs.begin();
+	const auto rhsEnd = rhs.end();
+	auto lhsItr = lhs.begin();
+	const auto lhsEnd = lhs.end();
 
-
-/// returns true if the common string length of the left name is greater thatn the right one
-static bool common_lesser_command_name(const TermGui::Command& com, const utf8::string_view& str){
-	auto strItr = str.begin();
-	const auto strEnd = str.end();
-	auto comItr = com.name.begin();
-	const auto comEnd = com.name.end();
-	
-	for(; (comItr != comEnd) && (strItr != strEnd); (void)++comItr, (void)++strItr){
-		if(!(*comItr <= *strItr)){
-			return false;
+	for (; (rhsItr != rhsEnd) && (lhsItr != lhsEnd); (void)++rhsItr, (void)++lhsItr) {
+		if (*lhsItr < *rhsItr) {
+			return true;
 		}
 	}
-	
-	return true; 
+
+	return false;
+}
+
+static bool lower_bound_fn(const TermGui::Command& com, const utf8::string_view& str){
+	return less(com.name, str);
 }
 
 /// returns true if the common string length of the left name is lesser than the right one
-static bool greater_command_name(const utf8::string_view& str, const TermGui::Command& com){
-	auto strItr = str.begin();
-	const auto strEnd = str.end();
-	auto comItr = com.name.begin();
-	const auto comEnd = com.name.end();
-	
-	for(; (comItr != comEnd) && (strItr != strEnd); (void)++comItr, (void)++strItr){
-		if(!(*comItr > *strItr)){
-			return false;
-		}
-	}
-	
-	return true; 
+static bool upper_bound_fn(const utf8::string_view& str, const TermGui::Command& com){
+	return less(str, com.name);
 }
 
-TermGui::const_command_range find(const utf8::string_view& command, const TermGui::Command* first, const TermGui::Command* last) {
-	const auto lowerBound = std::lower_bound(first, last, command, common_lesser_command_name);
-	const auto upperBound = std::upper_bound(lowerBound, last, command, greater_command_name);
+TermGui::const_command_range TermGui::find(const utf8::string_view& command, const TermGui::const_command_range& range) {
+	const auto lowerBound = std::lower_bound(range.first, range.last, command, lower_bound_fn);
+	const auto upperBound = std::upper_bound(lowerBound, range.last, command, upper_bound_fn);
 	return TermGui::const_command_range{lowerBound, upperBound};
 }
 
@@ -109,11 +99,6 @@ void TermGui::CommandLine::clear() {
 	historyItr = commandHistory.cend();
 }
 
-void TermGui::CommandLine::naive_insert(utf8::Char c){
-	this->inputString.insert(cursorIndex, c);
-	this->move_forward();
-}
-
 void TermGui::CommandLine::insert(utf8::Char c) {
 	this->message.clear();
 	this->historyItr = this->commandHistory.cend();
@@ -127,11 +112,11 @@ void TermGui::CommandLine::insert(utf8::Char c) {
 }
 
 void TermGui::CommandLine::enter() {
-	const Command* command = possibleCommands.first;
+	const Command* command = this->possibleCommands.first;
 	
-	if(possibleCommands.first == nullptr || possibleCommands.last == nullptr){
+	if(this->possibleCommands.first == nullptr || this->possibleCommands.last == nullptr){
 		this->message = "command list is empty";
-	}else if(possibleCommands.first != possibleCommands.last - 1){
+	}else if(this->possibleCommands.first != this->possibleCommands.last - 1){
 		this->message = "command not found";
 	}else if(command->callbackFn == nullptr){
 		this->message = "command does not have a callback function";
@@ -147,12 +132,15 @@ void TermGui::CommandLine::enter() {
 	}
 	
 	this->clear();
+
+	this->possibleCommands = this->commands;
 }
 
 void TermGui::CommandLine::erase() { 
 	if(!this->is_end_of_line()){
 		this->inputString.erase(this->cursorIndex); 
 	}
+	this->select_possible_commands();
 }
 
 void TermGui::CommandLine::Delete() {
@@ -160,6 +148,17 @@ void TermGui::CommandLine::Delete() {
 		this->move_back();
 		this->inputString.erase(this->cursorIndex);
 	}
+	this->select_possible_commands();
+}
+
+void TermGui::CommandLine::naive_insert(utf8::Char c) {
+	this->inputString.insert(cursorIndex, c);
+	this->move_forward();
+	this->select_possible_commands();
+}
+
+void TermGui::CommandLine::select_possible_commands(){
+	this->possibleCommands = find(this->inputString, this->commands);
 }
 
 void TermGui::CommandLine::move_screen_to_cursor(){
@@ -275,7 +274,6 @@ void TermGui::CommandLine::render_command(std::string& outputString) const {
 
 void TermGui::CommandLine::render(std::string& outputString) const {
 	if(this->GridCell::get_screen_width().y > 0){
-		
 		if(this->display_message()){
 			this->render_message(outputString);
 		}else{

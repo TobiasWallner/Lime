@@ -33,7 +33,7 @@ struct Command{
 struct const_command_range { const Command* first; const Command* last;};
 
 /// searches a range of commands that starts with the provided command name in the sorted range of commands
-const_command_range find(const utf8::string_view& commandName, const_command_range sortedCommandRange);
+const_command_range find(const utf8::string_view& commandName, const TermGui::const_command_range& range);
 
 /// offers an editable string with a callback function that gets executed on enter.
 /// On construction offer a pointer to the object that should be notified and a 
@@ -84,6 +84,8 @@ public:
 	void enter() override;
 	void erase() override;
 	void Delete() override;
+	
+	void select_possible_commands();
 	
 	void move_screen_to_cursor();
 	
