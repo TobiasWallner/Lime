@@ -53,7 +53,7 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 	return commandList;
 }
 
-static bool less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+static bool common_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
 	auto rhsItr = rhs.begin();
 	const auto rhsEnd = rhs.end();
 	auto lhsItr = lhs.begin();
@@ -63,18 +63,27 @@ static bool less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
 		if (*lhsItr < *rhsItr) {
 			return true;
 		}
+		else if (*lhsItr > *rhsItr) {
+			return false;
+		}
 	}
 
 	return false;
 }
 
+static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+	const bool commonLess = common_less(lhs, rhs);
+	const bool result = (commonLess) ? commonLess : rhs.size() > lhs.size();
+	return result;
+}
+
 static bool lower_bound_fn(const TermGui::Command& com, const utf8::string_view& str){
-	return less(com.name, str);
+	return strict_less(com.name, str);
 }
 
 /// returns true if the common string length of the left name is lesser than the right one
 static bool upper_bound_fn(const utf8::string_view& str, const TermGui::Command& com){
-	return less(str, com.name);
+	return common_less(str, com.name);
 }
 
 TermGui::const_command_range TermGui::find(const utf8::string_view& command, const TermGui::const_command_range& range) {
