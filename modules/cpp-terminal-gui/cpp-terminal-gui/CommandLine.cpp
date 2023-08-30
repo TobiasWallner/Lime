@@ -54,6 +54,7 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 }
 
 static bool common_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+	// TODO: put in utf8 string
 	auto rhsItr = rhs.begin();
 	const auto rhsEnd = rhs.end();
 	auto lhsItr = lhs.begin();
@@ -72,6 +73,7 @@ static bool common_less(const utf8::string_view& lhs, const utf8::string_view& r
 }
 
 static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+	// TODO: put in utf8 string
 	const bool commonLess = common_less(lhs, rhs);
 	const bool result = (commonLess) ? commonLess : rhs.size() > lhs.size();
 	return result;
@@ -210,7 +212,12 @@ void TermGui::CommandLine::naive_insert(utf8::Char c) {
 }
 
 void TermGui::CommandLine::select_possible_commands(){
-	this->possibleCommands = find(this->inputString, this->commands);
+	const auto first = this->inputString.begin();
+	const auto last = this->inputString.end();
+	const auto commandBegin = std::find_if_not(first, last, utf8::is_whitespace);
+	const auto commandEnd = std::find_if(commandBegin, last, utf8::is_whitespace);
+	utf8::string_view inputCommand(commandBegin, commandEnd);
+	this->possibleCommands = find(inputCommand, this->commands);
 }
 
 void TermGui::CommandLine::move_screen_to_cursor(){
