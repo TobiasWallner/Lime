@@ -79,8 +79,11 @@ public:
 	
 	ScreenWidth::size_type get_target_info_height();
 	void update_height();
+	void select_possible_commands();
+	void update_on_input();
 	
 	void clear() override;
+	void clear_internal();
 	
 	void naive_insert(utf8::Char c);
 	void insert(utf8::Char c) override;
@@ -90,9 +93,12 @@ public:
 	void erase() override;
 	void Delete() override;
 	
-	void select_possible_commands();
+	
 	
 	void move_screen_to_cursor();
+	
+	/// returns the first command/word and skips whitespaces
+	utf8::string_view view_first_word() const;
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists
@@ -110,12 +116,15 @@ public:
 	
 	/// moves the cursor to the start of the line
 	void move_to_start_of_line() override;
+	void move_to_start_of_line_internal();
+
 	
 	/// moves the cursor the the start of the line
 	void move_to_start_of_file() override;
 	
 	/// moves the cursor to the end of the line;
 	void move_to_end_of_line() override;
+	void move_to_end_of_line_internal();
 	
 	void move_to_end_of_file() override;
 	

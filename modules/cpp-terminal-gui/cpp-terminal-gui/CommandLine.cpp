@@ -122,7 +122,7 @@ TermGui::ScreenWidth::size_type TermGui::CommandLine::get_target_info_height(){
 void TermGui::CommandLine::update_height(){
 	const TermGui::ScreenWidth::size_type commandLineHeight = 1;
 	const TermGui::ScreenWidth targetWidth = this->GridCell::get_target_width();
-	if(this->showCursor == false){
+	if(this->showCursor == false || !this->message.empty()){
 		if(commandLineHeight != targetWidth.y){
 			this->GridCell::set_target_width(TermGui::ScreenWidth{.x = targetWidth.x, .y = commandLineHeight});
 		}
@@ -135,10 +135,24 @@ void TermGui::CommandLine::update_height(){
 	}
 }
 
+void TermGui::CommandLine::update_on_input() {
+	this->select_possible_commands();
+	this->update_height();
+}
+
+// does not call the update function
+// does not clear the message string
+void TermGui::CommandLine::clear_internal() {
+	this->move_to_start_of_line_internal();
+	this->inputString.clear();
+	historyItr = commandHistory.cend();
+}
+
 void TermGui::CommandLine::clear() {
 	this->move_to_start_of_line();
 	this->inputString.clear();
 	historyItr = commandHistory.cend();
+	this->update_on_input();
 }
 
 void TermGui::CommandLine::insert(utf8::Char c) {
@@ -163,7 +177,7 @@ void TermGui::CommandLine::enter() {
 	}else if(command->callbackFn == nullptr){
 		this->message = "command does not have a callback function";
 	}else{
-		auto args = parse_command_string (this->inputString);
+		const auto args = parse_command_string(this->inputString);
 		command->callbackFn(objectPtr, args);
 	}
 	
@@ -173,21 +187,15 @@ void TermGui::CommandLine::enter() {
 		this->commandHistory.push_front(this->inputString);	
 	}
 	
-	this->clear();
-
-	//update info
-	this->possibleCommands = this->commands;
-	this->update_height();
+	this->clear_internal();
+	this->update_on_input();
 }
 
 void TermGui::CommandLine::erase() { 
 	if(!this->is_end_of_line()){
 		this->inputString.erase(this->cursorIndex); 
 	}
-	
-	//update info
-	this->select_possible_commands();
-	this->update_height();
+	this->update_on_input();
 }
 
 void TermGui::CommandLine::Delete() {
@@ -195,29 +203,33 @@ void TermGui::CommandLine::Delete() {
 		this->move_back();
 		this->inputString.erase(this->cursorIndex);
 	}
-	
-	//update info
-	this->select_possible_commands();
-	this->update_height();
+	this->update_on_input();
 }
 
 void TermGui::CommandLine::naive_insert(utf8::Char c) {
 	this->inputString.insert(cursorIndex, c);
 	this->move_forward();
-	this->select_possible_commands();
-	
-	//update info
-	this->select_possible_commands();
-	this->update_height();
+	this->update_on_input();
+}
+
+
+utf8::string_view TermGui::CommandLine::view_first_word() const{
+	const auto first = this->inputString.begin();
+	const auto last = this->inputString.end();
+	// skip whitespaces
+	const auto commandBegin = std::find_if_not(first, last, utf8::is_whitespace);
+	// find end of word
+	const auto commandEnd = std::find_if(commandBegin, last, utf8::is_whitespace);
+	utf8::string_view result(commandBegin, commandEnd);
+	return result;
 }
 
 void TermGui::CommandLine::select_possible_commands(){
-	const auto first = this->inputString.begin();
-	const auto last = this->inputString.end();
-	const auto commandBegin = std::find_if_not(first, last, utf8::is_whitespace);
-	const auto commandEnd = std::find_if(commandBegin, last, utf8::is_whitespace);
-	utf8::string_view inputCommand(commandBegin, commandEnd);
-	this->possibleCommands = find(inputCommand, this->commands);
+	if (this->inputString.empty()) {
+		this->possibleCommands = this->commands;
+	}else {
+		this->possibleCommands = find(this->view_first_word(), this->commands);
+	}
 }
 
 void TermGui::CommandLine::move_screen_to_cursor(){
@@ -229,13 +241,17 @@ void TermGui::CommandLine::move_screen_to_cursor(){
 }
 
 void TermGui::CommandLine::move_forward() { 
+	this->message.clear();
 	this->cursorIndex += !this->is_end_of_line();
 	this->move_screen_to_cursor();
+	this->update_on_input();
 }
 
 void TermGui::CommandLine::move_back() { 
+	this->message.clear();
 	this->cursorIndex -= !this->is_start_of_line();
 	this->move_screen_to_cursor();
+	this->update_on_input();
 }
 
 /// loads the previous command into the command line
@@ -253,9 +269,10 @@ void TermGui::CommandLine::move_up() {
 		}
 		if(this->historyItr != this->commandHistory.cend()){
 			this->inputString = *(this->historyItr);
-			this->move_to_end_of_line();
+			this->move_to_end_of_line_internal();
 		}
 	}
+	this->update_on_input();
 }
 
 /// loads the earlier command into the command line
@@ -271,27 +288,48 @@ void TermGui::CommandLine::move_down() {
 		}
 		if(this->historyItr != this->commandHistory.cend()){
 			this->inputString = *(this->historyItr);
-			this->move_to_end_of_line();
+			this->move_to_end_of_line_internal();
 		}	
-	}		
+	}
+	this->update_on_input();
 }
 
-void TermGui::CommandLine::move_to_start_of_line() { 
-	this->cursorIndex = 0; 
+
+void TermGui::CommandLine::move_to_start_of_line_internal() {
+	this->cursorIndex = 0;
 	this->screenColumn = 0;
 }
 
-void TermGui::CommandLine::move_to_start_of_file() { 
-	this->move_to_start_of_line(); 
+
+void TermGui::CommandLine::move_to_start_of_line() { 
+	this->message.clear();
+	this->move_to_start_of_line_internal();
+	this->update_on_input();
+}
+
+
+
+void TermGui::CommandLine::move_to_start_of_file() {
+	this->message.clear();
+	this->move_to_start_of_line();
+	this->update_on_input();
+}
+
+void TermGui::CommandLine::move_to_end_of_line_internal() {
+	this->cursorIndex = this->inputString.size();
+	this->screenColumn = (this->inputString.size() + 3 > this->input_line_width()) ? this->inputString.size() - (this->input_line_width() - 3) : 0;
 }
 
 void TermGui::CommandLine::move_to_end_of_line() {
-	this->cursorIndex = this->inputString.size(); 
-	this->screenColumn = (this->inputString.size() + 3 > this->input_line_width()) ? this->inputString.size() - (this->input_line_width() - 3): 0;
+	this->message.clear();
+	this->move_to_end_of_line_internal();
+	this->update_on_input();
 }
 
-void TermGui::CommandLine::move_to_end_of_file() { 
-	this->move_to_end_of_line(); 
+void TermGui::CommandLine::move_to_end_of_file() {
+	this->message.clear();
+	this->move_to_end_of_line();
+	this->update_on_input();
 }
 
 bool TermGui::CommandLine::is_start_of_line() const { 
@@ -377,7 +415,7 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 	TermGui::ScreenWidth::size_type lineEnd = infoWidth.y;
 	
 	if(lineItr != lineEnd){// print name
-		outputString += Term::cursor_move(infoPosition.y + lineItr, infoPosition.x);
+		outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
 		
 		const utf8::string& name = command->name;
 		utf8::string::const_iterator itr = name.begin();
@@ -394,7 +432,7 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 		++lineItr;
 	}
 	if(lineItr != lineEnd){// print info
-		outputString += Term::cursor_move(infoPosition.y + lineItr, infoPosition.x);
+		outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
 		
 		const utf8::string& info = command->info;
 		utf8::string::const_iterator itr = info.begin();
@@ -418,7 +456,7 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 		const ScreenWidth::size_type maxFlagWidth = static_cast<ScreenWidth::size_type>(max_flag_size(flags));
 		
 		for(; flagItr != flagEnd && lineItr != lineEnd; (void)++flagItr, (void)++lineItr){
-			outputString += Term::cursor_move(infoPosition.y + lineItr, infoPosition.x);
+			outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
 	
 			TermGui::ScreenWidth::size_type columnItr = 0;
 			const ScreenWidth::size_type columnEnd = infoWidth.x;
