@@ -523,22 +523,30 @@ void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
-			return (void)This->commandLine->message.assign("Error: the command open needs a filename");
+			This->commandLine->message = "Error: the command open needs a filename";
 		}break;
 		case 2 : {
-			(void)This->open(commands[1].to_std_string());
+			const bool successful_read = This->open(commands[1].to_std_string());
+			if (!successful_read) {
+				This->commandLine->message.assign("Error: could not read filename")
+					.append("'").append(commands[1]).append("'");
+			}
 		}break;
 		case 3 : {
 			if(commands[2] == "-r"){
-				return (void)This->commandLine->message.assign("Error: open: -r flag is not supported yet");
+				This->commandLine->message.assign("Error: open: -r flag is not supported yet");
 			}else if(commands[2] == "-a"){
-				return (void)This->commandLine->message.assign("Error: open: -a flag is not supported yet");
+				This->commandLine->message.assign("Error: open: -a flag is not supported yet");
 			}else if(commands[2] == "-copy"){
-				return (void)This->commandLine->message.assign("Error: open: -copy flag is not supported yet");
+				This->commandLine->message.assign("Error: open: -copy flag is not supported yet");
+			}else {
+				This->commandLine->message.assign("Error: '").append(commands[2]).append("' is not a valid flag");
 			}
+		}return;
+		default: {
+			This->commandLine->message.assign("Error: incorrect number of arguments");
 		}break;
 	}
-	This->commandLine->message.assign("Error: incorrect arguments");
 }
 
 bool Lime::open(const std::string& path){
@@ -554,17 +562,21 @@ void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
-			return (void)This->quit(); //TODO: -> save_quit();
+			This->quit(); //TODO: -> save_quit();
 		}break;
 		case 2 : {
-			if(commands[2] == "-s"){
-				return (void)This->commandLine->message.assign("Error: open: -s flag is not supported yet");
-			}else if(commands[2] == "-f"){
-				return (void)This->quit(); //TODO: -> force_quit();
+			if(commands[1] == "-s"){
+				This->commandLine->message.assign("Error: open: -s flag is not supported yet");
+			}else if(commands[1] == "-f"){
+				This->quit(); //TODO: -> force_quit();
+			}else {
+				This->commandLine->message.assign("Error: '").append(commands[1]).append("' is not a valid flag");
 			}
 		}break;
+		default: {
+			This->commandLine->message.assign("Error: incorrect number of arguments"); 
+		}break;
 	}
-	This->commandLine->message.assign("Error: incorrect arguments");
 }
 
 
@@ -575,19 +587,25 @@ void Lime::save(void* ptr, const std::vector<utf8::string_view>& commands){
 			return (void)This->save();
 		}break;
 		case 2 : {
-			if(commands[2] == "-all"){
+			if(commands[1] == "-all"){
 				return (void)This->commandLine->message.assign("Error: save: -all flag is not supported yet");
+			}else {
+				This->commandLine->message.assign("Error: '").append(commands[1]).append("' is not a valid flag");
 			}
 		}break;
 		case 3 : {
-			if(commands[2] == "-as"){
+			if(commands[1] == "-as"){
 				return (void)This->save_as(commands[2].to_std_string());
-			}else if(commands[2] == "-copy"){
+			}else if(commands[1] == "-copy"){
 				return (void)This->commandLine->message.assign("Error: save: -copy flag is not supported yet");
+			}else {
+				This->commandLine->message.assign("Error: '").append(commands[1]).append("' is not a valid flag");
 			}
 		}break;
+		default: {
+			This->commandLine->message.assign("Error: incorrect number of arguments");
+		}break;
 	}
-	This->commandLine->message.assign("Error: incorrect arguments");
 }
 
 bool Lime::save(){
