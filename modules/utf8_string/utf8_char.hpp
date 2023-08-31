@@ -166,7 +166,7 @@ public:
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first, CharItr last){
 		const auto identifier = identify(static_cast<char>(*first));
-		if((identifier == Identifier::Unsupported) | (identifier == Identifier::NotFirst)){
+		if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
 			return first;
 		}else{
 			const auto length = static_cast<size_type>(identifier);
@@ -183,7 +183,7 @@ public:
 	template<class CharItr>
 	constexpr inline CharItr assign(CharItr first){
 		const auto identifier = identify(static_cast<char>(*first));
-		if((identifier == Identifier::Unsupported) | (identifier == Identifier::NotFirst)){
+		if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
 			return first;
 		}else{
 			const auto length = static_cast<size_type>(identifier);
@@ -427,7 +427,7 @@ public:
 
 
 inline constexpr bool is_control(Char c){
-	auto i = c.to_int();
+	const auto i = c.to_int();
 	return (0x0 <= i && i <= 0x1f) || (0x7f <= i && i <= 0x9f);
 }
 
@@ -435,8 +435,13 @@ inline constexpr bool is_whitespace(Char c){
 	return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
+inline constexpr bool is_special(Char c) {
+	const auto i = c.to_int();
+	return (0x21 <= i && i <= 0x2f) || (0x3a <= i && i <= 0x40) || (0x5b <= i && i <= 0x60) || (0x7b <= i && i <= 0x7e);
+}
+
 inline constexpr bool is_ascii(Char c){
-	auto i = c.to_int();
+	const auto i = c.to_int();
 	return (i <= 0x7f);
 }
 
