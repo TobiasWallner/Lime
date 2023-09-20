@@ -12,9 +12,9 @@ set(INTERNAL_MODULES_PATH "modules")
 
 # external dependencies
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # allow to override variables within the CMakeLists.txt of the library
-set(CPPTERMINAL_BUILD_EXAMPLES OFF) # disable building examples
+set(CPPTERMINAL_BUILD_EXAMPLES ON) # disable building examples
 set(CPPTERMINAL_ENABLE_INSTALL OFF) # disable the installation of the library
-set(CPPTERMINAL_ENABLE_TESTING OFF) # disable the tests of the library ... when running 'ctest' we only want to see our own tests
+set(CPPTERMINAL_ENABLE_TESTING ON) # disable the tests of the library ... when running 'ctest' we only want to see our own tests
 add_subdirectory("${EXTERNAL_MODULES_PATH}/cpp-terminal")
 
 # internal dependencies
@@ -88,7 +88,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(COMPILER_FLAGS
 		/W3
-	
+		/Zc:__cplusplus # enable __cplusplus
 		# set compiler flags for debugging
 		#---------------------------------
 		$<$<CONFIG:Debug>:
