@@ -139,6 +139,8 @@ public:
 		}
 	}
 	
+	constexpr inline Char(std::int32_t utf8) : Char(static_cast<char32_t>(utf8)){}
+	
 	/// reads one utf8 character from the range and stores it in the char
 	template<class CharItr>
 	constexpr inline explicit Char(CharItr first) : utf8{0} {this->assign(first);}
