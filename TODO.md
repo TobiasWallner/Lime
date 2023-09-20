@@ -10,7 +10,6 @@ TODOs
 + Do not re-render the whole screen but only the parts that change
 + When the cursor is moveing up and down it should stay at the current colum and not jump fom end 
 	to end
-+ Figure out why deleting the line above crashes the editor
 + For objects with the TextTrait, change the methods so that they output a string that only changes
 	the view characters on screen that actually got changed.
 + make a class that contains a textEditor as well as the title of the file and prints that

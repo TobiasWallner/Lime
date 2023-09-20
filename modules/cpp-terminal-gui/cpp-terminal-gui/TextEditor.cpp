@@ -181,8 +181,11 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 			stylesItr->render(outputString);
 		}
 		
-		outputString.append(renderCursor.screen_column() - this->screenColumn, ' ');
-		
+		{// append spaces to the start of the line
+			const auto spaces = std::max(renderCursor.screen_column() - this->screenColumn, 0);
+			outputString.append(spaces, ' ');
+		}
+
 		// print characters until the end of the screen has been reached
 		const size_type screenColumnEnd = this->screenColumn + this->text_width();
 		for(; renderCursor.screen_column() < screenColumnEnd && !renderCursor.is_end_of_line(); renderCursor.move_forward()){
