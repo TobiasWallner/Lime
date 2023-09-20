@@ -74,9 +74,21 @@ static bool common_less(const utf8::string_view& lhs, const utf8::string_view& r
 
 static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
 	// TODO: put in utf8 string
-	const bool commonLess = common_less(lhs, rhs);
-	const bool result = (commonLess) ? commonLess : rhs.size() > lhs.size();
-	return result;
+	auto rhsItr = rhs.begin();
+	const auto rhsEnd = rhs.end();
+	auto lhsItr = lhs.begin();
+	const auto lhsEnd = lhs.end();
+
+	for (; (rhsItr != rhsEnd) && (lhsItr != lhsEnd); (void)++rhsItr, (void)++lhsItr) {
+		if (*lhsItr < *rhsItr) {
+			return true;
+		}
+		else if (*lhsItr > *rhsItr) {
+			return false;
+		}
+	}
+
+	return lhsItr == lhsEnd && rhsItr != rhsEnd;
 }
 
 static bool lower_bound_fn(const TermGui::Command& com, const utf8::string_view& str){
