@@ -12,6 +12,7 @@
 #include <cctype>
 #include <cstdint>
 #include <chrono>
+#include <filesystem>
 
 // cpp-terminal
 #include <cpp-terminal/cursor.hpp>
@@ -44,6 +45,28 @@
 #include <cstring>
 #endif
 
+static TermGui::Command generate_cd_command(){
+	TermGui::Command result{
+		.name = utf8::string("cd"),
+		.info = utf8::string("+ <path> changes the current directory to the new "),
+		.flags = std::vector<TermGui::Command::Flag>(),
+		.callbackFn = &Lime::change_directory,
+	};
+	
+	return result;
+}
+
+static TermGui::Command generate_pwd_command(){
+	TermGui::Command result{
+		.name = utf8::string("pwd"),
+		.info = utf8::string("prints the working directory"),
+		.flags = std::vector<TermGui::Command::Flag>(),
+		.callbackFn = &Lime::print_working_directory,
+	};
+	
+	return result;
+}
+
 static TermGui::Command generate_open_command(){
 	TermGui::Command result{
 		.name = utf8::string("open"),
@@ -55,6 +78,7 @@ static TermGui::Command generate_open_command(){
 		}),
 		.callbackFn = &Lime::open,
 	};
+	
 	return result;
 }
 
@@ -82,6 +106,7 @@ static TermGui::Command generate_save_command(){
 		}),
 		.callbackFn = &Lime::save,
 	};
+	
 	return result;
 }
 
@@ -97,8 +122,10 @@ static TermGui::Command generate_set_command(){
 	return result;
 }
 
-const TermGui::Command Lime::commandList[]{
+const TermGui::Command Lime::commandList[]{ // !!! Has to be in alphabetical order !!!
+	generate_cd_command(),
 	generate_open_command(),
+	generate_pwd_command(),
 	generate_quit_command(),
 	generate_save_command(),
 	generate_set_command(),
@@ -228,7 +255,7 @@ static bool is_ignore_event(const Term::Event& event){
 		}break;
 		case Term::Event::Type::Key : {
 			const Term::Key key = event;
-			return key == Term::Key::ALT || key == Term::Key::NO_KEY || key == Term::Key::NUL;
+			return key == Term::Key::Value::NoKey || key == Term::Key::Value::Null;
 		}break;
 		case Term::Event::Type::Screen : {
 			const Term::Screen screen = event;
@@ -241,7 +268,7 @@ static bool is_ignore_event(const Term::Event& event){
 		}break;
 		case Term::Event::Type::CopyPaste : {
 			// TODO: remove the static_cast as soon as cpp-terminal fixes the API of Term::Event
-			return static_cast<std::string>(event).size() == 0;
+			return event.get_if_copy_paste()->empty();
 		}break; 
 		default : {
 			return true;
@@ -252,7 +279,7 @@ static bool is_ignore_event(const Term::Event& event){
 void Lime::run_main_loop(){
 	// reserve memory in advance
 	std::string outputString; 	
-	outputString.reserve(1024 * 10); 
+	outputString.reserve(static_cast<size_t>(1024 * 10)); 
 	
 	// initial render of the whole screen
 	this->render(outputString);
@@ -404,50 +431,41 @@ void Lime::insert_from_clipboard(){
 
 void Lime::prozess_key_event(Term::Key keyEvent){
 	// get analyse input
-	const char32_t utf32 = static_cast<char32_t>(keyEvent);
-	
-	switch(utf32){
+	switch(keyEvent){
 		//---- basics -----
-		case Term::Key::CTRL_Q : this->quit(); break;
-		case Term::Key::ESC : this->toggle_command_line(); break;
-		case Term::Key::ENTER : this->activeCursor->enter(); break; 
-		case Term::Key::BACKSPACE : this->activeCursor->Delete(); break;
-		case Term::Key::DEL: this->activeCursor->erase(); break;
-		//case Term::Key::TAB: this->activeCursor->insert('\t'); break;
+		case Term::Key::Value::Ctrl_Q : this->quit(); break;
+		case Term::Key::Value::Esc : this->toggle_command_line(); break;
+		case Term::Key::Value::Enter : this->activeCursor->enter(); break; 
+		case Term::Key::Value::Backspace : this->activeCursor->Delete(); break;
+		case Term::Key::Value::Del : this->activeCursor->erase(); break;
 
 		//---- i/o ----
-		case Term::Key::CTRL_S : this->save(); break;
+		case Term::Key::Value::Ctrl_S : this->save(); break;
 		
 		//----- navigation and cursor movement -----
-		case Term::Key::ALT + Term::Key::j : this->activeCursor->move_back(); break; 	// change to CTRL as soon as cpp-terminal library has support
-		case Term::Key::ALT + Term::Key::i : this->activeCursor->move_up(); break;		// change to CTRL as soon as cpp-terminal library has support
-		case Term::Key::ALT + Term::Key::l : this->activeCursor->move_forward(); break; // change to CTRL as soon as cpp-terminal library has support
-		case Term::Key::ALT + Term::Key::k : this->activeCursor->move_down(); break;	// change to CTRL as soon as cpp-terminal library has support
+		case Term::MetaKey::Value::Alt + Term::Key::Value::j : this->activeCursor->move_back(); break; 	// change to CTRL as soon as cpp-terminal library has support
+		case Term::MetaKey::Value::Alt + Term::Key::Value::i : this->activeCursor->move_up(); break;		// change to CTRL as soon as cpp-terminal library has support
+		case Term::MetaKey::Value::Alt + Term::Key::Value::l : this->activeCursor->move_forward(); break; // change to CTRL as soon as cpp-terminal library has support
+		case Term::MetaKey::Value::Alt + Term::Key::Value::k : this->activeCursor->move_down(); break;	// change to CTRL as soon as cpp-terminal library has support
 		
-		case Term::Key::ARROW_LEFT 	: this->activeCursor->move_back(); break;
-		case Term::Key::ARROW_UP 	: this->activeCursor->move_up(); break;
-		case Term::Key::ARROW_RIGHT : this->activeCursor->move_forward(); break; 
-		case Term::Key::ARROW_DOWN 	: this->activeCursor->move_down(); break; 
+		case Term::Key::Value::ArrowLeft 	: this->activeCursor->move_back(); break;
+		case Term::Key::Value::ArrowUp 	: this->activeCursor->move_up(); break;
+		case Term::Key::Value::ArrowRight 	: this->activeCursor->move_forward(); break; 
+		case Term::Key::Value::ArrowDown 	: this->activeCursor->move_down(); break; 
 		
-		case Term::Key::CTRL_T : this->activeCursor->move_to_start_of_file();break;
-		case Term::Key::CTRL_E : this->activeCursor->move_to_end_of_file();break;
-		
-		case Term::Key::ALT + Term::Key::u : this->activeCursor->move_to_start_of_line(); break;
-		case Term::Key::ALT + Term::Key::o : this->activeCursor->move_to_end_of_line(); break;
-		
-		//case Term::Key::ALT + Term::Key::J : this->topMessageBar->assign("/*TODO: move one word left*/"); break;
-		//case Term::Key::ALT + Term::Key::I : this->topMessageBar->assign("/*move one paragraph/codeblock up*/"); break;
-		//case Term::Key::ALT + Term::Key::L : this->topMessageBar->assign("/*TODO: move one word right*/"); break; 
-		//case Term::Key::ALT + Term::Key::K : this->topMessageBar->assign("/*TODO: move one paragraph/codeblock down*/"); break;
+		case Term::MetaKey::Value::Alt + Term::Key::Value::b : this->activeCursor->move_to_start_of_file();break;
+		case Term::MetaKey::Value::Alt + Term::Key::Value::e : this->activeCursor->move_to_end_of_file();break;
+		case Term::MetaKey::Value::Alt + Term::Key::Value::u  : this->activeCursor->move_to_start_of_line(); break;
+		case Term::MetaKey::Value::Alt + Term::Key::Value::o  : this->activeCursor->move_to_end_of_line(); break;
 		
 		// ------- editing -------
-		case Term::Key::CTRL_V : this->insert_from_clipboard(); break;
-		case Term::Key::CTRL_C : this->topMessageBar->assign("/* TODO: copy selection into clipboard */"); break;
-		case Term::Key::CTRL_X : this->topMessageBar->assign("/* TODO: cut selection into clipboard */"); break;
+		case Term::Key::Value::Ctrl_V : this->insert_from_clipboard(); break;		
+		case Term::Key::Value::Ctrl_C : this->topMessageBar->assign("/* TODO: copy selection into clipboard */"); break;
+		case Term::Key::Value::Ctrl_X : this->topMessageBar->assign("/* TODO: cut selection into clipboard */"); break;
 		
 		default:{
-			if(!keyEvent.isALT() && !keyEvent.isCTRL()){
-				const utf8::Char input(utf32);
+			if(!Term::hasAlt(keyEvent) && !Term::hasCtrl(keyEvent)){
+				const utf8::Char input(keyEvent.value);
 				this->activeCursor->insert(input);
 				this->topMessageBar->assign("Key press: ").append(input.to_std_string_view());
 			}
@@ -519,11 +537,48 @@ void Lime::set_tab_size(utf8::string_view tabSize){
 	}
 }
 
+void Lime::change_directory(void* ptr, const std::vector<utf8::string_view>& commands){
+	Lime* This = reinterpret_cast<Lime*>(ptr);
+	switch(commands.size()){
+		case 1 : {
+			This->commandLine->message = "Error: cd: the command, cange directory, needs a path";
+		}break;
+		
+		case 2 : {
+			const auto path = commands[1].to_std_string();
+			if(std::filesystem::is_directory(path)){
+				std::error_code ec;
+				std::filesystem::current_path(path, ec);
+				if(ec){
+					//error:
+					This->commandLine->message.assign("Error: cd: system:").append(ec.message());
+				}
+			}else{
+				This->commandLine->message = "Error: cd: the provided path has to be a directory but it is not.";
+			}
+		}break;
+		
+		default : {
+			This->commandLine->message = "Error: cd: only needs one parameter: ch + <path>";
+		}break;
+	}
+}
+
+void Lime::print_working_directory(void* ptr, const std::vector<utf8::string_view>& commands){
+	Lime* This = reinterpret_cast<Lime*>(ptr);
+	if(commands.size() == 1){
+		const auto path = std::filesystem::current_path();
+		This->commandLine->message = path.string();
+	}else{
+		This->commandLine->message = "Error: pwd: this command just prints the directory and does not accept any parameters";
+	}
+}
+
 void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
-			This->commandLine->message = "Error: the command open needs a filename";
+			This->commandLine->message = "Error: the command 'open' needs a filename";
 		}break;
 		case 2 : {
 			const bool successful_read = This->open(commands[1].to_std_string());
