@@ -16,39 +16,39 @@
 int main(){
 
 	{ // createing string results in string being empty
-		utf8::string s;
+		utf8::wstring s;
 		assert(s.empty() == true, "string should be empty.");
 	}
 	{ // assign string with ascii sequence results in string not empty
-		utf8::string s("löka");
+		utf8::wstring s("löka");
 		assert(s.empty() == false, "string should not be empty.");
 	}
 	{// pushing back to empty string changes size to 1
-		utf8::string s;
+		utf8::wstring s;
 		s.push_back('a');
 		const auto expected = 1;
 		assert(s.size() == expected, "pushed back one character, size should be" << expected << " but is " << s.size());
 	}
 	{// pushing back to empty string changes size to 1
-		utf8::string s;
+		utf8::wstring s;
 		s.push_back("ß");
 		const auto expected = 1;
 		assert(s.size() == expected, "pushed back one character, size should be" << expected << " but is " << s.size());
 	}
 	{// pushing back to empty string changes size to 1
-		utf8::string s;
+		utf8::wstring s;
 		s.push_back("水");
 		const auto expected = 1;
 		assert(s.size() == expected, "pushed back one character, size should be" << expected << " but is " << s.size());
 	}
 	{// pushing back to empty string changes size to 1
-		utf8::string s;
+		utf8::wstring s;
 		s.push_back("🦄");
 		const auto expected = 1;
 		assert(s.size() == expected, "pushed back one character, size should be" << expected << " but is " << s.size());
 	}
 	{// push back 4 times should give size 4
-		utf8::string s;
+		utf8::wstring s;
 		s.push_back("🦄");
 		s.push_back("水");
 		s.push_back("ß");
@@ -57,28 +57,28 @@ int main(){
 		assert(s.size() == expected, "pushed back one character, size should be" << expected << " but is " << s.size());
 	}
 	{// assign string of 5 characters gives size of 5
-		utf8::string s("🦄水ßaä");
+		utf8::wstring s("🦄水ßaä");
 		const auto expected = 5;
 		assert(s.size() == expected, "pushed back one character, size should be" << expected << " but is " << s.size());
 	}
 	{// to string provides the same c_str again for ascii only
 		std::string input("ascii");
-		utf8::string utf8(input);
+		utf8::wstring utf8(input);
 		auto result = utf8.to_std_string();
-		assert(result == input, "error converting from std::string to utf8::string and back to std::string\n"
+		assert(result == input, "error converting from std::string to utf8::wstring and back to std::string\n"
 								"result should be: '" << input << "' but is '" << result << "'.");
 		
 	}
 	{// read utf8 characters should output same characters
 		std::string input("🦄水ßaä");
-		utf8::string utf8(input);
+		utf8::wstring utf8(input);
 		auto result = utf8.to_std_string();
-		assert(result == input, "error converting from std::string to utf8::string and back to std::string\n"
+		assert(result == input, "error converting from std::string to utf8::wstring and back to std::string\n"
 								"result should be: '" << input << "' but is '" << result << "'.");
 	}
 	{// use the assignment operator
 		std::string input("🦄水ßaä");
-		utf8::string utf8;
+		utf8::wstring utf8;
 		utf8 = input;
 		auto result = utf8.to_std_string();
 		assert(result == input, "error result should be: '" << input << "' but is '" << result << "'.");
@@ -86,7 +86,7 @@ int main(){
 	{// use the += operator
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8;
+		utf8::wstring utf8;
 		utf8 += input1;
 		utf8 += input2;
 		auto expected = input1 + input2;
@@ -96,8 +96,8 @@ int main(){
 	{// use the + operator
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8_1;
-		utf8::string utf8_2;
+		utf8::wstring utf8_1;
+		utf8::wstring utf8_2;
 		utf8_1 = input1;
 		utf8_2 = input2;
 		auto expected = input1 + input2;
@@ -108,8 +108,8 @@ int main(){
 	{// use the + operator move lhs
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8_1;
-		utf8::string utf8_2;
+		utf8::wstring utf8_1;
+		utf8::wstring utf8_2;
 		utf8_1 = input1;
 		utf8_2 = input2;
 		auto expected = input1 + input2;
@@ -121,8 +121,8 @@ int main(){
 	{// use the + operator move rhs
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8_1;
-		utf8::string utf8_2;
+		utf8::wstring utf8_1;
+		utf8::wstring utf8_2;
 		utf8_1 = input1;
 		utf8_2 = input2;
 		auto expected = input1 + input2;
@@ -134,8 +134,8 @@ int main(){
 	{// use the + operator move both only moves rhs
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8_1;
-		utf8::string utf8_2;
+		utf8::wstring utf8_1;
+		utf8::wstring utf8_2;
 		utf8_1 = input1;
 		utf8_2 = input2;
 		auto expected = input1 + input2;
@@ -148,8 +148,8 @@ int main(){
 	{// use += to concattenate two strings
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8_1;
-		utf8::string utf8_2;
+		utf8::wstring utf8_1;
+		utf8::wstring utf8_2;
 		utf8_1 = input1;
 		utf8_2 = input2;
 	
@@ -161,8 +161,8 @@ int main(){
 	{// use append to concattenate two strings
 		std::string input1("🦄水");
 		std::string input2("ßaä");
-		utf8::string utf8_1;
-		utf8::string utf8_2;
+		utf8::wstring utf8_1;
+		utf8::wstring utf8_2;
 		utf8_1 = input1;
 		utf8_2 = input2;
 	

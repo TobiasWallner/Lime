@@ -18,8 +18,8 @@ TermGui::CommandLine::CommandLine(object_pointer objectPtr, const_command_range 
 
 /// parses a utf8 view of a command string into a vector of string views
 /// returns a vector where each element holds one word or string ("..") of the command
-static std::vector<utf8::string_view> parse_command_string(utf8::string_view inputString){
-	std::vector<utf8::string_view> commandList;
+static std::vector<utf8::wstring_view> parse_command_string(utf8::wstring_view inputString){
+	std::vector<utf8::wstring_view> commandList;
 	auto itr = inputString.cbegin();
 	const auto end = inputString.cend();
 	while(itr != end){
@@ -35,7 +35,7 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 			}
 			const bool has_quotation_marks = next != end;
 			const auto distance = std::distance(itr + 1, next);
-			const utf8::string_view::const_pointer pChar = &(*(itr + 1));
+			const utf8::wstring_view::const_pointer pChar = &(*(itr + 1));
 			commandList.emplace_back(pChar, distance);
 			itr = next + has_quotation_marks;
 		}else{
@@ -45,7 +45,7 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 				if (utf8::is_whitespace(*next)) break;
 			}
 			const auto distance = std::distance(itr, next);
-			const utf8::string_view::const_pointer pChar = &(*itr);
+			const utf8::wstring_view::const_pointer pChar = &(*itr);
 			commandList.emplace_back(pChar, distance);
 			itr = next;
 		}
@@ -53,7 +53,7 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 	return commandList;
 }
 
-static bool common_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+static bool common_less(const utf8::wstring_view& lhs, const utf8::wstring_view& rhs) {
 	// TODO: put in utf8 string
 	auto rhsItr = rhs.begin();
 	const auto rhsEnd = rhs.end();
@@ -72,7 +72,7 @@ static bool common_less(const utf8::string_view& lhs, const utf8::string_view& r
 	return false;
 }
 
-static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+static bool strict_less(const utf8::wstring_view& lhs, const utf8::wstring_view& rhs) {
 	// TODO: put in utf8 string
 	auto rhsItr = rhs.begin();
 	const auto rhsEnd = rhs.end();
@@ -91,16 +91,16 @@ static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& r
 	return lhsItr == lhsEnd && rhsItr != rhsEnd;
 }
 
-static bool lower_bound_fn(const TermGui::Command& com, const utf8::string_view& str){
+static bool lower_bound_fn(const TermGui::Command& com, const utf8::wstring_view& str){
 	return strict_less(com.name, str);
 }
 
 /// returns true if the common string length of the left name is lesser than the right one
-static bool upper_bound_fn(const utf8::string_view& str, const TermGui::Command& com){
+static bool upper_bound_fn(const utf8::wstring_view& str, const TermGui::Command& com){
 	return common_less(str, com.name);
 }
 
-TermGui::const_command_range TermGui::find(const utf8::string_view& command, const TermGui::const_command_range& range) {
+TermGui::const_command_range TermGui::find(const utf8::wstring_view& command, const TermGui::const_command_range& range) {
 	const auto lowerBound = std::lower_bound(range.first, range.last, command, lower_bound_fn);
 	const auto upperBound = std::upper_bound(lowerBound, range.last, command, upper_bound_fn);
 	return TermGui::const_command_range{lowerBound, upperBound};
@@ -225,14 +225,14 @@ void TermGui::CommandLine::naive_insert(utf8::Char c) {
 }
 
 
-utf8::string_view TermGui::CommandLine::view_first_word() const{
+utf8::wstring_view TermGui::CommandLine::view_first_word() const{
 	const auto first = this->inputString.begin();
 	const auto last = this->inputString.end();
 	// skip whitespaces
 	const auto commandBegin = std::find_if_not(first, last, utf8::is_whitespace);
 	// find end of word
 	const auto commandEnd = std::find_if(commandBegin, last, utf8::is_whitespace);
-	utf8::string_view result(commandBegin, commandEnd);
+	utf8::wstring_view result(commandBegin, commandEnd);
 	return result;
 }
 
@@ -429,9 +429,9 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 	if(lineItr != lineEnd){// print name
 		outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
 		
-		const utf8::string& name = command->name;
-		utf8::string::const_iterator itr = name.begin();
-		const utf8::string::const_iterator end = name.end();
+		const utf8::wstring& name = command->name;
+		utf8::wstring::const_iterator itr = name.begin();
+		const utf8::wstring::const_iterator end = name.end();
 		TermGui::ScreenWidth::size_type columnItr = 0;
 		const TermGui::ScreenWidth::size_type columnEnd = infoWidth.x;
 		
@@ -446,9 +446,9 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 	if(lineItr != lineEnd){// print info
 		outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
 		
-		const utf8::string& info = command->info;
-		utf8::string::const_iterator itr = info.begin();
-		const utf8::string::const_iterator end = info.end();
+		const utf8::wstring& info = command->info;
+		utf8::wstring::const_iterator itr = info.begin();
+		const utf8::wstring::const_iterator end = info.end();
 		TermGui::ScreenWidth::size_type columnItr = 0;
 		const TermGui::ScreenWidth::size_type columnEnd = infoWidth.x;
 		
@@ -474,9 +474,9 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 			const ScreenWidth::size_type columnEnd = infoWidth.x;
 			
 			{// print flag name
-				const utf8::string& name = flagItr->name;
-				utf8::string::const_iterator itr = name.begin();
-				const utf8::string::const_iterator end = name.end();
+				const utf8::wstring& name = flagItr->name;
+				utf8::wstring::const_iterator itr = name.begin();
+				const utf8::wstring::const_iterator end = name.end();
 				
 				for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
 					outputString.append(itr->to_std_string_view());
@@ -486,9 +486,9 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 				outputString.append(std::min(spaceing + maxFlagWidth - columnItr, columnEnd - columnItr), ' ');
 			}
 			{// print flag info
-				const utf8::string& info = flagItr->info;
-				utf8::string::const_iterator itr = info.begin();
-				const utf8::string::const_iterator end = info.end();
+				const utf8::wstring& info = flagItr->info;
+				utf8::wstring::const_iterator itr = info.begin();
+				const utf8::wstring::const_iterator end = info.end();
 				
 				for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
 					outputString.append(itr->to_std_string_view());
