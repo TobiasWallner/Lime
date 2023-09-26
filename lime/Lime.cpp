@@ -47,8 +47,8 @@
 
 static TermGui::Command generate_cd_command(){
 	TermGui::Command result{
-		.name = utf8::string("cd"),
-		.info = utf8::string("+ <path> changes the current directory to the new "),
+		.name = utf8::wstring("cd"),
+		.info = utf8::wstring("+ <path> changes the current directory to the new "),
 		.flags = std::vector<TermGui::Command::Flag>(),
 		.callbackFn = &Lime::change_directory,
 	};
@@ -58,8 +58,8 @@ static TermGui::Command generate_cd_command(){
 
 static TermGui::Command generate_pwd_command(){
 	TermGui::Command result{
-		.name = utf8::string("pwd"),
-		.info = utf8::string("prints the working directory"),
+		.name = utf8::wstring("pwd"),
+		.info = utf8::wstring("prints the working directory"),
 		.flags = std::vector<TermGui::Command::Flag>(),
 		.callbackFn = &Lime::print_working_directory,
 	};
@@ -69,12 +69,12 @@ static TermGui::Command generate_pwd_command(){
 
 static TermGui::Command generate_open_command(){
 	TermGui::Command result{
-		.name = utf8::string("open"),
-		.info = utf8::string("+ <path> opens the specified file."),
+		.name = utf8::wstring("open"),
+		.info = utf8::wstring("+ <path> opens the specified file."),
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::string("-r"), utf8::string("opens the file in read-only mode")},
-			TermGui::Command::Flag{utf8::string("-a"), utf8::string("opens the file in append-only mode")},  
-			TermGui::Command::Flag{utf8::string("-copy"), utf8::string("+ <path> makes a copy of the file and opens it")},  
+			TermGui::Command::Flag{utf8::wstring("-r"), utf8::wstring("opens the file in read-only mode")},
+			TermGui::Command::Flag{utf8::wstring("-a"), utf8::wstring("opens the file in append-only mode")},  
+			TermGui::Command::Flag{utf8::wstring("-copy"), utf8::wstring("+ <path> makes a copy of the file and opens it")},  
 		}),
 		.callbackFn = &Lime::open,
 	};
@@ -84,11 +84,11 @@ static TermGui::Command generate_open_command(){
 
 static TermGui::Command generate_quit_command(){
 	TermGui::Command result{
-		.name = utf8::string("quit"),
-		.info = utf8::string("quits the editor if there are no unsaved files"),
+		.name = utf8::wstring("quit"),
+		.info = utf8::wstring("quits the editor if there are no unsaved files"),
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::string("-s"), utf8::string("saves all files before quitting")},
-			TermGui::Command::Flag{utf8::string("-f"), utf8::string("forces to quit and discards all unsaved changes")},  
+			TermGui::Command::Flag{utf8::wstring("-s"), utf8::wstring("saves all files before quitting")},
+			TermGui::Command::Flag{utf8::wstring("-f"), utf8::wstring("forces to quit and discards all unsaved changes")},  
 		}),
 		.callbackFn = &Lime::quit,
 	};
@@ -97,12 +97,12 @@ static TermGui::Command generate_quit_command(){
 
 static TermGui::Command generate_save_command(){
 	TermGui::Command result{
-		.name = utf8::string("save"),
-		.info = utf8::string("saves the active file"),
+		.name = utf8::wstring("save"),
+		.info = utf8::wstring("saves the active file"),
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::string("-as"), utf8::string("+ <path>, changes the file to the provided 'path' and saves it. Cannot be used together with '-all'")},
-			TermGui::Command::Flag{utf8::string("-all"), utf8::string("saves all open files")},  
-			TermGui::Command::Flag{utf8::string("-copy"), utf8::string("+ <path>, makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'")},  
+			TermGui::Command::Flag{utf8::wstring("-as"), utf8::wstring("+ <path>, changes the file to the provided 'path' and saves it. Cannot be used together with '-all'")},
+			TermGui::Command::Flag{utf8::wstring("-all"), utf8::wstring("saves all open files")},  
+			TermGui::Command::Flag{utf8::wstring("-copy"), utf8::wstring("+ <path>, makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'")},  
 		}),
 		.callbackFn = &Lime::save,
 	};
@@ -112,10 +112,10 @@ static TermGui::Command generate_save_command(){
 
 static TermGui::Command generate_set_command(){
 	TermGui::Command result{
-		.name = utf8::string("set"),
-		.info = utf8::string("<value_name> <new_value> sets a value to the provided one"),
+		.name = utf8::wstring("set"),
+		.info = utf8::wstring("<value_name> <new_value> sets a value to the provided one"),
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::string("tabsize"), utf8::string("+ <number>, sets the tabsize")}
+			TermGui::Command::Flag{utf8::wstring("tabsize"), utf8::wstring("+ <number>, sets the tabsize")}
 		}),
 		.callbackFn = &Lime::set,
 	};
@@ -268,7 +268,7 @@ static bool is_ignore_event(const Term::Event& event){
 		}break;
 		case Term::Event::Type::CopyPaste : {
 			// TODO: remove the static_cast as soon as cpp-terminal fixes the API of Term::Event
-			return event.get_if_copy_paste()->empty();
+			return event.get_if_copy_paste().empty();
 		}break; 
 		default : {
 			return true;
@@ -464,7 +464,7 @@ void Lime::prozess_key_event(Term::Key keyEvent){
 		case Term::Key::Value::Ctrl_X : this->topMessageBar->assign("/* TODO: cut selection into clipboard */"); break;
 		
 		default:{
-			if(!Term::hasAlt(keyEvent) && !Term::hasCtrl(keyEvent)){
+			if(!keyEvent.hasAlt() && !keyEvent.hasCtrl()){
 				const utf8::Char input(keyEvent.value);
 				this->activeCursor->insert(input);
 				this->topMessageBar->assign("Key press: ").append(input.to_std_string_view());
@@ -507,7 +507,7 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar->assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
-void Lime::set(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::set(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	if(commands.size() == 3){
 		//error
@@ -520,7 +520,7 @@ void Lime::set(void* ptr, const std::vector<utf8::string_view>& commands){
 	}
 }
 
-void Lime::set_tab_size(utf8::string_view tabSize){
+void Lime::set_tab_size(utf8::wstring_view tabSize){
 	std::int32_t value = 0;
 	const auto read = tabSize.parse_int32(&value);
 	if(read == 0){
@@ -537,7 +537,7 @@ void Lime::set_tab_size(utf8::string_view tabSize){
 	}
 }
 
-void Lime::change_directory(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::change_directory(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -564,7 +564,7 @@ void Lime::change_directory(void* ptr, const std::vector<utf8::string_view>& com
 	}
 }
 
-void Lime::print_working_directory(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::print_working_directory(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	if(commands.size() == 1){
 		const auto path = std::filesystem::current_path();
@@ -574,7 +574,7 @@ void Lime::print_working_directory(void* ptr, const std::vector<utf8::string_vie
 	}
 }
 
-void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::open(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -613,7 +613,7 @@ bool Lime::open(const std::string& path){
 }
 
 
-void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::quit(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -635,7 +635,7 @@ void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
 }
 
 
-void Lime::save(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::save(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
