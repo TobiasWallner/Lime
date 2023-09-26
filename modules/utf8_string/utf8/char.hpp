@@ -11,13 +11,24 @@
 namespace utf8{
 
 enum class Identifier : std::int8_t{
-	Unsupported = -1,
-	NotFirst 	= 0,
-	Bytes1 		= 1,
-	Bytes2 		= 2,
-	Bytes3 		= 3,
-	Bytes4 		= 4
+	Unsupported,
+	NotFirst,
+	Bytes1,
+	Bytes2,
+	Bytes3,
+	Bytes4,
 };
+
+constexpr bool is_start_byte(Identifier id){
+	return  id == Identifier::Bytes1 
+			|| id == Identifier::Bytes2
+			|| id == Identifier::Bytes3 
+			|| id == Identifier::Bytes4;
+}
+
+constexpr bool is_start_byte(char c){
+	return is_start_byte(identify(c));
+}
 
 constexpr const char* to_string(Identifier i){
 	switch(i){
@@ -84,9 +95,6 @@ constexpr Identifier identify(char c){
 	
 */
 class Char{
-
-
-	
 private:
 	char utf8[4];
 	
@@ -94,6 +102,7 @@ public:
 	using value_type = char;
 	using int_type = std::uint32_t;
 	using size_type = std::size_t;
+	using difference_type = long;
 	using iterator = char*;
 	using const_iterator = const char*;
 	using reference = char&;
@@ -425,7 +434,6 @@ public:
 	template<class Range> friend constexpr inline bool operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
 	template<class Range> friend constexpr inline bool operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
 };
-
 
 
 inline constexpr bool is_control(Char c){
