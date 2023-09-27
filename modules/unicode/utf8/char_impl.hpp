@@ -9,7 +9,10 @@
 #include <cinttypes>
 
 // project
+#include "char_type.hpp"
 #include "char_reference.hpp"
+
+/* TODO: finish refactoring of the implementation */
 
 namespace utf8{
 
@@ -85,361 +88,326 @@ constexpr Identifier identify(char c){
 }
 
 constexpr bool is_start_byte(char c){
-	return is_start_byte(utf8::identify(c));
+	return is_start_byte(identify(c));
 }
 
-/**
-	Stores an UTF8 symbol in a 4-byte wide buffer.
-	
-	It works and functions mostly as a container and also provides most standard container functions.
-	
-	It also has multiple functions that writes and prints this character into new or existing char strings,
-	output streams and the like.
-	
-*/
-class Char{
-private:
-	char utf8[4];
-	
-public:
-	using value_type = char;
-	using int_type = std::uint32_t;
-	using size_type = std::size_t;
-	using difference_type = long;
-	using iterator = char*;
-	using const_iterator = const char*;
-	using reference = char&;
-	using const_reference = const char&;
-	using pointer = char*;
-	using const_pointer = const char*;
+/// construct from an ascii character
+constexpr inline Char::Char(char ascii) : utf8{ascii, 0, 0, 0} {}
 
-	/// default constuctor constructable
-	inline Char() = default;
-	
-	/// supports default copy construction
-	constexpr inline Char(const Char&) = default;
-	
-	/// supports default copy assignment
-	constexpr inline Char& operator=(const Char&) = default;
-	
-	/// construct from an ascii character
-	constexpr inline Char(char ascii) : utf8{ascii, 0, 0, 0} {}
-	
-	constexpr inline Char(const char* character) : utf8{0} {this->assign(character);}
-	
-	constexpr inline Char(char32_t utf32) : utf8{0} {
-		// First code point 	Last code point 	Byte 1 		Byte 2 		Byte 3 		Byte 4
-		// U+0000 				U+007F 				0xxxxxxx 	
-		// U+0080 				U+07FF 				110xxxxx 	10xxxxxx 	
-		// U+0800 				U+FFFF 				1110xxxx 	10xxxxxx 	10xxxxxx 	
-		// U+10000 				U+10FFFF 			11110xxx 	10xxxxxx 	10xxxxxx 	10xxxxxx
-		if(utf32 <= 0x0000'007FL){
-			// it is just an ascii character
-			this->utf8[0] = static_cast<char>(utf32);
-		}else if(utf32 <= 0x0000'07FFL){
-			this->utf8[1] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
-			this->utf8[0] = static_cast<char>((utf32 >> 6) & 0b00011111L) | 0b11000000;
-		}else if(utf32 <= 0x0000'FFFFL){
-			this->utf8[2] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
-			this->utf8[1] = static_cast<char>((utf32 >> 6) & 0b00111111L) | 0b10000000;
-			this->utf8[0] = static_cast<char>((utf32 >> 12) & 0b00001111) | 0b11100000; 
-		}else if(utf32 <= 0x0010'FFFFL){
-			this->utf8[3] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
-			this->utf8[2] = static_cast<char>((utf32 >> 6) & 0b00111111L) | 0b10000000;
-			this->utf8[1] = static_cast<char>((utf32 >> 12) & 0b00111111L) | 0b10000000;
-			this->utf8[0] = static_cast<char>((utf32 >> 18) & 0b00000111L) | 0b11110000;
-		}
-	}
-	
-	constexpr inline Char(std::int32_t utf8) : Char(static_cast<char32_t>(utf8)){}
-	
-	/// reads one utf8 character from the range and stores it in the char
-	template<class CharItr>
-	constexpr inline explicit Char(CharItr first) : utf8{0} {this->assign(first);}
-	
-	/// reads one utf8 character from the range and stores it in the char, 
-	/// makes sure to not read more than the buffer
-	template<class CharItr>
-	constexpr inline Char(CharItr first, CharItr last) : utf8{0} {this->assign(first, last);}
-	
-	template<class CharItr>
-	constexpr inline Char(CharItr first, size_type n) : utf8{0} {this->assign(first, first + n);}
-	
-	/// reads first utf8 character from the string and makes sure not to read more than the strings content
-	inline explicit Char(const std::string& str) : utf8{0} {this->assign(str);}
-	
-	/// reads first utf8 character from the string and makes sure not to read more than the strings content
-	inline explicit Char(const std::string_view& str) : utf8{0} {this->assign(str);}
-	
-	/// assigns the ascii character to the utf8 character
-	constexpr inline void assign(char ascii){utf8[0] = ascii;}
-	
-	/// reads the first utf8 character and stores it in the character, within the range
-	/// returns the iterator to the next character after that.
-	/// returns the same first iterator if the provided character is not the first byte of an utf8 encoded character
-	template<class CharItr>
-	constexpr inline CharItr assign(CharItr first, CharItr last){
-		const auto identifier = identify(static_cast<char>(*first));
-		if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
-			return first;
-		}else{
-			const auto length = static_cast<size_type>(identifier);
-			for(int i = 0; i != length && first != last && i < 4; ++i, (void)(++first)){
-				this->utf8[i] = static_cast<char>(*first);
-			}
-			return first;
-		}		
-	}
-	
-	/// reads the first utf8 character and stores it in the character
-	/// returns the iterator to the next character after that.
-	/// returns the same iterator if the character is not a valid utf8 character
-	template<class CharItr>
-	constexpr inline CharItr assign(CharItr first){
-		const auto identifier = identify(static_cast<char>(*first));
-		if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
-			return first;
-		}else{
-			const auto length = static_cast<size_type>(identifier);
-			for(int i = 0; i != length && i < 4; ++i, (void)(++first)){
-				this->utf8[i] = static_cast<char>(*first);
-			}
-			return first;
-		}	
-	}
-	
-	constexpr inline void assign(char_const_reference ch){this->assign(static_cast<utf8::Char>(ch));}
-	constexpr inline void assign(char_reference ch){this->assign(static_cast<utf8::Char>(ch));}
-	
-	/// reads the first utf8 character from the string and stores it in the character
-	/// returns the string iterator after the read character
-	inline std::string::const_iterator assign(const std::string& str){return this->assign(str.cbegin(), str.cend());}
-	
-	/// reads the first utf8 character from the string and stores it in the character
-	/// returns the string iterator after the read character
-	inline std::string_view::const_iterator assign(const std::string_view& str){return this->assign(str.cbegin(), str.cend());}
+constexpr inline Char::Char(const char* character) : utf8{0} {this->assign(character);}
 
-	/// reads the first utf8 character from the string and stores it in the character
-	/// returns the string iterator after the read character
-	inline const_iterator assign(const_iterator str, size_type size){return this->assign(str, str+size);}
-	
-	
-	/// assigns an ascii character to the utf8 character
-	constexpr inline Char& operator=(char c){ this->assign(c); return *this; }
-	
-	template<class CharItr>
-	constexpr inline Char& operator=(CharItr itr){ this->assign(itr); return *this; }
-	
-	inline Char& operator=(const std::string& str){ this->assign(str); return *this; }
-	inline Char& operator=(const std::string_view& str){ this->assign(str); return *this; }
-	
-	/// returns the first character of the utf8 character string
-	constexpr inline char& front() { return this->utf8[0]; }
-	constexpr inline const char& front() const {return this->utf8[0];}
-	
-	/// returns the begin iterator of the utf8 character string
-	constexpr inline iterator begin() {return this->utf8;}
-	constexpr inline const_iterator begin() const {return this->utf8;}
-	constexpr inline const_iterator cbegin() const {return this->utf8;}
+constexpr inline Char::Char(char32_t utf32) : utf8{0} {
+	// First code point 	Last code point 	Byte 1 		Byte 2 		Byte 3 		Byte 4
+	// U+0000 				U+007F 				0xxxxxxx 	
+	// U+0080 				U+07FF 				110xxxxx 	10xxxxxx 	
+	// U+0800 				U+FFFF 				1110xxxx 	10xxxxxx 	10xxxxxx 	
+	// U+10000 				U+10FFFF 			11110xxx 	10xxxxxx 	10xxxxxx 	10xxxxxx
+	if(utf32 <= 0x0000'007FL){
+		// it is just an ascii character
+		this->utf8[0] = static_cast<char>(utf32);
+	}else if(utf32 <= 0x0000'07FFL){
+		this->utf8[1] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
+		this->utf8[0] = static_cast<char>((utf32 >> 6) & 0b00011111L) | 0b11000000;
+	}else if(utf32 <= 0x0000'FFFFL){
+		this->utf8[2] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
+		this->utf8[1] = static_cast<char>((utf32 >> 6) & 0b00111111L) | 0b10000000;
+		this->utf8[0] = static_cast<char>((utf32 >> 12) & 0b00001111) | 0b11100000; 
+	}else if(utf32 <= 0x0010'FFFFL){
+		this->utf8[3] = static_cast<char>(utf32 & 0b00111111L) | 0b10000000;
+		this->utf8[2] = static_cast<char>((utf32 >> 6) & 0b00111111L) | 0b10000000;
+		this->utf8[1] = static_cast<char>((utf32 >> 12) & 0b00111111L) | 0b10000000;
+		this->utf8[0] = static_cast<char>((utf32 >> 18) & 0b00000111L) | 0b11110000;
+	}
+}
 
-	/// returns the end iterator of the utf8 character string
-	constexpr inline iterator end() {return this->begin() + this->size();}
-	constexpr inline const_iterator end() const {return this->begin() + this->size();}
-	constexpr inline const_iterator cend() const {return this->begin() + this->size();}
-	
-	/// returns a string view object pointing to the utf8 symbol
-	constexpr inline std::string_view to_std_string_view() const {return std::string_view(this->begin(), this->size());}
-	
-	/// returns the character at the index of the utf8 string
-	constexpr inline reference operator[](size_type index){return this->utf8[index];}
-	constexpr inline const_reference operator[](size_type index) const {return this->utf8[index];}
-	
-	/// returns the number of bytes that the unicode character needs
-	constexpr inline size_type size() const {
-		const auto first_char = this->front();
-		const auto result = identify(first_char);
-		return static_cast<size_type>(result);
-	}
-	
-	/// provides a pointer to the underlieing data
-	constexpr inline pointer data() {return this->utf8;}
-	constexpr inline const_pointer data() const {return this->utf8;}
-	
-	/// writes this character into an std::string
-	inline void print(std::string& str) const {str.append(this->utf8, this->size());}
-	
-	/// turns this utf8 character string into an std::string
-	inline std::string to_std_string() const {return std::string(this->utf8, this->size());}
-	
-	/// writes this char into an std::ostream useing the stream operator <<
-	template<class OStream>
-	friend inline std::ostream& operator << (OStream& stream, Char c) {
-		stream.write(c.utf8, c.size()); return stream;
-	}
-	
-	/// reads an utf8 char from the input stream
-	template<class IStream>
-	friend IStream& operator >> (IStream& stream, Char& c) {
-		c[0] = stream.get();
-		const auto length = identify(c[0]);
-		switch(length){
-			case 2: {
-				c[1] = stream.get();
-			}break;
-			case 3: {
-				c[1] = stream.get();
-				c[2] = stream.get();
-			}break;
-			case 4: {
-				c[1] = stream.get();
-				c[2] = stream.get();
-				c[3] = stream.get();
-			}break;
+constexpr inline Char::Char(std::int32_t utf8) : Char(static_cast<char32_t>(utf8)){}
+
+/// reads one utf8 character from the range and stores it in the char
+template<class CharItr>
+constexpr inline explicit Char::Char(CharItr first) : utf8{0} {this->assign(first);}
+
+/// reads one utf8 character from the range and stores it in the char, 
+/// makes sure to not read more than the buffer
+template<class CharItr>
+constexpr inline Char::Char(CharItr first, CharItr last) : utf8{0} {this->assign(first, last);}
+
+template<class CharItr>
+constexpr inline Char::Char(CharItr first, size_type n) : utf8{0} {this->assign(first, first + n);}
+
+/// reads first utf8 character from the string and makes sure not to read more than the strings content
+inline explicit Char::Char(const std::string& str) : utf8{0} {this->assign(str);}
+
+/// reads first utf8 character from the string and makes sure not to read more than the strings content
+inline explicit Char::Char(const std::string_view& str) : utf8{0} {this->assign(str);}
+
+/// assigns the ascii character to the utf8 character
+constexpr inline void assign(char ascii){utf8[0] = ascii;}
+
+/// reads the first utf8 character and stores it in the character, within the range
+/// returns the iterator to the next character after that.
+/// returns the same first iterator if the provided character is not the first byte of an utf8 encoded character
+template<class CharItr>
+constexpr inline Char::CharItr assign(CharItr first, CharItr last){
+	const auto identifier = identify(static_cast<char>(*first));
+	if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
+		return first;
+	}else{
+		const auto length = static_cast<size_type>(identifier);
+		for(int i = 0; i != length && first != last && i < 4; ++i, (void)(++first)){
+			this->utf8[i] = static_cast<char>(*first);
 		}
-		return stream;
-	}
-	
-	constexpr inline int_type to_int() const {
-		switch(this->size()){
-			case 1: return (static_cast<int_type>(utf8[0]));
-			case 2: return (static_cast<int_type>(utf8[0] & 0b01111111) << 8) 
-							| static_cast<int_type>(utf8[1]);
-			case 3: return (static_cast<int_type>(utf8[0] & 0b00111111) << 16)
-							| (static_cast<int_type>(utf8[1]) << 8)
-							| (static_cast<int_type>(utf8[2]));
-			case 4: return (static_cast<int_type>(utf8[0] & 0b00011111) << 24)
-							| (static_cast<int_type>(utf8[1]) << 16)
-							| (static_cast<int_type>(utf8[2]) << 8)
-							| (static_cast<int_type>(utf8[3]));
-			default: return -1;
-		}	
-	}
-	
-	/// equality comparison with the same type
-	friend constexpr inline bool operator==(Char lhs, Char rhs){return lhs.to_int() == rhs.to_int();}
-	
-	friend constexpr inline bool operator==(Char lhs, char rhs){return lhs.to_int() == static_cast<Char::int_type>(rhs);}
-	friend constexpr inline bool operator==(char lhs, Char rhs){return (rhs == lhs);}
-	
-	/// equality comparison with a const char* string symbol that is null terminated
-	friend constexpr bool operator==(Char lhs, const char* rhs){
-		auto lhsItr = lhs.cbegin();
-		auto lhsEnd = lhs.cend();
-		for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
-			if(*rhs == '\0' || *lhsItr != *rhs) return false;
+		return first;
+	}		
+}
+
+/// reads the first utf8 character and stores it in the character
+/// returns the iterator to the next character after that.
+/// returns the same iterator if the character is not a valid utf8 character
+template<class CharItr>
+constexpr inline Char::CharItr assign(CharItr first){
+	const auto identifier = identify(static_cast<char>(*first));
+	if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
+		return first;
+	}else{
+		const auto length = static_cast<size_type>(identifier);
+		for(int i = 0; i != length && i < 4; ++i, (void)(++first)){
+			this->utf8[i] = static_cast<char>(*first);
 		}
-		return *rhs == '\0';
+		return first;
+	}	
+}
+
+constexpr inline void Char::assign(char_const_reference ch){this->assign(static_cast<Char>(ch));}
+constexpr inline void Char::assign(char_reference ch){this->assign(static_cast<Char>(ch));}
+
+/// reads the first utf8 character from the string and stores it in the character
+/// returns the string iterator after the read character
+inline std::string::const_iterator Char::assign(const std::string& str){return this->assign(str.cbegin(), str.cend());}
+
+/// reads the first utf8 character from the string and stores it in the character
+/// returns the string iterator after the read character
+inline std::string_view::const_iterator Char::assign(const std::string_view& str){return this->assign(str.cbegin(), str.cend());}
+
+/// reads the first utf8 character from the string and stores it in the character
+/// returns the string iterator after the read character
+inline const_iterator Char::assign(const_iterator str, size_type size){return this->assign(str, str+size);}
+
+
+/// assigns an ascii character to the utf8 character
+constexpr inline Char& Char::operator=(char c){ this->assign(c); return *this; }
+
+template<class CharItr>
+constexpr inline Char& Char::operator=(CharItr itr){ this->assign(itr); return *this; }
+
+inline Char& Char::operator=(const std::string& str){ this->assign(str); return *this; }
+inline Char& Char::operator=(const std::string_view& str){ this->assign(str); return *this; }
+
+/// returns the first character of the utf8 character string
+constexpr inline char& Char::front() { return this->utf8[0]; }
+constexpr inline const char& Char::front() const {return this->utf8[0];}
+
+/// returns the begin iterator of the utf8 character string
+constexpr inline Char::iterator Char::begin() {return this->utf8;}
+constexpr inline Char::const_iterator Char::begin() const {return this->utf8;}
+constexpr inline Char::const_iterator Char::cbegin() const {return this->utf8;}
+
+/// returns the end iterator of the utf8 character string
+constexpr inline Char::iterator Char::end() {return this->begin() + this->size();}
+constexpr inline Char::const_iterator Char::end() const {return this->begin() + this->size();}
+constexpr inline Char::const_iterator Char::cend() const {return this->begin() + this->size();}
+
+/// returns a string view object pointing to the utf8 symbol
+constexpr inline std::string_view Char::to_std_string_view() const {return std::string_view(this->begin(), this->size());}
+
+/// returns the character at the index of the utf8 string
+constexpr inline Char::reference Char::operator[](size_type index){return this->utf8[index];}
+constexpr inline Char::const_reference Char::operator[](size_type index) const {return this->utf8[index];}
+
+/// returns the number of bytes that the unicode character needs
+constexpr inline Char::size_type Char::size() const {
+	const auto first_char = this->front();
+	const auto result = identify(first_char);
+	return static_cast<size_type>(result);
+}
+
+/// provides a pointer to the underlieing data
+constexpr inline Char::pointer Char::data() {return this->utf8;}
+constexpr inline Char::const_pointer Char::data() const {return this->utf8;}
+
+/// writes this character into an std::string
+inline void Char::print(std::string& str) const {str.append(this->utf8, this->size());}
+
+/// turns this utf8 character string into an std::string
+inline std::string Char::to_std_string() const {return std::string(this->utf8, this->size());}
+
+/// writes this char into an std::ostream useing the stream operator <<
+template<class OStream>
+friend inline std::ostream& Char::operator << (OStream& stream, Char c) {
+	stream.write(c.utf8, c.size()); return stream;
+}
+
+/// reads an utf8 char from the input stream
+template<class IStream>
+friend IStream& Char::operator >> (IStream& stream, Char& c) {
+	c[0] = stream.get();
+	const auto length = identify(c[0]);
+	switch(length){
+		case 2: {
+			c[1] = stream.get();
+		}break;
+		case 3: {
+			c[1] = stream.get();
+			c[2] = stream.get();
+		}break;
+		case 4: {
+			c[1] = stream.get();
+			c[2] = stream.get();
+			c[3] = stream.get();
+		}break;
 	}
-	
-	/// equality comparison with a const char* string symbol
-	friend constexpr inline bool operator==(const char* lhs, Char rhs){return (rhs == lhs);}
-	
-	/// equality comparison with a range. has to support cbegin() and cend() !
-	template<class Range>
-	friend bool operator==(Char lhs, const Range& rhs){
-		auto lhsItr = lhs.cbegin();
-		const auto lhsEnd = lhs.cend();
-		auto rhsItr = rhs.cbegin();
-		const auto rhsEnd = rhs.cend();
-		for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
-			if(*lhsItr != *rhsItr) return false;
-		}
-		return lhsItr == lhsEnd && rhsItr == rhsEnd;
+	return stream;
+}
+
+constexpr inline Char::int_type to_int() const {
+	switch(this->size()){
+		case 1: return (static_cast<int_type>(utf8[0]));
+		case 2: return (static_cast<int_type>(utf8[0] & 0b01111111) << 8) 
+						| static_cast<int_type>(utf8[1]);
+		case 3: return (static_cast<int_type>(utf8[0] & 0b00111111) << 16)
+						| (static_cast<int_type>(utf8[1]) << 8)
+						| (static_cast<int_type>(utf8[2]));
+		case 4: return (static_cast<int_type>(utf8[0] & 0b00011111) << 24)
+						| (static_cast<int_type>(utf8[1]) << 16)
+						| (static_cast<int_type>(utf8[2]) << 8)
+						| (static_cast<int_type>(utf8[3]));
+		default: return -1;
+	}	
+}
+
+/// equality comparison with the same type
+friend constexpr inline bool Char::operator==(Char lhs, Char rhs){return lhs.to_int() == rhs.to_int();}
+
+friend constexpr inline bool Char::operator==(Char lhs, char rhs){return lhs.to_int() == static_cast<Char::int_type>(rhs);}
+friend constexpr inline bool Char::operator==(char lhs, Char rhs){return (rhs == lhs);}
+
+/// equality comparison with a const char* string symbol that is null terminated
+friend constexpr bool Char::operator==(Char lhs, const char* rhs){
+	auto lhsItr = lhs.cbegin();
+	auto lhsEnd = lhs.cend();
+	for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
+		if(*rhs == '\0' || *lhsItr != *rhs) return false;
 	}
-	
-	friend constexpr inline bool operator!=(Char lhs, char rhs){return !(lhs == rhs);}
-	friend constexpr inline bool operator!=(char lhs, Char rhs){return !(lhs == rhs);}
-	
-	/// equality comparison with a range. has to support cbegin() and cend() !
-	template<class Range>
-	friend constexpr inline bool operator==(const Range& lhs, Char rhs){return (rhs == lhs);}
-	
-	/// unequality comparison with self
-	friend constexpr inline bool operator!=(Char lhs, Char rhs){return lhs.to_int() != rhs.to_int();}
-	
-	/// unequality comparison with c_string
-	friend constexpr inline bool operator!=(Char lhs, const char* rhs){return !(lhs == rhs);}
-	friend constexpr inline bool operator!=(const char* lhs, Char rhs){return !(lhs == rhs);}
-	
-	/// unequality comparison with char range
-	template<class Range>
-	friend inline bool operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
-	
-	/// unequality comparison with char range
-	template<class Range>
-	friend inline bool operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
-	
-	friend constexpr bool operator<(Char lhs, const char* rhs){
-		auto lhsItr = lhs.cbegin();
-		auto lhsEnd = lhs.cend();
-		for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
-			if(*rhs == '\0' || *lhsItr >= *rhs) return false;
-		}
-		return *rhs == '\0';
+	return *rhs == '\0';
+}
+
+/// equality comparison with a const char* string symbol
+friend constexpr inline bool Char::operator==(const char* lhs, Char rhs){return (rhs == lhs);}
+
+/// equality comparison with a range. has to support cbegin() and cend() !
+template<class Range>
+friend bool operator==(Char lhs, const Range& rhs){
+	auto lhsItr = lhs.cbegin();
+	const auto lhsEnd = lhs.cend();
+	auto rhsItr = rhs.cbegin();
+	const auto rhsEnd = rhs.cend();
+	for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
+		if(*lhsItr != *rhsItr) return false;
 	}
-	
-	friend constexpr bool operator>(Char lhs, const char* rhs){
-		auto lhsItr = lhs.cbegin();
-		auto lhsEnd = lhs.cend();
-		for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
-			if(*rhs == '\0' || *lhsItr <= *rhs) return false;
-		}
-		return *rhs == '\0';
+	return lhsItr == lhsEnd && rhsItr == rhsEnd;
+}
+
+friend constexpr inline bool Char::operator!=(Char lhs, char rhs){return !(lhs == rhs);}
+friend constexpr inline bool Char::operator!=(char lhs, Char rhs){return !(lhs == rhs);}
+
+/// equality comparison with a range. has to support cbegin() and cend() !
+template<class Range>
+friend constexpr inline bool Char::operator==(const Range& lhs, Char rhs){return (rhs == lhs);}
+
+/// unequality comparison with self
+friend constexpr inline bool Char::operator!=(Char lhs, Char rhs){return lhs.to_int() != rhs.to_int();}
+
+/// unequality comparison with c_string
+friend constexpr inline bool Char::operator!=(Char lhs, const char* rhs){return !(lhs == rhs);}
+friend constexpr inline bool Char::operator!=(const char* lhs, Char rhs){return !(lhs == rhs);}
+
+/// unequality comparison with char range
+template<class Range>
+friend inline bool Char::operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
+
+/// unequality comparison with char range
+template<class Range>
+friend inline bool Char::operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
+
+friend constexpr bool Char::operator<(Char lhs, const char* rhs){
+	auto lhsItr = lhs.cbegin();
+	auto lhsEnd = lhs.cend();
+	for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
+		if(*rhs == '\0' || *lhsItr >= *rhs) return false;
 	}
-	
-	template<class Range>
-	friend bool operator<(Char lhs, const Range& rhs){
-		auto lhsItr = lhs.cbegin();
-		const auto lhsEnd = lhs.cend();
-		auto rhsItr = rhs.cbegin();
-		const auto rhsEnd = rhs.cend();
-		for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
-			if(*lhsItr >= *rhsItr) return false;
-		}
-		return lhsItr == lhsEnd && rhsItr == rhsEnd;
+	return *rhs == '\0';
+}
+
+friend constexpr bool Char::operator>(Char lhs, const char* rhs){
+	auto lhsItr = lhs.cbegin();
+	auto lhsEnd = lhs.cend();
+	for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
+		if(*rhs == '\0' || *lhsItr <= *rhs) return false;
 	}
-	
-	template<class Range>
-	friend bool operator>(Char lhs, const Range& rhs){
-		auto lhsItr = lhs.cbegin();
-		const auto lhsEnd = lhs.cend();
-		auto rhsItr = rhs.cbegin();
-		const auto rhsEnd = rhs.cend();
-		for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
-			if(*lhsItr <= *rhsItr) return false;
-		}
-		return lhsItr == lhsEnd && rhsItr == rhsEnd;
+	return *rhs == '\0';
+}
+
+template<class Range>
+friend bool Char::operator<(Char lhs, const Range& rhs){
+	auto lhsItr = lhs.cbegin();
+	const auto lhsEnd = lhs.cend();
+	auto rhsItr = rhs.cbegin();
+	const auto rhsEnd = rhs.cend();
+	for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
+		if(*lhsItr >= *rhsItr) return false;
 	}
-	
-	friend constexpr inline bool operator<(Char lhs, char rhs){return lhs.to_int() < static_cast<Char::int_type>(rhs);}
-	friend constexpr inline bool operator<(char lhs, Char rhs){return static_cast<Char::int_type>(lhs) < rhs.to_int();}
-	friend constexpr inline bool operator<(Char lhs, Char rhs){return lhs.to_int() < rhs.to_int();}
-	friend constexpr inline bool operator<(const char* lhs, Char rhs){return rhs > lhs;}
-	template<class Range> friend constexpr inline bool operator<(const Range& lhs, Char rhs){return rhs > lhs;}
-	
-	
-	friend constexpr inline bool operator>(Char lhs, char rhs){return rhs < lhs;}
-	friend constexpr inline bool operator>(char lhs, Char rhs){return rhs < lhs;}
-	friend constexpr inline bool operator>(Char lhs, Char rhs){return lhs.to_int() > rhs.to_int();}
-	friend constexpr inline bool operator>(const char* lhs, Char rhs){return rhs < lhs;}
-	template<class Range> friend constexpr inline bool operator>(const Range& lhs, Char rhs){return rhs < lhs;}
-	
-	friend constexpr inline bool operator<=(Char lhs, char rhs){return !(lhs > rhs);}
-	friend constexpr inline bool operator<=(char lhs, Char rhs){return !(lhs > rhs);}
-	friend constexpr inline bool operator<=(Char lhs, Char rhs){return lhs.to_int() <= rhs.to_int();}
-	friend constexpr inline bool operator<=(Char lhs, const char* rhs){return !(lhs > rhs);}
-	friend constexpr inline bool operator<=(const char* lhs, Char rhs){return !(rhs < lhs);}
-	template<class Range> friend constexpr inline bool operator<=(Char lhs, const Range& rhs){return !(lhs > rhs);}
-	template<class Range> friend constexpr inline bool operator<=(const Range& lhs, Char rhs){return !(rhs < lhs);}
-	
-	friend constexpr inline bool operator>=(Char lhs, char rhs){return !(lhs < rhs);}
-	friend constexpr inline bool operator>=(char lhs, Char rhs){return !(lhs < rhs);}
-	friend constexpr inline bool operator>=(Char lhs, Char rhs){return lhs.to_int() >= rhs.to_int();}
-	friend constexpr inline bool operator>=(Char lhs, const char* rhs){return !(lhs < rhs);}
-	friend constexpr inline bool operator>=(const char* lhs, Char rhs){return !(rhs > lhs);}
-	template<class Range> friend constexpr inline bool operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
-	template<class Range> friend constexpr inline bool operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
-};
+	return lhsItr == lhsEnd && rhsItr == rhsEnd;
+}
+
+template<class Range>
+friend bool Char::operator>(Char lhs, const Range& rhs){
+	auto lhsItr = lhs.cbegin();
+	const auto lhsEnd = lhs.cend();
+	auto rhsItr = rhs.cbegin();
+	const auto rhsEnd = rhs.cend();
+	for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
+		if(*lhsItr <= *rhsItr) return false;
+	}
+	return lhsItr == lhsEnd && rhsItr == rhsEnd;
+}
+
+friend constexpr inline bool Char::operator<(Char lhs, char rhs){return lhs.to_int() < static_cast<Char::int_type>(rhs);}
+friend constexpr inline bool Char::operator<(char lhs, Char rhs){return static_cast<Char::int_type>(lhs) < rhs.to_int();}
+friend constexpr inline bool Char::operator<(Char lhs, Char rhs){return lhs.to_int() < rhs.to_int();}
+friend constexpr inline bool Char::operator<(const char* lhs, Char rhs){return rhs > lhs;}
+template<class Range> friend constexpr inline bool Char::operator<(const Range& lhs, Char rhs){return rhs > lhs;}
+
+
+friend constexpr inline bool Char::operator>(Char lhs, char rhs){return rhs < lhs;}
+friend constexpr inline bool Char::operator>(char lhs, Char rhs){return rhs < lhs;}
+friend constexpr inline bool Char::operator>(Char lhs, Char rhs){return lhs.to_int() > rhs.to_int();}
+friend constexpr inline bool Char::operator>(const char* lhs, Char rhs){return rhs < lhs;}
+template<class Range> friend constexpr inline bool Char::operator>(const Range& lhs, Char rhs){return rhs < lhs;}
+
+friend constexpr inline bool Char::operator<=(Char lhs, char rhs){return !(lhs > rhs);}
+friend constexpr inline bool Char::operator<=(char lhs, Char rhs){return !(lhs > rhs);}
+friend constexpr inline bool Char::operator<=(Char lhs, Char rhs){return lhs.to_int() <= rhs.to_int();}
+friend constexpr inline bool Char::operator<=(Char lhs, const char* rhs){return !(lhs > rhs);}
+friend constexpr inline bool Char::operator<=(const char* lhs, Char rhs){return !(rhs < lhs);}
+template<class Range> friend constexpr inline bool Char::operator<=(Char lhs, const Range& rhs){return !(lhs > rhs);}
+template<class Range> friend constexpr inline bool Char::operator<=(const Range& lhs, Char rhs){return !(rhs < lhs);}
+
+friend constexpr inline bool Char::operator>=(Char lhs, char rhs){return !(lhs < rhs);}
+friend constexpr inline bool Char::operator>=(char lhs, Char rhs){return !(lhs < rhs);}
+friend constexpr inline bool Char::operator>=(Char lhs, Char rhs){return lhs.to_int() >= rhs.to_int();}
+friend constexpr inline bool Char::operator>=(Char lhs, const char* rhs){return !(lhs < rhs);}
+friend constexpr inline bool Char::operator>=(const char* lhs, Char rhs){return !(rhs > lhs);}
+template<class Range> friend constexpr inline bool Char::operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
+template<class Range> friend constexpr inline bool Char::operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
 
 
 inline constexpr bool is_control(Char c){
