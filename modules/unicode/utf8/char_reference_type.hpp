@@ -1,5 +1,6 @@
 #pragma once
 
+#include "char_type.hpp"
 #include "string_type.hpp"
 
 namespace utf8{
@@ -23,7 +24,6 @@ public:
 	constexpr char_const_reference(iterator pos);
 	constexpr size_type size() const;
 	
-	constexpr operator utf8::Char () const;
 	explicit constexpr operator std::string_view() const;
 	
 	constexpr const_pointer operator&() const;
@@ -35,6 +35,9 @@ public:
 	friend constexpr bool operator > (char_const_reference lhs, char_const_reference rhs);
 	friend constexpr bool operator >= (char_const_reference lhs, char_const_reference rhs);
 };
+
+class string;
+class Char;
 
 class char_reference{
 public:
@@ -58,8 +61,7 @@ public:
 	
 	constexpr pointer operator&();
 
-	constexpr operator const_reference();	
-	constexpr operator utf8::Char () const;
+	constexpr operator char_const_reference();
 	explicit constexpr operator std::string_view() const;
 	
 	constexpr char_reference& operator = (char c);

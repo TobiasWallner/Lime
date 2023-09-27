@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include "char.hpp"
-#include "char_reference.hpp"
-#include "string_iterator.hpp"
-#include "string_view.hpp"
+#include "char_type.hpp"
+#include "char_reference_type.hpp"
+#include "string_iterator_type.hpp"
+#include "string_view_type.hpp"
 
 namespace utf8{
 

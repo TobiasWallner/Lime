@@ -1,8 +1,8 @@
 #pragma once
 
-#include "char.hpp"
-#include "char_reference.hpp"
-#include "string.hpp"
+#include "char_type.hpp"
+#include "char_reference_type.hpp"
+#include "string_type.hpp"
 
 namespace utf8{
 	
@@ -12,6 +12,8 @@ private:
 	
 public:
 	using const_reference = utf8::char_const_reference;
+	using size_type = size_t;
+	using distance_type = long;
 
 	constexpr string_const_iterator(const char* pos);
 	constexpr string_const_iterator(const string_const_iterator&);
@@ -39,10 +41,12 @@ private:
 public:
 	using reference = utf8::char_reference;
 	using const_reference = utf8::char_const_reference;
+	using size_type = size_t;
+	using distance_type = long;
 
 	constexpr string_iterator(const char* pos);
 	constexpr string_iterator(const string_iterator&);
-	constexpr string_iterator& operator(const string_iterator&);
+	constexpr string_iterator& operator=(const string_iterator&);
 	
 	constexpr operator string_const_iterator();
 	constexpr reference operator*();
@@ -55,6 +59,6 @@ public:
 
 namespace std{
 
-constexpr sizt_t distance(utf8::string_const_iterator first, utf8::string_const_iterator last);
+constexpr utf8::string_const_iterator::distance_type distance(utf8::string_const_iterator first, utf8::string_const_iterator last);
 
 }

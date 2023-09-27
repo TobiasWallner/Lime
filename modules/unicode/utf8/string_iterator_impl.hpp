@@ -44,7 +44,7 @@ friend constexpr bool operator >= (string_const_iterator lhs, string_const_itera
 
 constexpr string_iterator::string_iterator(const char* pos) : itr(pos){}
 constexpr string_iterator::string_iterator(const string_iterator&) = default;
-constexpr string_iterator::string_iterator& operator(const string_iterator&) = default;
+constexpr string_iterator::string_iterator& operator=(const string_iterator&) = default;
 
 constexpr string_iterator::operator string_const_iterator() {return string_const_iterator(this->itr);}
 
