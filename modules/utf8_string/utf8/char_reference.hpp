@@ -2,7 +2,7 @@
 
 namespace utf8{
 	
-class const_reference{
+class char_const_reference{
 public:
 	using iterator = char*;
 	using const_iterator = const char*;
@@ -16,43 +16,23 @@ protected:
 public:
 	constexpr const_reference(iterator pos) : _pos(pos){}
 	
-	constexpr size_type size() const {return 1;}
-	constexpr size_type byte_size() const {
-		switch(utf8::identify(*this->_pos)){
-			case Unsupported :
-				throw std::runtime_error("Error: utf8::string_base::reference.byte_size(): encountered an unsupported unicode character."); 
-				break;
-			
-			case NotFirst :
-				throw std::runtime_error("Error: utf8::string_base::reference.byte_size(): encountered an unicode character that should not be at the start of an utf8 character"); 
-				break;
-			
-			case Bytes1 :
-				return 1;
-				break;
-			
-			case Bytes2 :
-				return 2;
-				break;
-			
-			case Bytes3 : 
-				return 3;
-				break;
-			
-			case Bytes4 : 
-				return 4;
-				break;
-			
-			default :
-				throw std::runtime_error("Error: utf8::string_base::reference.byte_size(): unhandled switch statement"); 
-				break;
-		}
-	}
+	constexpr const_pointer operator&() const {return this->_pos;}
+	
+	constexpr size_type size() const {static_cast<size_type>(utf8::identify(*this->_pos));}
 	
 	constexpr operator utf8::Char () const {return utf8::Char(&*iterator);}
-	constexpr operator utf8::string_view() const {return utf8::string_view(this->_pos, this->byte_size(), this->size())}
-	constexpr operator std::string_view() const {return std::string_view(this->_pos, this->byte_size())}
+	explicit constexpr operator utf8::string_view() const {return utf8::string_view(this->_pos, this->size());}
+	explicit constexpr operator std::string_view() const {return std::string_view(this->_pos, this->size());}
+	
+	friend constexpr bool operator == (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
+	friend constexpr bool operator != (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) != utf8::Char(rhs); }
+	friend constexpr bool operator < (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) < utf8::Char(rhs); }
+	friend constexpr bool operator <= (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) <= utf8::Char(rhs); }
+	friend constexpr bool operator > (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) > utf8::Char(rhs); }
+	friend constexpr bool operator >= (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) >= utf8::Char(rhs); }
 }
+
+class string;
 
 class reference{
 public:
@@ -63,127 +43,41 @@ public:
 	using size_type = size_t;
 
 private:	
-	string_base& _str;
+	utf8::string* _str = nullptr;
 	iterator : _pos;
 	
 public:
-	reference(const reference&) = default;
-	reference(string_base& str, iterator pos) : _str(str), _pos(pos){}
+	constexpr reference(const reference&) = default;
+	constexpr reference(string_base* str, iterator pos) : _str(str), _pos(pos){}
 	
-	constexpr size_type size() const {return 1;}
-	constexpr size_type byte_size() const {
-		switch(utf8::identify(*this->_pos)){
-			case Unsupported :
-				throw std::runtime_error("Error: utf8::string_base::reference.byte_size(): encountered an unsupported unicode character."); 
-				break;
-			
-			case NotFirst :
-				throw std::runtime_error("Error: utf8::string_base::reference.byte_size(): encountered an unicode character that should not be at the start of an utf8 character"); 
-				break;
-			
-			case Bytes1 :
-				return 1;
-				break;
-			
-			case Bytes2 :
-				return 2;
-				break;
-			
-			case Bytes3 : 
-				return 3;
-				break;
-			
-			case Bytes4 : 
-				return 4;
-				break;
-			
-			default :
-				throw std::runtime_error("Error: utf8::string_base::reference.byte_size(): unhandled switch statement"); 
-				break;
-		}
-	}
+	constexpr operator const_reference(){return const_reference(this->_pos);}
+	
+	constexpr size_type size() const {static_cast<size_type>(utf8::identify(*this->_pos));}
 	
 	constexpr operator utf8::Char () const {return utf8::Char(&*iterator);}
-	constexpr operator utf8::string_view() const {return utf8::string_view(this->_pos, this->byte_size(), this->size())}
-	constexpr operator std::string_view() const {return std::string_view(this->_pos, this->byte_size())}
+	explicit constexpr operator utf8::string_view() const {return utf8::string_view(this->_pos, this->size());}
+	explicit constexpr operator std::string_view() const {return std::string_view(this->_pos, this->size());}
 	
-	reference& operator = (char c){
-		switch(utf8::identify(*this->_pos)){
-			case Unsupported :
-				throw std::runtime_error("Error: utf8::string_base::reference.operator=(char c): encountered an unsupported unicode character."); 
-				break;
-			
-			case NotFirst :
-				throw std::runtime_error("Error: utf8::string_base::reference.operator=(char c): encountered an unicode character that should not be at the start of an utf8 character"); 
-				break;
-			
-			case Bytes1 :
-				*_pos = c;
-				break;
-			
-			case Bytes2 :
-				*_pos = c;
-				str.erase(this->_pos + 1, this->_pos + 2);
-				break;
-			
-			case Bytes3 : 
-				*_pos = c;
-				str.erase(this->_pos + 1, this->_pos + 3);
-				break;
-			
-			case Bytes4 : 
-				*_pos = c;
-				str.erase(this->_pos + 1, this->_pos + 4);
-				break;
-			
-			default :
-				throw std::runtime_error("Error: utf8::string_base::reference.operator=(char c): unhandled switch statement"); 
-				break;
-		}
+	constexpr reference& operator = (char c){
+		*this->_pos = c;
+		const auto erase_from = this->_pos+1;
+		const auto erase_to = this->_pos + this->size();
+		str.erase(erase_from, erase_to);
 		return *this;
 	}
 	
-	reference& operator = (utf8::Char c){
-		long this_size = 0;
-		switch(utf8::identify(*this->_pos)){
-			case Unsupported :
-				throw std::runtime_error("Error: utf8::string_base::reference.operator=(char c): encountered an unsupported unicode character."); break;
-			
-			case NotFirst :
-				throw std::runtime_error("Error: utf8::string_base::reference.operator=(char c): encountered an unicode character that should not be at the start of an utf8 character"); break;
-			
-			case Bytes1 :
-				this_size = 1;
-				break;
-			
-			case Bytes2 :
-				this_size = 2;
-				break;
-			
-			case Bytes3 : 
-				this_size = 3;
-				break;
-			
-			case Bytes4 : 
-				this_size = 4;
-				break;
-			
-			default :
-				throw std::runtime_error("Error: utf8::string_base::reference.operator=(char c): unhandled switch statement"); break;
-		}
-		
-		long rhs_size = c.size();
-		
-		if(this_size > rhs_size){
+	constexpr pointer operator&(){return this->_pos;}
+	
+	constexpr reference& operator = (utf8::Char c){
+		if(this->size() > c.size()){
 			std::copy(c.begin(), c.end(), this->_pos);
-			this->_str.erase(this->_pos + rhs_size, this->_pos + lhs_size);
-		}else if(this_size < rhs_size){
-			std::copy(c.begin(), c.begin() + this_size, this->_pos);
-			this->_str.insert(this->_pos + this_size, c.begin() + this_size, c.begin() + rhs_size)
+			this->_str->erase(this->_pos + c.size(), this->_pos + lhs_size);
+		}else if(this->size() < c.size()){
+			std::copy(c.begin(), c.begin() + this->size(), this->_pos);
+			this->_str->insert(this->_pos + this->size(), c.begin() + this->size(), c.begin() + c.size())
 		}else{
 			std::copy(c.begin(), c.end(), this->_pos);
 		}
-		
 		return *this;
 	}	
 };

@@ -11,12 +11,12 @@
 namespace utf8{
 
 enum class Identifier : std::int8_t{
-	Unsupported,
-	NotFirst,
-	Bytes1,
-	Bytes2,
-	Bytes3,
-	Bytes4,
+	NotFirst = 0,
+	Bytes1 = 1,
+	Bytes2 = 2,
+	Bytes3 = 3,
+	Bytes4 = 4,
+	Unsupported = 5,
 };
 
 constexpr bool is_start_byte(Identifier id){
