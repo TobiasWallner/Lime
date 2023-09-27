@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <exceptions>
 
 #include "char.hpp"
 #include "char_reference.hpp"

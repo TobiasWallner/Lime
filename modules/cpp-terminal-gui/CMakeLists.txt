@@ -28,7 +28,7 @@ target_include_directories(cpp-terminal-gui PUBLIC
 )
 
 target_link_libraries(cpp-terminal-gui 
-	utf8_string
+	unicode
 	cpp-terminal
 )
 

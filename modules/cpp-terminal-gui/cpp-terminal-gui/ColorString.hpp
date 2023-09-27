@@ -3,7 +3,7 @@
 #include <utility>
 
 // utf8_string
-#include <utf8_string.hpp>
+#include <utf8/string.hpp>
 
 // Project
 #include "FontStyle.hpp"

@@ -47,8 +47,8 @@
 
 static TermGui::Command generate_cd_command(){
 	TermGui::Command result{
-		.name = utf8::wstring("cd"),
-		.info = utf8::wstring("+ <path> changes the current directory to the new "),
+		.name = "cd",
+		.info = "+ <path> changes the current directory to the new ",
 		.flags = std::vector<TermGui::Command::Flag>(),
 		.callbackFn = &Lime::change_directory,
 	};
@@ -58,8 +58,8 @@ static TermGui::Command generate_cd_command(){
 
 static TermGui::Command generate_pwd_command(){
 	TermGui::Command result{
-		.name = utf8::wstring("pwd"),
-		.info = utf8::wstring("prints the working directory"),
+		.name = "pwd",
+		.info = "prints the working directory",
 		.flags = std::vector<TermGui::Command::Flag>(),
 		.callbackFn = &Lime::print_working_directory,
 	};
@@ -69,12 +69,12 @@ static TermGui::Command generate_pwd_command(){
 
 static TermGui::Command generate_open_command(){
 	TermGui::Command result{
-		.name = utf8::wstring("open"),
-		.info = utf8::wstring("+ <path> opens the specified file."),
+		.name = "open",
+		.info = "+ <path> opens the specified file.",
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::wstring("-r"), utf8::wstring("opens the file in read-only mode")},
-			TermGui::Command::Flag{utf8::wstring("-a"), utf8::wstring("opens the file in append-only mode")},  
-			TermGui::Command::Flag{utf8::wstring("-copy"), utf8::wstring("+ <path> makes a copy of the file and opens it")},  
+			TermGui::Command::Flag{"-r", "opens the file in read-only mode"},
+			TermGui::Command::Flag{"-a", "opens the file in append-only mode"},  
+			TermGui::Command::Flag{"-copy", "+ <path> makes a copy of the file and opens it"},  
 		}),
 		.callbackFn = &Lime::open,
 	};
@@ -84,11 +84,11 @@ static TermGui::Command generate_open_command(){
 
 static TermGui::Command generate_quit_command(){
 	TermGui::Command result{
-		.name = utf8::wstring("quit"),
-		.info = utf8::wstring("quits the editor if there are no unsaved files"),
+		.name = "quit",
+		.info = "quits the editor if there are no unsaved files",
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::wstring("-s"), utf8::wstring("saves all files before quitting")},
-			TermGui::Command::Flag{utf8::wstring("-f"), utf8::wstring("forces to quit and discards all unsaved changes")},  
+			TermGui::Command::Flag{"-s", "saves all files before quitting"},
+			TermGui::Command::Flag{"-f", "forces to quit and discards all unsaved changes"},  
 		}),
 		.callbackFn = &Lime::quit,
 	};
@@ -97,12 +97,12 @@ static TermGui::Command generate_quit_command(){
 
 static TermGui::Command generate_save_command(){
 	TermGui::Command result{
-		.name = utf8::wstring("save"),
-		.info = utf8::wstring("saves the active file"),
+		.name = "save",
+		.info = "saves the active file",
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::wstring("-as"), utf8::wstring("+ <path>, changes the file to the provided 'path' and saves it. Cannot be used together with '-all'")},
-			TermGui::Command::Flag{utf8::wstring("-all"), utf8::wstring("saves all open files")},  
-			TermGui::Command::Flag{utf8::wstring("-copy"), utf8::wstring("+ <path>, makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'")},  
+			TermGui::Command::Flag{"-as", "+ <path>, changes the file to the provided 'path' and saves it. Cannot be used together with '-all'"},
+			TermGui::Command::Flag"-all", "saves all open files"},  
+			TermGui::Command::Flag{"-copy", "+ <path>, makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'"},  
 		}),
 		.callbackFn = &Lime::save,
 	};
@@ -112,10 +112,10 @@ static TermGui::Command generate_save_command(){
 
 static TermGui::Command generate_set_command(){
 	TermGui::Command result{
-		.name = utf8::wstring("set"),
-		.info = utf8::wstring("<value_name> <new_value> sets a value to the provided one"),
+		.name = "set",
+		.info = "<value_name> <new_value> sets a value to the provided one",
 		.flags = std::vector<TermGui::Command::Flag>({
-			TermGui::Command::Flag{utf8::wstring("tabsize"), utf8::wstring("+ <number>, sets the tabsize")}
+			TermGui::Command::Flag{"tabsize", "+ <number>, sets the tabsize"}
 		}),
 		.callbackFn = &Lime::set,
 	};

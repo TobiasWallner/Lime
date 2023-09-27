@@ -19,9 +19,8 @@ add_subdirectory("${EXTERNAL_MODULES_PATH}/cpp-terminal")
 
 # internal dependencies
 enable_testing() # enable testing for internal libraries
-add_subdirectory("${INTERNAL_MODULES_PATH}/utf8_string")
+add_subdirectory("${INTERNAL_MODULES_PATH}/unicode")
 add_subdirectory("${INTERNAL_MODULES_PATH}/cpp-terminal-gui")
-add_subdirectory("${INTERNAL_MODULES_PATH}/verification")
 
 # ---------- unix specific libraries ------------
 
@@ -123,7 +122,7 @@ target_compile_options(lime PUBLIC
 
 
 target_link_libraries(lime PUBLIC
-	utf8_string
+	unicode
 	cpp-terminal
 	cpp-terminal-gui
 	# ----- linux specific libraries -----

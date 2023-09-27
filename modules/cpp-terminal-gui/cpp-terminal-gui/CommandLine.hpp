@@ -1,7 +1,7 @@
 #pragma once
 
 //utf8 string
-#include <utf8_string.hpp>
+#include <utf8/string.hpp>
 
 // c++ std
 #include <algorithm>
@@ -20,11 +20,11 @@ namespace TermGui{
 /// command element
 struct Command{
 	using object_pointer = void*;
-	using callback_function = void(*)(object_pointer self, const std::vector<utf8::wstring_view>& command);
-	struct Flag{ const utf8::wstring name; const utf8::wstring info; };
+	using callback_function = void(*)(object_pointer self, const std::vector<utf8::const_string_view>& command);
+	struct Flag{ const utf8::const_string_view name; const utf8::const_string_view info; };
 	
-	const utf8::wstring name;
-	const utf8::wstring info;
+	const utf8::const_string_view name;
+	const utf8::const_string_view info;
 	const std::vector<Flag> flags;
 	object_pointer objectPtr;
 	callback_function callbackFn;
@@ -42,7 +42,7 @@ const_command_range find(const utf8::wstring_view& commandName, const TermGui::c
 /// will move the command string into the provided method
 class CommandLine : public GridCell, public EditTrait{
 public:
-	using string_type = utf8::wstring;
+	using string_type = utf8::const_string_view;
 	using value_type = string_type::value_type;
 	using size_type = string_type::size_type;
 	using object_pointer = Command::object_pointer;

@@ -3,7 +3,7 @@
 #include <cpp-terminal/event.hpp>
 
 //utf8 string
-#include <utf8_string.hpp>
+#include <utf8/string.hpp>
 
 // cpp-terminal-gui
 #include <cpp-terminal-gui/ColorString.hpp>

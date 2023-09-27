@@ -6,8 +6,8 @@
 #include <cctype>
 
 // utf8 string 
-#include <utf8_char.hpp>
-#include <utf8_string.hpp>
+#include <utf8/char.hpp>
+#include <utf8/string.hpp>
 
 // project
 #include "TextEditor.hpp"
