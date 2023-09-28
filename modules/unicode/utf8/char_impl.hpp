@@ -91,13 +91,8 @@ constexpr bool is_start_byte(char c){
 	return is_start_byte(identify(c));
 }
 
-constexpr Char(char_const_reference ch){
-	this->assign(ch);
-}
-
-constexpr Char(char_reference ch){
-	this->assign(ch);
-}
+constexpr Char::Char(char_const_reference ch){this->assign(ch);}
+constexpr Char::Char(char_reference ch){this->assign(ch);}
 
 /// construct from an ascii character
 constexpr Char::Char(char ascii) : utf8{ascii, 0, 0, 0} {}
@@ -132,7 +127,7 @@ constexpr Char::Char(std::int32_t utf8) : Char(static_cast<char32_t>(utf8)){}
 
 /// reads one utf8 character from the range and stores it in the char
 template<class CharItr>
-constexpr explicit Char::Char(CharItr first) : utf8{0} {this->assign(first);}
+constexpr Char::Char(CharItr first) : utf8{0} {this->assign(first);}
 
 /// reads one utf8 character from the range and stores it in the char, 
 /// makes sure to not read more than the buffer
@@ -143,19 +138,26 @@ template<class CharItr>
 constexpr Char::Char(CharItr first, size_type n) : utf8{0} {this->assign(first, first + n);}
 
 /// reads first utf8 character from the string and makes sure not to read more than the strings content
-explicit Char::Char(const std::string& str) : utf8{0} {this->assign(str);}
+Char::Char(const std::string& str) : utf8{0} {this->assign(str);}
 
 /// reads first utf8 character from the string and makes sure not to read more than the strings content
-explicit Char::Char(const std::string_view& str) : utf8{0} {this->assign(str);}
+Char::Char(const std::string_view& str) : utf8{0} {this->assign(str);}
 
 /// assigns the ascii character to the utf8 character
-constexpr void assign(char ascii){utf8[0] = ascii;}
+constexpr void Char::assign(char ascii){utf8[0] = ascii;}
+
+constexpr void Char::assign(Char c){
+	this->utf8[0] = c.utf8[0];
+	this->utf8[1] = c.utf8[1];
+	this->utf8[2] = c.utf8[2];
+	this->utf8[3] = c.utf8[3];
+}
 
 /// reads the first utf8 character and stores it in the character, within the range
 /// returns the iterator to the next character after that.
 /// returns the same first iterator if the provided character is not the first byte of an utf8 encoded character
 template<class CharItr>
-constexpr Char::CharItr assign(CharItr first, CharItr last){
+constexpr CharItr Char::assign(CharItr first, CharItr last){
 	const auto identifier = identify(static_cast<char>(*first));
 	if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
 		return first;
@@ -172,7 +174,7 @@ constexpr Char::CharItr assign(CharItr first, CharItr last){
 /// returns the iterator to the next character after that.
 /// returns the same iterator if the character is not a valid utf8 character
 template<class CharItr>
-constexpr Char::CharItr assign(CharItr first){
+constexpr CharItr Char::assign(CharItr first){
 	const auto identifier = identify(static_cast<char>(*first));
 	if((identifier == Identifier::Unsupported) || (identifier == Identifier::NotFirst)){
 		return first;
@@ -198,7 +200,7 @@ std::string_view::const_iterator Char::assign(const std::string_view& str){retur
 
 /// reads the first utf8 character from the string and stores it in the character
 /// returns the string iterator after the read character
-const_iterator Char::assign(const_iterator str, size_type size){return this->assign(str, str+size);}
+Char::const_iterator Char::assign(const_iterator str, size_type size){return this->assign(str, str+size);}
 
 
 /// assigns an ascii character to the utf8 character
@@ -250,13 +252,13 @@ std::string Char::to_std_string() const {return std::string(this->utf8, this->si
 
 /// writes this char into an std::ostream useing the stream operator <<
 template<class OStream>
-friend std::ostream& Char::operator << (OStream& stream, Char c) {
+std::ostream& Char::operator << (OStream& stream, Char c) {
 	stream.write(c.utf8, c.size()); return stream;
 }
 
 /// reads an utf8 char from the input stream
 template<class IStream>
-friend IStream& Char::operator >> (IStream& stream, Char& c) {
+IStream& Char::operator >> (IStream& stream, Char& c) {
 	c[0] = stream.get();
 	const auto length = identify(c[0]);
 	switch(length){
@@ -293,13 +295,13 @@ constexpr Char::int_type to_int() const {
 }
 
 /// equality comparison with the same type
-friend constexpr bool Char::operator==(Char lhs, Char rhs){return lhs.to_int() == rhs.to_int();}
+constexpr bool Char::operator==(Char lhs, Char rhs){return lhs.to_int() == rhs.to_int();}
 
-friend constexpr bool Char::operator==(Char lhs, char rhs){return lhs.to_int() == static_cast<Char::int_type>(rhs);}
-friend constexpr bool Char::operator==(char lhs, Char rhs){return (rhs == lhs);}
+constexpr bool Char::operator==(Char lhs, char rhs){return lhs.to_int() == static_cast<Char::int_type>(rhs);}
+constexpr bool Char::operator==(char lhs, Char rhs){return (rhs == lhs);}
 
 /// equality comparison with a const char* string symbol that is null terminated
-friend constexpr bool Char::operator==(Char lhs, const char* rhs){
+constexpr bool Char::operator==(Char lhs, const char* rhs){
 	auto lhsItr = lhs.cbegin();
 	auto lhsEnd = lhs.cend();
 	for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
@@ -309,11 +311,11 @@ friend constexpr bool Char::operator==(Char lhs, const char* rhs){
 }
 
 /// equality comparison with a const char* string symbol
-friend constexpr bool Char::operator==(const char* lhs, Char rhs){return (rhs == lhs);}
+constexpr bool Char::operator==(const char* lhs, Char rhs){return (rhs == lhs);}
 
 /// equality comparison with a range. has to support cbegin() and cend() !
 template<class Range>
-friend bool operator==(Char lhs, const Range& rhs){
+bool operator==(Char lhs, const Range& rhs){
 	auto lhsItr = lhs.cbegin();
 	const auto lhsEnd = lhs.cend();
 	auto rhsItr = rhs.cbegin();
@@ -324,29 +326,29 @@ friend bool operator==(Char lhs, const Range& rhs){
 	return lhsItr == lhsEnd && rhsItr == rhsEnd;
 }
 
-friend constexpr bool Char::operator!=(Char lhs, char rhs){return !(lhs == rhs);}
-friend constexpr bool Char::operator!=(char lhs, Char rhs){return !(lhs == rhs);}
+constexpr bool Char::operator!=(Char lhs, char rhs){return !(lhs == rhs);}
+constexpr bool Char::operator!=(char lhs, Char rhs){return !(lhs == rhs);}
 
 /// equality comparison with a range. has to support cbegin() and cend() !
 template<class Range>
-friend constexpr bool Char::operator==(const Range& lhs, Char rhs){return (rhs == lhs);}
+constexpr bool Char::operator==(const Range& lhs, Char rhs){return (rhs == lhs);}
 
 /// unequality comparison with self
-friend constexpr bool Char::operator!=(Char lhs, Char rhs){return lhs.to_int() != rhs.to_int();}
+constexpr bool Char::operator!=(Char lhs, Char rhs){return lhs.to_int() != rhs.to_int();}
 
 /// unequality comparison with c_string
-friend constexpr bool Char::operator!=(Char lhs, const char* rhs){return !(lhs == rhs);}
-friend constexpr bool Char::operator!=(const char* lhs, Char rhs){return !(lhs == rhs);}
+constexpr bool Char::operator!=(Char lhs, const char* rhs){return !(lhs == rhs);}
+constexpr bool Char::operator!=(const char* lhs, Char rhs){return !(lhs == rhs);}
 
 /// unequality comparison with char range
 template<class Range>
-friend bool Char::operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
+bool Char::operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
 
 /// unequality comparison with char range
 template<class Range>
-friend bool Char::operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
+bool Char::operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
 
-friend constexpr bool Char::operator<(Char lhs, const char* rhs){
+constexpr bool Char::operator<(Char lhs, const char* rhs){
 	auto lhsItr = lhs.cbegin();
 	auto lhsEnd = lhs.cend();
 	for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
@@ -355,7 +357,7 @@ friend constexpr bool Char::operator<(Char lhs, const char* rhs){
 	return *rhs == '\0';
 }
 
-friend constexpr bool Char::operator>(Char lhs, const char* rhs){
+constexpr bool Char::operator>(Char lhs, const char* rhs){
 	auto lhsItr = lhs.cbegin();
 	auto lhsEnd = lhs.cend();
 	for(; lhsItr != lhsEnd; ++lhsItr, (void)++rhs){
@@ -365,7 +367,7 @@ friend constexpr bool Char::operator>(Char lhs, const char* rhs){
 }
 
 template<class Range>
-friend bool Char::operator<(Char lhs, const Range& rhs){
+bool Char::operator<(Char lhs, const Range& rhs){
 	auto lhsItr = lhs.cbegin();
 	const auto lhsEnd = lhs.cend();
 	auto rhsItr = rhs.cbegin();
@@ -377,7 +379,7 @@ friend bool Char::operator<(Char lhs, const Range& rhs){
 }
 
 template<class Range>
-friend bool Char::operator>(Char lhs, const Range& rhs){
+bool Char::operator>(Char lhs, const Range& rhs){
 	auto lhsItr = lhs.cbegin();
 	const auto lhsEnd = lhs.cend();
 	auto rhsItr = rhs.cbegin();
@@ -388,34 +390,34 @@ friend bool Char::operator>(Char lhs, const Range& rhs){
 	return lhsItr == lhsEnd && rhsItr == rhsEnd;
 }
 
-friend constexpr bool Char::operator<(Char lhs, char rhs){return lhs.to_int() < static_cast<Char::int_type>(rhs);}
-friend constexpr bool Char::operator<(char lhs, Char rhs){return static_cast<Char::int_type>(lhs) < rhs.to_int();}
-friend constexpr bool Char::operator<(Char lhs, Char rhs){return lhs.to_int() < rhs.to_int();}
-friend constexpr bool Char::operator<(const char* lhs, Char rhs){return rhs > lhs;}
-template<class Range> friend constexpr bool Char::operator<(const Range& lhs, Char rhs){return rhs > lhs;}
+constexpr bool Char::operator<(Char lhs, char rhs){return lhs.to_int() < static_cast<Char::int_type>(rhs);}
+constexpr bool Char::operator<(char lhs, Char rhs){return static_cast<Char::int_type>(lhs) < rhs.to_int();}
+constexpr bool Char::operator<(Char lhs, Char rhs){return lhs.to_int() < rhs.to_int();}
+constexpr bool Char::operator<(const char* lhs, Char rhs){return rhs > lhs;}
+template<class Range> constexpr bool Char::operator<(const Range& lhs, Char rhs){return rhs > lhs;}
 
 
-friend constexpr bool Char::operator>(Char lhs, char rhs){return rhs < lhs;}
-friend constexpr bool Char::operator>(char lhs, Char rhs){return rhs < lhs;}
-friend constexpr bool Char::operator>(Char lhs, Char rhs){return lhs.to_int() > rhs.to_int();}
-friend constexpr bool Char::operator>(const char* lhs, Char rhs){return rhs < lhs;}
-template<class Range> friend constexpr bool Char::operator>(const Range& lhs, Char rhs){return rhs < lhs;}
+constexpr bool Char::operator>(Char lhs, char rhs){return rhs < lhs;}
+constexpr bool Char::operator>(char lhs, Char rhs){return rhs < lhs;}
+constexpr bool Char::operator>(Char lhs, Char rhs){return lhs.to_int() > rhs.to_int();}
+constexpr bool Char::operator>(const char* lhs, Char rhs){return rhs < lhs;}
+template<class Range> constexpr bool Char::operator>(const Range& lhs, Char rhs){return rhs < lhs;}
 
-friend constexpr bool Char::operator<=(Char lhs, char rhs){return !(lhs > rhs);}
-friend constexpr bool Char::operator<=(char lhs, Char rhs){return !(lhs > rhs);}
-friend constexpr bool Char::operator<=(Char lhs, Char rhs){return lhs.to_int() <= rhs.to_int();}
-friend constexpr bool Char::operator<=(Char lhs, const char* rhs){return !(lhs > rhs);}
-friend constexpr bool Char::operator<=(const char* lhs, Char rhs){return !(rhs < lhs);}
-template<class Range> friend constexpr bool Char::operator<=(Char lhs, const Range& rhs){return !(lhs > rhs);}
-template<class Range> friend constexpr bool Char::operator<=(const Range& lhs, Char rhs){return !(rhs < lhs);}
+constexpr bool Char::operator<=(Char lhs, char rhs){return !(lhs > rhs);}
+constexpr bool Char::operator<=(char lhs, Char rhs){return !(lhs > rhs);}
+constexpr bool Char::operator<=(Char lhs, Char rhs){return lhs.to_int() <= rhs.to_int();}
+constexpr bool Char::operator<=(Char lhs, const char* rhs){return !(lhs > rhs);}
+constexpr bool Char::operator<=(const char* lhs, Char rhs){return !(rhs < lhs);}
+template<class Range> constexpr bool Char::operator<=(Char lhs, const Range& rhs){return !(lhs > rhs);}
+template<class Range> constexpr bool Char::operator<=(const Range& lhs, Char rhs){return !(rhs < lhs);}
 
-friend constexpr bool Char::operator>=(Char lhs, char rhs){return !(lhs < rhs);}
-friend constexpr bool Char::operator>=(char lhs, Char rhs){return !(lhs < rhs);}
-friend constexpr bool Char::operator>=(Char lhs, Char rhs){return lhs.to_int() >= rhs.to_int();}
-friend constexpr bool Char::operator>=(Char lhs, const char* rhs){return !(lhs < rhs);}
-friend constexpr bool Char::operator>=(const char* lhs, Char rhs){return !(rhs > lhs);}
-template<class Range> friend constexpr bool Char::operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
-template<class Range> friend constexpr bool Char::operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
+constexpr bool Char::operator>=(Char lhs, char rhs){return !(lhs < rhs);}
+constexpr bool Char::operator>=(char lhs, Char rhs){return !(lhs < rhs);}
+constexpr bool Char::operator>=(Char lhs, Char rhs){return lhs.to_int() >= rhs.to_int();}
+constexpr bool Char::operator>=(Char lhs, const char* rhs){return !(lhs < rhs);}
+constexpr bool Char::operator>=(const char* lhs, Char rhs){return !(rhs > lhs);}
+template<class Range> constexpr bool Char::operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
+template<class Range> constexpr bool Char::operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
 
 
 constexpr bool is_control(Char c){

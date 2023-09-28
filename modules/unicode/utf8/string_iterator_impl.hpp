@@ -73,6 +73,9 @@ constexpr string_iterator string_iterator::operator -- (int) {
 	return copy;
 }
 
+constexpr string* container() {return this->_str;}
+constexpr const string* container() const {return this->_str;}
+
 }
 
 namespace std{

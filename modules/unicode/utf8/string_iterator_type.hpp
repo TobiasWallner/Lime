@@ -2,7 +2,6 @@
 
 #include "char_type.hpp"
 #include "char_reference_type.hpp"
-#include "string_type.hpp"
 
 namespace utf8{
 	
@@ -33,6 +32,8 @@ public:
 	friend constexpr bool operator >= (string_const_iterator lhs, string_const_iterator rhs);
 };
 
+class string;
+
 class string_iterator{
 private:
 	string* _str;
@@ -47,6 +48,9 @@ public:
 	constexpr string_iterator(const char* pos);
 	constexpr string_iterator(const string_iterator&);
 	constexpr string_iterator& operator=(const string_iterator&);
+	
+	constexpr string* container();
+	constexpr const string* container() const;
 	
 	constexpr operator string_const_iterator();
 	constexpr reference operator*();

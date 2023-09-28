@@ -62,6 +62,7 @@ public:
 	constexpr Char(char_reference ch);
 	
 	/// construct from an ascii character
+	constexpr void assign(Char c);
 	constexpr Char(char ascii);
 	
 	constexpr Char(const char* character);

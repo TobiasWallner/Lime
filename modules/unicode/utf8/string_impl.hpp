@@ -6,6 +6,7 @@
 #include "char_reference.hpp"
 #include "string_iterator.hpp"
 #include "string_view.hpp"
+#include "common.hpp"
 
 namespace utf8{
 
@@ -49,6 +50,7 @@ template<class StringViewLike>
 constexpr string& string::assign(const StringViewLike& t) {this->string::Base::assign(t); return *this;}
 template<class StringViewLike>
 constexpr string& string::assign(const StringViewLike& t, string::size_type pos) {this->string::Base::assign(t, pos); return *this;}
+template<class StringViewLike>
 constexpr string& string::assign(const StringViewLike& t, string::size_type pos, string::size_type count)  {this->string::Base::assign(t, pos, count); return *this;}
 
 // allocator
@@ -112,8 +114,8 @@ constexpr string::iterator string::insert(string::const_iterator pos, const char
 template< class InputIt >
 constexpr string::iterator string::insert(string::const_iterator pos, InputIt first, InputIt last){return string::iterator(&*this->string::Base::insert(&*pos, first, last));}
 constexpr string::iterator string::insert(string::const_iterator pos, std::initializer_list<char> ilist){string::iterator(&*this->string::Base::insert(&*pos, first, last));}
-constexpr string& string::erase(string::size_type index = 0){this->erase(this->begin() + index); return *this;}
-constexpr string& string::erase(string::size_type index = 0, string::size_type count){auto first = this->begin() + index;auto last = first + count;this->erase(first, last);return *this;}
+constexpr string& string::erase(string::size_type inde){this->erase(this->begin() + index); return *this;}
+constexpr string& string::erase(string::size_type index, string::size_type count){auto first = this->begin() + index;auto last = first + count;this->erase(first, last);return *this;}
 constexpr string::iterator string::erase(string::const_iterator position){return string::iterator(&*this->erase(&*position));}
 constexpr string::iterator string::erase(string::const_iterator first, string::const_iterator last){return string::iterator(&*this->erase(&*first, &*last));}
 constexpr void string::push_back(char ascii){this->string::Base::push_back(ascii);}
@@ -129,7 +131,7 @@ constexpr string& string::append(const char* str, string::size_type count){this-
 constexpr string& string::append(const char* str){this->string::Base::append(str); return *this;}
 template< class InputIt >
 constexpr string& string::append(InputIt first, InputIt last){this->string::Base::append(first, last); return *this;}
-constexpr string& string::append(std::initializer_list<CharT> ilist){this->string::Base::append(ilist); return *this;}
+constexpr string& string::append(std::initializer_list<char> ilist){this->string::Base::append(ilist); return *this;}
 template< class StringViewLike >
 constexpr string& string::append(const StringViewLike& t){this->string::Base::append(t); return *this;}
 template< class StringViewLike >
@@ -142,7 +144,7 @@ constexpr string& string::operator+=(const string::Base& str ){return this->appe
 constexpr string& string::operator+=(char ascii){return this->append(ascii);}
 constexpr string& string::operator+=(utf8::Char ch){return this->append(ch);}
 constexpr string& string::operator+=(const char* s){return this->append(s);}
-constexpr string& string::operator+=(std::initializer_list<CharT> ilist){return this->append(ilist);}
+constexpr string& string::operator+=(std::initializer_list<char> ilist){return this->append(ilist);}
 template< class StringViewLike >
 constexpr basic_string& string::operator+=(const StringViewLike& t){return this->append(t);}
 
@@ -153,28 +155,65 @@ constexpr int string::compare(const string& str) const noexcept {
 	return false;
 }
 constexpr int string::compare(const basic_string& str) const noexcept {return this->string::Base::compare(str);}
-constexpr int string::compare(const CharT* s) const {return this->string::Base::compare(s);}
+constexpr int string::compare(const char* s) const {return this->string::Base::compare(s);}
 template< class StringViewLike >
 constexpr int string::compare(const StringViewLike& t) const {return this->string::Base::compare(t);}
 
-constexpr bool string::starts_with(std::string_view sv) const noexcept {return this->string::Base::starts_with(sv);}
-constexpr bool string::starts_with(utf8::string_view sv) const noexcept {return this->string::Base::starts_with(static_cast<std::string_view>(sv));}
+template<class CharItr>
+constexpr bool string::starts_with(CharItr first, CharItr last) const noexcept {return utf8::starts_with(this->begin(), this->end(), first, last);}
+template<class StringViewLike>
+constexpr bool string::starts_with(StringViewLike sv) const noexcept {return this->string::starts_with(sv.begin(), sv.end());}
 constexpr bool string::starts_with(char ch) const noexcept {return this->string::Base::starts_with(ch);}
 constexpr bool string::starts_with(utf8::Char ch) const noexcept {return this->starts_with(ch.to_std_string_view());}
 constexpr bool string::starts_with(const char* str) const {return this->string::Base::starts_with(str);}
 
-constexpr bool string::ends_with(std::string_view sv) const noexcept {return this->string::Base::ends_with(sv);}
-constexpr bool string::ends_with(utf8::string_view sv) const noexcept {return this->string::Base::ends_with(static_cast<std::string_view>(sv));}
+template<class CharItr>
+constexpr bool string::ends_with(CharItr first, CharItr last) const noexcept {return utf8::ends_with(this->begin(), this->end(), first, last);}
+template<class StringViewLike>
+constexpr bool string::ends_with(StringViewLike sv) const noexcept {return this->string::starts_with(sv.begin(), sv.end());}
 constexpr bool string::ends_with(char ch) const noexcept {return this->string::Base::ends_with(ch);}
 constexpr bool string::ends_with(utf8::Char ch) const noexcept {return this->ends_with(ch.to_std_string_view());}
 constexpr bool string::ends_with(const char* str) const {return this->string::Base::ends_with(str);}
 
-constexpr bool string::contains(std::string_view sv) const noexcept {return this->string::Base::contains(sv);}
-constexpr bool string::contains(utf8::string_view sv) const noexcept {return this->contains(static_cast<std::string_view>(sv));}
+template<class CharItr>
+constexpr bool string::contains(CharItr first, CharItr last) const noexcept{return utf8::contains(this->begin(), this->end(), first, last);}
+template<class StringViewLike>
+constexpr bool string::contains(StringViewLike sv) const noexcept{this->contains(sv.begin(), sv.end());}
 constexpr bool string::contains(char ch) const noexcept {return this->string::Base::contains(ch);}
 constexpr bool string::contains(utf8::Char ch) const noexcept {return this->contains(ch.to_std_string_view());}
 constexpr bool string::contains(const char* str) const {return this->string::Base::contains(str);}
 
+constexpr string& string::replace(string::const_iterator pos, char c){
+	*this->_pos = c;
+	const auto erase_from = &*pos + 1;
+	const auto erase_to = &*pos + *pos.size();
+	_str->erase(erase_from, erase_to);
+	return *this;
+}
+constexpr string& string::replace(string::const_iterator pos, utf8::Char c){
+	if(this->size() > c.size()){
+		std::copy(c.begin(), c.end(), &*pos);
+		const auto erase_from = &*pos + c.size();
+		const auto erase_to = &*pos + *pos.size();
+		this->Base::erase(erase_from, erse_to);
+	}else if(this->size() < c.size()){
+		const auto copy_first = c.begin();
+		const auto copy_last = c.begin() + pos->size();
+		const auto copy_dest = &*pos;
+		std::copy(copy_first, copy_last, copy_dest);
+		
+		const auto insert_pos = &*pos + *pos.size();
+		const auto insert_first =  c.begin() + *pos.size();
+		const auto insert_last = c.begin() + c.size();
+		this->_str->insert(insert_pos, insert_first, insert_last);
+	}else{
+		const auto copy_first = c.begin();
+		const auto copy_last = c.end();
+		const auto copy_dest = &*pos;
+		std::copy(copy_first, copy_last, &*pos);
+	}
+	return *this;
+}
 constexpr string& string::replace(string::const_iterator first, string::const_iterator last, const string& str) {return this->replace(first, last, str.cbegin(), str.cend());}
 constexpr string& string::replace(string::const_iterator first, string::const_iterator last, const char* cstr, string::size_type count2) {
 	return this->replace(first, last, string::const_iterator(cstr), string::const_iterator(cstr + count2));
@@ -224,7 +263,7 @@ constexpr string& string::replace(string::const_iterator destFirst, string::cons
 	}
 	return *this;
 }
-constexpr string& string::replace(string::const_iterator first, string::const_iterator last, std::initializer_list<CharT> ilist) {return this->replace(first, last, ilist.begin(), ilist.end());}
+constexpr string& string::replace(string::const_iterator first, string::const_iterator last, std::initializer_list<char> ilist) {return this->replace(first, last, ilist.begin(), ilist.end());}
 template< class StringViewLike >
 constexpr string& string::replace(string::const_iterator first, string::const_iterator last, const StringViewLike& t) {return this->replace(first, last, t.begin(), t.end());}
 
@@ -235,49 +274,60 @@ constexpr void swap( string& other ) {this->string::Base::swap(other);}
 
 // search
 
-constexpr string::const_iterator string::find(const string& str, string::const_iterator pos = this->cbegin()) const noexcept {
+constexpr string::const_iterator string::find(const string& str, string::const_iterator pos) const noexcept {
 	string::size_type foundPos = this->string::Base::find(str, std::distance(&*this->cbegin(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
-constexpr string::const_iterator string::find(const CharT* s, string::const_iterator pos, string::size_type count) const {
+
+constexpr const_iterator find(const string& str) const noexcept {return this->find(str, this->cbegin());}
+
+constexpr string::const_iterator string::find(const char* s, string::const_iterator pos, string::size_type count) const {
 	string::size_type foundPos = this->string::Base::find(s, std::distace(&*this->cbegin(), &*pos), count);
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
-constexpr string::const_iterator string::find(const CharT* s, string::const_iterator pos =  = this->cbegin()) const {
+constexpr string::const_iterator string::find(const char* s, string::const_iterator pos) const {
 	string::size_type foundPos = this->string::Base::find(s, std::distace(&*this->cbegin(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
-constexpr string::const_iterator string::find(char ch, string::const_iterator pos = this->cbegin()) const noexcept{
+constexpr const_iterator find(const char* s) const {return this->find(s, this->cbegin());}
+constexpr string::const_iterator string::find(char ch, string::const_iterator pos) const noexcept{
 	string::size_type foundPos = this->string::Base::find(ch, std::distace(&*this->cbegin(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
+constexpr const_iterator find(char ch) const noexcept {return this->find(ch, this->begin());}
 template<class StringViewLike>
-constexpr string::const_iterator string::find(const StringViewLike& t, string::const_iterator pos = this->cbegin()) const noexcept {
+constexpr string::const_iterator string::find(const StringViewLike& t, string::const_iterator pos) const noexcept {
 	string::size_type foundPos = this->string::Base::find(t, std::distace(&*this->cbegin(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
+template<class StringViewLike>
+constexpr const_iterator find(const StringViewLike& t) const noexcept{return this->find(t, this->begin());}
 
-constexpr string::const_iterator string::rfind(const string& str, string::const_iterator pos = this->cend()) const noexcept {
+constexpr string::const_iterator string::rfind(const string& str, string::const_iterator pos) const noexcept {
 	string::size_type foundPos = this->string::Base::rfind(str, std::distance(&*this->cend(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
-constexpr string::const_iterator string::rfind(const CharT* s, string::const_iterator pos, string::size_type count) const {
+constexpr const_iterator rfind(const string& str) const noexcept{return this->rfind(str, this->begin());}
+constexpr string::const_iterator string::rfind(const char* s, string::const_iterator pos, string::size_type count) const {
 	string::size_type foundPos = this->string::Base::rfind(s, std::distace(&*this->cend(), &*pos), count);
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
-constexpr string::const_iterator string::rfind(const CharT* s, string::const_iterator pos =  = this->cend()) const {
+constexpr string::const_iterator string::rfind(const char* s, string::const_iterator pos) const {
 	string::size_type foundPos = this->string::Base::rfind(s, std::distace(&*this->cend(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
-constexpr string::const_iterator string::rfind(char ch, string::const_iterator pos = this->cend()) const noexcept{
+constexpr const_iterator rfind(const char* s) const{return this->rfind(s, this->begin());}
+constexpr string::const_iterator string::rfind(char ch, string::const_iterator pos) const noexcept{
 	string::size_type foundPos = this->string::Base::rfind(ch, std::distace(&*this->cend(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
+constexpr const_iterator rfind(char ch) const noexcept{return this->rfind(ch, this->begin());}
 template<class StringViewLike>
-constexpr string::const_iterator string::rfind(const StringViewLike& t, string::const_iterator pos = this->cend()) const noexcept {
+constexpr string::const_iterator string::rfind(const StringViewLike& t, string::const_iterator pos) const noexcept {
 	string::size_type foundPos = this->string::Base::rfind(t, std::distace(&*this->cend(), &*pos));
 	return string::const_iterator(&*this->cbegin() + foundPos);
 }
+constexpr const_iterator rfind(const StringViewLike& t) const noexcept{return this->rfind(t, this->begin());}
 
 
 // helper
