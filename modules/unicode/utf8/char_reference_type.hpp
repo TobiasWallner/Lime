@@ -14,14 +14,14 @@ public:
 	using size_type = size_t;
 	
 protected:	
-	iterator _pos = nullptr;
+	const_iterator _pos = nullptr;
 
 public:
 	constexpr char_const_reference() = default;
 	constexpr char_const_reference(const char_const_reference&) = default;
 	constexpr char_const_reference& operator= (const char_const_reference&) = default;
-
-	constexpr char_const_reference(iterator pos);
+	constexpr char_const_reference(const_iterator pos);
+	
 	constexpr size_type size() const;
 	
 	explicit constexpr operator std::string_view() const;

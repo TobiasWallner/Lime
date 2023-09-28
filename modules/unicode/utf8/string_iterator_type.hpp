@@ -45,7 +45,7 @@ public:
 	using size_type = size_t;
 	using distance_type = long;
 
-	constexpr string_iterator(const char* pos);
+	constexpr string_iterator(string* str, char* pos);
 	constexpr string_iterator(const string_iterator&);
 	constexpr string_iterator& operator=(const string_iterator&);
 	
@@ -54,6 +54,8 @@ public:
 	
 	constexpr operator string_const_iterator();
 	constexpr reference operator*();
+	constexpr const_reference operator*() const;
+	constexpr string_iterator operator ++ ();
 	constexpr string_iterator operator ++ (int);
 	constexpr string_iterator operator -- ();
 	constexpr string_iterator operator -- (int);

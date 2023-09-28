@@ -6,7 +6,7 @@
 
 namespace utf8{
 	
-constexpr char_const_reference::char_const_reference(char_const_reference::iterator pos) : _pos(pos){}
+constexpr char_const_reference::char_const_reference(const_iterator pos) : _pos(pos){}
 
 constexpr char_const_reference::const_pointer char_const_reference::operator&() const {return this->_pos;}
 

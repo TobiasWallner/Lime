@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "string_iterator_type.hpp"
 #include "char.hpp"
 #include "char_reference.hpp"
@@ -8,7 +10,7 @@ namespace utf8{
 
 constexpr string_const_iterator::string_const_iterator(const char* pos) : itr(pos){}
 constexpr string_const_iterator::string_const_iterator(const string_const_iterator&) = default;
-constexpr string_const_iterator::string_const_iterator& operator=(const string_const_iterator&) = default;
+constexpr string_const_iterator& string_const_iterator::operator=(const string_const_iterator&) = default;
 
 constexpr string_const_iterator::const_reference string_const_iterator::operator*(){return string_const_iterator::const_reference(this->itr);}
 constexpr string_const_iterator string_const_iterator::operator ++ (){
@@ -35,20 +37,21 @@ constexpr string_const_iterator string_const_iterator::operator -- (int) {
 	return copy;
 }
 
-friend constexpr bool operator == (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr == rhs.itr;}
-friend constexpr bool operator != (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr != rhs.itr;}
-friend constexpr bool operator < (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr < rhs.itr;}
-friend constexpr bool operator <= (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr <= rhs.itr;}
-friend constexpr bool operator > (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr > rhs.itr;}
-friend constexpr bool operator >= (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr >= rhs.itr;}
+constexpr bool operator == (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr == rhs.itr;}
+constexpr bool operator != (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr != rhs.itr;}
+constexpr bool operator < (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr < rhs.itr;}
+constexpr bool operator <= (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr <= rhs.itr;}
+constexpr bool operator > (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr > rhs.itr;}
+constexpr bool operator >= (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr >= rhs.itr;}
 
-constexpr string_iterator::string_iterator(const char* pos) : itr(pos){}
+constexpr string_iterator::string_iterator(string* str, char* pos) : _str(str), itr(pos){}
 constexpr string_iterator::string_iterator(const string_iterator&) = default;
-constexpr string_iterator::string_iterator& operator=(const string_iterator&) = default;
+constexpr string_iterator& string_iterator::operator=(const string_iterator&) = default;
 
 constexpr string_iterator::operator string_const_iterator() {return string_const_iterator(this->itr);}
 
-constexpr string_iterator::reference string_iterator::operator*(){return const_reference(this->itr);}
+constexpr string_iterator::reference string_iterator::operator*(){return reference(this->_str, this->itr);}
+constexpr string_iterator::const_reference string_iterator::operator*() const {return const_reference(this->itr);}
 constexpr string_iterator string_iterator::operator ++ (){
 	this->itr += static_cast<std::int32_t>(utf8::identify(*(this->itr)));
 	return *this;
@@ -73,17 +76,17 @@ constexpr string_iterator string_iterator::operator -- (int) {
 	return copy;
 }
 
-constexpr string* container() {return this->_str;}
-constexpr const string* container() const {return this->_str;}
+constexpr string* string_iterator::container() {return this->_str;}
+constexpr const string* string_iterator::container() const {return this->_str;}
 
 }
 
 namespace std{
 
-constexpr sizt_t distance(utf8::string_const_iterator first, utf8::string_const_iterator last){
+constexpr long distance(utf8::string_const_iterator first, utf8::string_const_iterator last){
 	const char* _first = &*first;
 	const char* _last = &*last;
-	return std::count_if(_first, _last, utf8::is_start_byte);
+	return std::count_if(_first, _last, static_cast<bool(*)(char)>(&utf8::is_start_byte));
 }
 
 }
