@@ -178,9 +178,13 @@ public:
 	
 	/// equality comparison with the same type
 	friend constexpr bool operator==(Char lhs, Char rhs);
-	
 	friend constexpr bool operator==(Char lhs, char rhs);
 	friend constexpr bool operator==(char lhs, Char rhs);
+	
+	friend constexpr bool operator == (utf8::Char lhs, char_const_reference rhs);
+	friend constexpr bool operator == (char_const_reference lhs, utf8::Char rhs);
+	friend constexpr bool operator == (utf8::Char lhs, char_reference rhs);
+	friend constexpr bool operator == (char_reference lhs, utf8::Char rhs);
 	
 	/// equality comparison with a const char* string symbol that is null terminated
 	friend constexpr bool operator==(Char lhs, const char* rhs);
@@ -194,6 +198,11 @@ public:
 	
 	friend constexpr bool operator!=(Char lhs, char rhs);
 	friend constexpr bool operator!=(char lhs, Char rhs);
+	
+	friend constexpr bool operator != (utf8::Char lhs, char_const_reference rhs);
+	friend constexpr bool operator != (char_const_reference lhs, utf8::Char rhs);
+	friend constexpr bool operator != (utf8::Char lhs, char_reference rhs);
+	friend constexpr bool operator != (char_reference lhs, utf8::Char rhs);
 	
 	/// equality comparison with a range. has to support cbegin() and cend() !
 	template<class Range>
@@ -228,12 +237,22 @@ public:
 	friend constexpr bool operator<(const char* lhs, Char rhs);
 	template<class Range> friend constexpr bool operator<(const Range& lhs, Char rhs);
 	
+	friend constexpr bool operator < (utf8::Char lhs, char_const_reference rhs);
+	friend constexpr bool operator < (char_const_reference lhs, utf8::Char rhs);
+	friend constexpr bool operator < (utf8::Char lhs, char_reference rhs);
+	friend constexpr bool operator < (char_reference lhs, utf8::Char rhs);
+	
 	
 	friend constexpr bool operator>(Char lhs, char rhs);
 	friend constexpr bool operator>(char lhs, Char rhs);
 	friend constexpr bool operator>(Char lhs, Char rhs);
 	friend constexpr bool operator>(const char* lhs, Char rhs);
 	template<class Range> friend constexpr bool operator>(const Range& lhs, Char rhs);
+	
+	friend constexpr bool operator > (utf8::Char lhs, char_const_reference rhs);
+	friend constexpr bool operator > (char_const_reference lhs, utf8::Char rhs);
+	friend constexpr bool operator > (utf8::Char lhs, char_reference rhs);
+	friend constexpr bool operator > (char_reference lhs, utf8::Char rhs);
 	
 	friend constexpr bool operator<=(Char lhs, char rhs);
 	friend constexpr bool operator<=(char lhs, Char rhs);
@@ -242,6 +261,10 @@ public:
 	friend constexpr bool operator<=(const char* lhs, Char rhs);
 	template<class Range> friend constexpr bool operator<=(Char lhs, const Range& rhs);
 	template<class Range> friend constexpr bool operator<=(const Range& lhs, Char rhs);
+	friend constexpr bool operator <= (utf8::Char lhs, char_const_reference rhs);
+	friend constexpr bool operator <= (char_const_reference lhs, utf8::Char rhs);
+	friend constexpr bool operator <= (utf8::Char lhs, char_reference rhs);
+	friend constexpr bool operator <= (char_reference lhs, utf8::Char rhs);
 	
 	friend constexpr bool operator>=(Char lhs, char rhs);
 	friend constexpr bool operator>=(char lhs, Char rhs);
@@ -250,6 +273,11 @@ public:
 	friend constexpr bool operator>=(const char* lhs, Char rhs);
 	template<class Range> friend constexpr bool operator>=(Char lhs, const Range& rhs);
 	template<class Range> friend constexpr bool operator>=(const Range& lhs, Char rhs);
+	friend constexpr bool operator >= (utf8::Char lhs, char_const_reference rhs);
+	friend constexpr bool operator >= (char_const_reference lhs, utf8::Char rhs);
+	friend constexpr bool operator >= (utf8::Char lhs, char_reference rhs);
+	friend constexpr bool operator >= (char_reference lhs, utf8::Char rhs);
+	
 };
 
 

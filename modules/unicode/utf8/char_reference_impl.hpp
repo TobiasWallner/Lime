@@ -16,38 +16,26 @@ constexpr char_const_reference::operator std::string_view() const {return std::s
 constexpr bool operator == (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
 constexpr bool operator == (char lhs, char_const_reference rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
 constexpr bool operator == (char_const_reference lhs, char rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
-constexpr bool operator == (utf8::Char lhs, char_const_reference rhs){ return lhs == utf8::Char(rhs); }
-constexpr bool operator == (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) == rhs; }
 
 constexpr bool operator != (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) != utf8::Char(rhs); }
 constexpr bool operator != (char lhs, char_const_reference rhs){ return utf8::Char(lhs) != utf8::Char(rhs); }
 constexpr bool operator != (char_const_reference lhs, char rhs){ return utf8::Char(lhs) != utf8::Char(rhs); }
-constexpr bool operator != (utf8::Char lhs, char_const_reference rhs){ return lhs != utf8::Char(rhs); }
-constexpr bool operator != (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) != rhs; }
 
 constexpr bool operator < (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) < utf8::Char(rhs); }
 constexpr bool operator < (char lhs, char_const_reference rhs){ return utf8::Char(lhs) < utf8::Char(rhs); }
 constexpr bool operator < (char_const_reference lhs, char rhs){ return utf8::Char(lhs) < utf8::Char(rhs); }
-constexpr bool operator < (utf8::Char lhs, char_const_reference rhs){ return lhs < utf8::Char(rhs); }
-constexpr bool operator < (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) < rhs; }
 
 constexpr bool operator <= (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) <= utf8::Char(rhs); }
 constexpr bool operator <= (char lhs, char_const_reference rhs){ return utf8::Char(lhs) <= utf8::Char(rhs); }
 constexpr bool operator <= (char_const_reference lhs, char rhs){ return utf8::Char(lhs) <= utf8::Char(rhs); }
-constexpr bool operator <= (utf8::Char lhs, char_const_reference rhs){ return lhs <= utf8::Char(rhs); }
-constexpr bool operator <= (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) <= rhs; }
 
 constexpr bool operator > (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) > utf8::Char(rhs); }
 constexpr bool operator > (char lhs, char_const_reference rhs){ return utf8::Char(lhs) > utf8::Char(rhs); }
 constexpr bool operator > (char_const_reference lhs, char rhs){ return utf8::Char(lhs) > utf8::Char(rhs); }
-constexpr bool operator > (utf8::Char lhs, char_const_reference rhs){ return lhs > utf8::Char(rhs); }
-constexpr bool operator > (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) > rhs; }
 
 constexpr bool operator >= (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) >= utf8::Char(rhs); }
 constexpr bool operator >= (char lhs, char_const_reference rhs){ return utf8::Char(lhs) >= utf8::Char(rhs); }
 constexpr bool operator >= (char_const_reference lhs, char rhs){ return utf8::Char(lhs) >= utf8::Char(rhs); }
-constexpr bool operator >= (utf8::Char lhs, char_const_reference rhs){ return lhs >= utf8::Char(rhs); }
-constexpr bool operator >= (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) >= rhs; }
 
 constexpr char_reference::char_reference(utf8::string* str, char_reference::iterator pos) : _str(str), _pos(pos){}
 
@@ -62,4 +50,39 @@ constexpr char_reference& char_reference::operator = (const utf8::Char& c){this-
 
 constexpr char_reference::pointer char_reference::operator&(){return this->_pos;}
 	
+constexpr bool operator == (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
+constexpr bool operator == (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
+constexpr bool operator == (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
+constexpr bool operator == (char lhs, char_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
+constexpr bool operator == (char_reference lhs, char rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
+
+constexpr bool operator != (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) != utf8::Char(rhs);}
+constexpr bool operator != (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) != utf8::Char(rhs);}
+constexpr bool operator != (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) != utf8::Char(rhs);}
+constexpr bool operator != (char lhs, char_reference rhs) {return utf8::Char(lhs) != utf8::Char(rhs);}
+constexpr bool operator != (char_reference lhs, char rhs) {return utf8::Char(lhs) != utf8::Char(rhs);}
+
+constexpr bool operator < (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) < utf8::Char(rhs);}
+constexpr bool operator < (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) < utf8::Char(rhs);}
+constexpr bool operator < (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) < utf8::Char(rhs);}
+constexpr bool operator < (char lhs, char_reference rhs) {return utf8::Char(lhs) < utf8::Char(rhs);}
+constexpr bool operator < (char_reference lhs, char rhs) {return utf8::Char(lhs) < utf8::Char(rhs);}
+
+constexpr bool operator <= (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) <= utf8::Char(rhs);}
+constexpr bool operator <= (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) <= utf8::Char(rhs);}
+constexpr bool operator <= (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) <= utf8::Char(rhs);}
+constexpr bool operator <= (char lhs, char_reference rhs) {return utf8::Char(lhs) <= utf8::Char(rhs);}
+constexpr bool operator <= (char_reference lhs, char rhs) {return utf8::Char(lhs) <= utf8::Char(rhs);}
+
+constexpr bool operator > (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) > utf8::Char(rhs);}
+constexpr bool operator > (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) > utf8::Char(rhs);}
+constexpr bool operator > (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) > utf8::Char(rhs);}
+constexpr bool operator > (char lhs, char_reference rhs) {return utf8::Char(lhs) > utf8::Char(rhs);}
+constexpr bool operator > (char_reference lhs, char rhs) {return utf8::Char(lhs) > utf8::Char(rhs);}
+
+constexpr bool operator >= (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
+constexpr bool operator >= (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
+constexpr bool operator >= (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
+constexpr bool operator >= (char lhs, char_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
+constexpr bool operator >= (char_reference lhs, char rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
 } // namespace utf8

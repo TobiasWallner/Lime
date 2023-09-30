@@ -28,11 +28,28 @@ public:
 	constexpr const_pointer operator&() const;
 	
 	friend constexpr bool operator == (char_const_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator == (char lhs, char_const_reference rhs);
+	friend constexpr bool operator == (char_const_reference lhs, char rhs);
+
 	friend constexpr bool operator != (char_const_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator != (char lhs, char_const_reference rhs);
+	friend constexpr bool operator != (char_const_reference lhs, char rhs);
+
 	friend constexpr bool operator < (char_const_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator < (char lhs, char_const_reference rhs);
+	friend constexpr bool operator < (char_const_reference lhs, char rhs);
+
 	friend constexpr bool operator <= (char_const_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator <= (char lhs, char_const_reference rhs);
+	friend constexpr bool operator <= (char_const_reference lhs, char rhs);
+
 	friend constexpr bool operator > (char_const_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator > (char lhs, char_const_reference rhs);
+	friend constexpr bool operator > (char_const_reference lhs, char rhs);
+
 	friend constexpr bool operator >= (char_const_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator >= (char lhs, char_const_reference rhs);
+	friend constexpr bool operator >= (char_const_reference lhs, char rhs);
 };
 
 class string;
@@ -66,6 +83,42 @@ public:
 	
 	constexpr char_reference& operator = (char c);
 	constexpr char_reference& operator = (const utf8::Char& c);
+	
+	friend constexpr bool operator == (char_reference lhs, char_reference rhs);
+	friend constexpr bool operator == (char_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator == (char_const_reference lhs, char_reference rhs);
+	friend constexpr bool operator == (char lhs, char_reference rhs);
+	friend constexpr bool operator == (char_reference lhs, char rhs);
+
+	friend constexpr bool operator != (char_reference lhs, char_reference rhs);
+	friend constexpr bool operator != (char_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator != (char_const_reference lhs, char_reference rhs);
+	friend constexpr bool operator != (char lhs, char_reference rhs);
+	friend constexpr bool operator != (char_reference lhs, char rhs);
+
+	friend constexpr bool operator < (char_reference lhs, char_reference rhs);
+	friend constexpr bool operator < (char_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator < (char_const_reference lhs, char_reference rhs);
+	friend constexpr bool operator < (char lhs, char_reference rhs);
+	friend constexpr bool operator < (char_reference lhs, char rhs);
+
+	friend constexpr bool operator <= (char_reference lhs, char_reference rhs);
+	friend constexpr bool operator <= (char_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator <= (char_const_reference lhs, char_reference rhs);
+	friend constexpr bool operator <= (char lhs, char_reference rhs);
+	friend constexpr bool operator <= (char_reference lhs, char rhs);
+
+	friend constexpr bool operator > (char_reference lhs, char_reference rhs);
+	friend constexpr bool operator > (char_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator > (char_const_reference lhs, char_reference rhs);
+	friend constexpr bool operator > (char lhs, char_reference rhs);
+	friend constexpr bool operator > (char_reference lhs, char rhs);
+
+	friend constexpr bool operator >= (char_reference lhs, char_reference rhs);
+	friend constexpr bool operator >= (char_reference lhs, char_const_reference rhs);
+	friend constexpr bool operator >= (char_const_reference lhs, char_reference rhs);
+	friend constexpr bool operator >= (char lhs, char_reference rhs);
+	friend constexpr bool operator >= (char_reference lhs, char rhs);
 };
 	
 } // namespace utf8

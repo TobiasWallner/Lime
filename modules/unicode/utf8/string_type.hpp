@@ -131,6 +131,8 @@ public:
 	
 	constexpr void pop_back();
 					
+	constexpr string& append(char ascii);
+	constexpr string& append(utf8::Char ch);
 	constexpr string& append(size_type count, char ascii);
 	constexpr string& append(const string& str);
 	constexpr string& append(const Base& str);
@@ -145,17 +147,16 @@ public:
 	template< class StringViewLike >
 	constexpr string& append(const StringViewLike& t, size_type pos, size_type count = Base::npos);
 	
-	constexpr string& operator+=(const string& str );
-	constexpr string& operator+=(const Base& str );
 	constexpr string& operator+=(char ascii);
 	constexpr string& operator+=(utf8::Char ch);
+	constexpr string& operator+=(const string& str );
+	constexpr string& operator+=(const Base& str );
 	constexpr string& operator+=(const char* s);
 	constexpr string& operator+=(std::initializer_list<char> ilist);
 	template< class StringViewLike >
-	constexpr basic_string& operator+=(const StringViewLike& t);
+	constexpr string& operator+=(const StringViewLike& t);
 	
 	constexpr int compare(const string& str) const noexcept;
-	constexpr int compare(const basic_string& str) const noexcept;
 	constexpr int compare(const char* s) const;
 	template< class StringViewLike >
 	constexpr int compare(const StringViewLike& t) const;

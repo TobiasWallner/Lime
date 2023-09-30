@@ -11,6 +11,16 @@ constexpr bool starts_with(AItr afirst, AItr alast, BItr bfirst, BItr blast) noe
 	return bfirst == blast;
 }
 
+template<class AItr>
+constexpr bool starts_with(AItr afirst, AItr alast, const char* str) noexcept {
+	while(afirst != alast && *str != '\0'){
+		if(*(afirst++) != *(str++)){
+			return false;
+		}
+	}
+	return *str == '\0';
+}
+
 template<class AItr, class BItr>
 constexpr bool ends_with(AItr afirst, AItr alast, BItr bfirst, BItr blast) noexcept {
 	while(afirst != alast && bfirst != blast){
@@ -30,6 +40,28 @@ constexpr bool contains(AItr afirst, AItr alast, BItr bfirst, BItr blast) noexce
 	}
 	return false;
 }
+
+template<class AItr, class Type>
+constexpr bool contains(AItr afirst, AItr alast, Type value) noexcept {
+	for(;afirst != alast; ++afirst){
+		if(*afirst == value){
+			return true;
+		}
+	}
+	return false;
+}
+
+template<class AItr>
+constexpr bool contains(AItr afirst, AItr alast, const char* str) noexcept {
+	for(;afirst != alast && *str != '\0'; ++afirst){
+		if(utf8::starts_with(afirst, alast, str)){
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
 // returns a pointer to the end of a c_style string that points to the termination character '\0'
 constexpr const char* strend(const char* str){while(*str != '\0'){++str;}; return str;}
