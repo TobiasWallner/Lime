@@ -44,8 +44,8 @@ public:
 	using difference_type = long;
 	using iterator = char*;
 	using const_iterator = const char*;
-	using reference = char&;
-	using const_reference = const char&;
+	using reference = char_reference;
+	using const_reference = char_const_reference;
 	using pointer = char*;
 	using const_pointer = const char*;
 
@@ -109,15 +109,15 @@ public:
 	
 	/// reads the first utf8 character from the string and stores it in the character
 	/// returns the string iterator after the read character
-	 std::string::const_iterator assign(const std::string& str);
+	constexpr std::string::const_iterator assign(const std::string& str);
 	
 	/// reads the first utf8 character from the string and stores it in the character
 	/// returns the string iterator after the read character
-	 std::string_view::const_iterator assign(const std::string_view& str);
+	constexpr std::string_view::const_iterator assign(const std::string_view& str);
 
 	/// reads the first utf8 character from the string and stores it in the character
 	/// returns the string iterator after the read character
-	 const_iterator assign(const_iterator str, size_type size);
+	constexpr const_iterator assign(const_iterator str, size_type size);
 	
 	
 	/// assigns an ascii character to the utf8 character
@@ -126,8 +126,11 @@ public:
 	template<class CharItr>
 	constexpr Char& operator=(CharItr itr);
 	
-	 Char& operator=(const std::string& str);
-	 Char& operator=(const std::string_view& str);
+	constexpr Char& operator=(const std::string& str);
+	constexpr Char& operator=(const std::string_view& str);
+	
+	constexpr operator reference();
+	constexpr operator const_reference() const;
 	
 	/// returns the first character of the utf8 character string
 	constexpr char& front();
@@ -147,8 +150,8 @@ public:
 	constexpr std::string_view to_std_string_view() const;
 	
 	/// returns the character at the index of the utf8 string
-	constexpr reference operator[](size_type index);
-	constexpr const_reference operator[](size_type index) const;
+	constexpr char& operator[](size_type index);
+	constexpr const char& operator[](size_type index) const;
 	
 	/// returns the number of bytes that the unicode character needs
 	constexpr size_type size() const;

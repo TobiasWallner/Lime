@@ -1,6 +1,5 @@
 #pragma once
 
-#include "char_type.hpp"
 #include "string_type.hpp"
 
 namespace utf8{
@@ -56,6 +55,7 @@ public:
 	constexpr char_reference(const char_reference&) = default;
 	constexpr char_reference& operator= (const char_reference&) = default;
 	constexpr char_reference(utf8::string* str, iterator pos);
+	constexpr char_reference(utf8::Char& ch);
 	
 	constexpr size_type size() const;
 	
@@ -65,7 +65,7 @@ public:
 	explicit constexpr operator std::string_view() const;
 	
 	constexpr char_reference& operator = (char c);
-	constexpr char_reference& operator = (utf8::Char c);
+	constexpr char_reference& operator = (const utf8::Char& c);
 };
 	
 } // namespace utf8

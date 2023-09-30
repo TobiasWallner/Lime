@@ -61,10 +61,6 @@ public:
 	constexpr string_iterator operator -- (int);
 };
 
-}
-
-namespace std{
-
-constexpr utf8::string_const_iterator::distance_type distance(utf8::string_const_iterator first, utf8::string_const_iterator last);
+size_t distance(string_const_iterator first, string_const_iterator last);
 
 }

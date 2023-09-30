@@ -81,7 +81,6 @@ public:
 	constexpr char* data() noexcept;
 	constexpr const char* data() const noexcept;
 	
-	constexpr char* c_str() noexcept;
 	constexpr const char* c_str() const noexcept;
 	
 	constexpr operator std::string_view() const noexcept;
@@ -94,13 +93,13 @@ public:
 	constexpr const_iterator end() const noexcept;
 	constexpr const_iterator cend() const noexcept;
 	
-	constexpr reverse_iterator rbegin() noexcept;
-	constexpr const_reverse_iterator rbegin() const noexcept;
-	constexpr const_reverse_iterator crbegin() const noexcept;
+	//constexpr reverse_iterator rbegin() noexcept;
+	//constexpr const_reverse_iterator rbegin() const noexcept;
+	//constexpr const_reverse_iterator crbegin() const noexcept;
 	
-	constexpr iterator rend() noexcept;
-	constexpr const_reverse_iterator rend() const noexcept;
-	constexpr const_reverse_iterator crend() const noexcept;
+	//constexpr iterator rend() noexcept;
+	//constexpr const_reverse_iterator rend() const noexcept;
+	//constexpr const_reverse_iterator crend() const noexcept;
 	
 	// Capacity
 	constexpr bool empty() const noexcept;
@@ -110,7 +109,7 @@ public:
 	constexpr size_type max_size() const noexcept;
 	constexpr void reserve(size_type new_cap);
 	constexpr size_type capacity() const noexcept;
-	constexpr void shrink_to_fit() const;
+	constexpr void shrink_to_fit();
 	
 	// Operations
 	constexpr void clear() noexcept;

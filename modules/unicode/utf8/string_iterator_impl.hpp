@@ -79,14 +79,13 @@ constexpr string_iterator string_iterator::operator -- (int) {
 constexpr string* string_iterator::container() {return this->_str;}
 constexpr const string* string_iterator::container() const {return this->_str;}
 
-}
-
-namespace std{
-
-constexpr long distance(utf8::string_const_iterator first, utf8::string_const_iterator last){
-	const char* _first = &*first;
-	const char* _last = &*last;
-	return std::count_if(_first, _last, static_cast<bool(*)(char)>(&utf8::is_start_byte));
+size_t distance(string_const_iterator first, string_const_iterator last){
+	size_t count = 0;
+	while(first != last){
+		++first;
+		++count;
+	}
+	return count;
 }
 
 }

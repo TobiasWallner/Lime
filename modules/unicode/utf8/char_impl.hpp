@@ -192,15 +192,15 @@ constexpr void Char::assign(char_reference ch){this->assign(static_cast<Char>(ch
 
 /// reads the first utf8 character from the string and stores it in the character
 /// returns the string iterator after the read character
-std::string::const_iterator Char::assign(const std::string& str){return this->assign(str.cbegin(), str.cend());}
+constexpr std::string::const_iterator Char::assign(const std::string& str){return this->assign(str.cbegin(), str.cend());}
 
 /// reads the first utf8 character from the string and stores it in the character
 /// returns the string iterator after the read character
-std::string_view::const_iterator Char::assign(const std::string_view& str){return this->assign(str.cbegin(), str.cend());}
+constexpr std::string_view::const_iterator Char::assign(const std::string_view& str){return this->assign(str.cbegin(), str.cend());}
 
 /// reads the first utf8 character from the string and stores it in the character
 /// returns the string iterator after the read character
-Char::const_iterator Char::assign(const_iterator str, size_type size){return this->assign(str, str+size);}
+constexpr Char::const_iterator Char::assign(const_iterator str, size_type size){return this->assign(str, str+size);}
 
 
 /// assigns an ascii character to the utf8 character
@@ -209,8 +209,11 @@ constexpr Char& Char::operator=(char c){ this->assign(c); return *this; }
 template<class CharItr>
 constexpr Char& Char::operator=(CharItr itr){ this->assign(itr); return *this; }
 
-Char& Char::operator=(const std::string& str){ this->assign(str); return *this; }
-Char& Char::operator=(const std::string_view& str){ this->assign(str); return *this; }
+constexpr Char& Char::operator=(const std::string& str){ this->assign(str); return *this; }
+constexpr Char& Char::operator=(const std::string_view& str){ this->assign(str); return *this; }
+
+constexpr Char::operator Char::reference() {return Char::reference(nullptr, this->begin());}
+constexpr Char::operator Char::const_reference() const {return Char::const_reference(this->begin());}
 
 /// returns the first character of the utf8 character string
 constexpr char& Char::front() { return this->utf8[0]; }
@@ -230,8 +233,8 @@ constexpr Char::const_iterator Char::cend() const {return this->begin() + this->
 constexpr std::string_view Char::to_std_string_view() const {return std::string_view(this->begin(), this->size());}
 
 /// returns the character at the index of the utf8 string
-constexpr Char::reference Char::operator[](Char::size_type index){return this->utf8[index];}
-constexpr Char::const_reference Char::operator[](Char::size_type index) const {return this->utf8[index];}
+constexpr char& Char::operator[](Char::size_type index){return this->utf8[index];}
+constexpr const char& Char::operator[](Char::size_type index) const {return this->utf8[index];}
 
 /// returns the number of bytes that the unicode character needs
 constexpr Char::size_type Char::size() const {

@@ -28,16 +28,16 @@ public:
 	constexpr string_view(utf8::string* str, const_iterator first, const_iterator last);
 	constexpr string_view(iterator first, iterator last);
 	constexpr string_view(const string_view& other);
-	constexpr string_view(const utf8::string& str);
+	constexpr string_view(utf8::string& str);
 	constexpr string_view& operator=(const string_view& other);
 	
 	constexpr iterator begin();
-	constexpr const_iterator begin();
-	constexpr const_iterator cbegin();
+	constexpr const_iterator begin() const;
+	constexpr const_iterator cbegin() const;
 	
 	constexpr iterator end();
-	constexpr const_iterator end();
-	constexpr const_iterator cend();
+	constexpr const_iterator end() const;
+	constexpr const_iterator cend() const;
 	
 	constexpr size_type size() const;
 	constexpr size_type length() const;
@@ -60,8 +60,10 @@ private:
 	const_iterator _end;
 	
 public:
+	constexpr const_string_view(const char* str);
 	constexpr const_string_view(const char* first, const char* last);
 	constexpr const_string_view(const_iterator first, const_iterator last);
+	constexpr const_string_view(const utf8::string& str);
 	constexpr const_string_view(const string_view& other);
 	constexpr const_string_view& operator=(const string_view& other);
 	constexpr const_string_view(const const_string_view& other);
@@ -79,7 +81,7 @@ public:
 	constexpr size_type length() const;
 
 	constexpr bool empty() const;
-	constexpr void swap(string_view& other);
+	constexpr void swap(const_string_view& other);
 };
 
 }

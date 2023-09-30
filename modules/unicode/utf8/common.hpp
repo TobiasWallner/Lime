@@ -1,9 +1,9 @@
-
+#pragma once
 namespace utf8{
 	
 template<class AItr, class BItr>
-constexpr bool string::starts_with(AItr afirst, AItr alast, BItr bfirst, BItr blast) const noexcept {
-	while(;afirst != alast && bfirst != blast){
+constexpr bool starts_with(AItr afirst, AItr alast, BItr bfirst, BItr blast) noexcept {
+	while(afirst != alast && bfirst != blast){
 		if(*(afirst++) != *(bfirst++)){
 			return false;
 		}
@@ -12,8 +12,8 @@ constexpr bool string::starts_with(AItr afirst, AItr alast, BItr bfirst, BItr bl
 }
 
 template<class AItr, class BItr>
-constexpr bool string::ends_with(AItr afirst, AItr alast, BItr bfirst, BItr blast) const noexcept {
-	while(;afirst != alast && bfirst != blast){
+constexpr bool ends_with(AItr afirst, AItr alast, BItr bfirst, BItr blast) noexcept {
+	while(afirst != alast && bfirst != blast){
 		if(*(--alast) != *(--blast)){
 			return false;
 		}
@@ -22,13 +22,21 @@ constexpr bool string::ends_with(AItr afirst, AItr alast, BItr bfirst, BItr blas
 }
 
 template<class AItr, class BItr>
-constexpr bool string::contains(AItr afirst, AItr alast, BItr bfirst, BItr blast) const noexcept {
-	for(afirst != alast && bfirst != blast; (void)++afirst){
+constexpr bool contains(AItr afirst, AItr alast, BItr bfirst, BItr blast) noexcept {
+	for(;afirst != alast && bfirst != blast; ++afirst){
 		if(utf8::starts_with(afirst, alast, bfirst, blast)){
 			return true;
 		}
 	}
 	return false;
 }
+
+// returns a pointer to the end of a c_style string that points to the termination character '\0'
+constexpr const char* strend(const char* str){while(*str != '\0'){++str;}; return str;}
+
+// returns the length of a c_style string not counting the termination character '\0'
+constexpr size_t strlen(const char* str){return utf8::strend(str) - str;}
+
+
 	
 }
