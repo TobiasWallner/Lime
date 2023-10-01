@@ -152,13 +152,13 @@ public:
 		return *this;
 	}
 	
-	inline Label& append(const utf8::wstring str){
+	inline Label& append(const utf8::string str){
 		update_on_append(str.begin(), str.end());
 		this->_string.append(str); 
 		return *this;
 	}
 	
-	inline Label& append(const utf8::wstring_view str){
+	inline Label& append(const utf8::string_view str){
 		update_on_append(str.begin(), str.end());
 		this->_string.append(str); 
 		return *this;
@@ -169,16 +169,16 @@ public:
 	inline Label& operator+=(const char* first){return this->append(first);}
 	inline Label& operator+=(const std::string& str){return this->append(str);}
 	inline Label& operator+=(std::string_view str){return this->append(str);}
-	inline Label& operator+=(const utf8::wstring str){return this->append(str);}
-	inline Label& operator+=(const utf8::wstring_view str){return this->append(str);}
+	inline Label& operator+=(const utf8::string str){return this->append(str);}
+	inline Label& operator+=(const utf8::string_view str){return this->append(str);}
 	
 	inline Label& operator<<(utf8::Char c){return this->append(c);}
 	inline Label& operator<<(char c){return this->append(c);}
 	inline Label& operator<<(const char* first){return this->append(first);}
 	inline Label& operator<<(const std::string& str){return this->append(str);}
 	inline Label& operator<<(std::string_view str){return this->append(str);}
-	inline Label& operator<<(const utf8::wstring str){return this->append(str);}
-	inline Label& operator<<(const utf8::wstring_view str){return this->append(str);}
+	inline Label& operator<<(const utf8::string str){return this->append(str);}
+	inline Label& operator<<(const utf8::string_view str){return this->append(str);}
 	
 	
 	
@@ -242,13 +242,13 @@ public:
 	}
 	
 	
-	inline Label& assign(const utf8::wstring str){
+	inline Label& assign(const utf8::string str){
 		update_on_assign(str.begin(), str.end());
 		this->_string.assign(str);
 		return *this;
 	}
 	
-	inline Label& assign(const utf8::wstring_view str){
+	inline Label& assign(const utf8::string_view str){
 		update_on_assign(str.begin(), str.end());
 		this->_string.assign(str);
 		return *this;
@@ -259,8 +259,8 @@ public:
 	inline Label& operator=(const char* first){return this->assign(first);}
 	inline Label& operator=(const std::string& str){return this->assign(str);}
 	inline Label& operator=(std::string_view str){return this->assign(str);}
-	inline Label& operator=(const utf8::wstring str){return this->assign(str);}
-	inline Label& operator=(const utf8::wstring_view str){return this->assign(str);}
+	inline Label& operator=(const utf8::string str){return this->assign(str);}
+	inline Label& operator=(const utf8::string_view str){return this->assign(str);}
 
 	
 };

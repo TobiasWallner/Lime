@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #include <string>
 
 #include "char_type.hpp"
@@ -27,37 +28,49 @@ public:
 public:
 	// constructors
 	constexpr string();
+	constexpr string(char ch);
+	constexpr string(utf8::Char ch);
 	constexpr string(size_type count, char ch);
+	constexpr string(size_type count, utf8::Char ch);
 	constexpr string(const string& other, size_type pos);
 	constexpr string(const string& other, size_type pos, size_type count);
 	constexpr string(const char* s, size_type count);
-	constexpr string( const char* s);
+	constexpr string(const utf8::Char* s, size_type count);
+	constexpr string(const char* s);
+	constexpr string(const utf8::Char* s);
 	template<class InputIt> 
 	constexpr string(InputIt first, InputIt last);
 	constexpr string(const string& other);
 	constexpr string(string&& other);
 	constexpr string(std::initializer_list<char> ilist);
+	constexpr string(std::initializer_list<utf8::Char> ilist);
 	template<class StringViewLike>
 	constexpr explicit string(const StringViewLike& t);
 	template<class StringViewLike>
 	constexpr string(const StringViewLike& t, size_type pos, size_type n);
 	
 	// assignments
+	constexpr string& operator=(char ch);
+	constexpr string& operator=(utf8::Char ch);
 	constexpr string& operator=(const string& str);
 	constexpr string& operator=(string&& str);
 	constexpr string& operator=(const char* s);
-	constexpr string& operator=(char ch);
 	constexpr string& operator=(std::initializer_list<char> ilist);
 	template<class StringViewLike> 
 	constexpr string& operator=(const StringViewLike& t);
 	
+	constexpr string& assign(char ch);
+	constexpr string& assign(utf8::Char ch);
 	constexpr string& assign(size_type count, char ch);
+	constexpr string& assign(size_type count, utf8::Char ch);
 	constexpr string& assign(const string& str);
 	constexpr string& assign(const string& str, size_type pos);
 	constexpr string& assign(const string& str, size_type pos, size_type count);
 	constexpr string& assign(string&& str) noexcept;
 	constexpr string& assign(const char* s, size_type count);
+	constexpr string& assign(const utf8::Char* s, size_type count);
 	constexpr string& assign(const char* s);
+	constexpr string& assign(const utf8::Char* s);
 	template<class InputIt> 
 	constexpr string& assign(InputIt first, InputIt last);
 	constexpr string& assign(std::initializer_list<char> ilist);
@@ -134,12 +147,19 @@ public:
 	constexpr string& append(char ascii);
 	constexpr string& append(utf8::Char ch);
 	constexpr string& append(size_type count, char ascii);
+	constexpr string& append(size_type count, utf8::Char ch);
 	constexpr string& append(const string& str);
 	constexpr string& append(const Base& str);
 	constexpr string& append(const Base& str, size_type pos, size_type count = Base::npos);
 	constexpr string& append(const char* str, size_type count);
+	constexpr string& append(const utf8::Char* str, size_type count);
 	constexpr string& append(const char* str);
+	constexpr string& append(const utf8::Char* str);
 	template< class InputIt >
+	requires std::is_same<char, typename std::iterator_traits<InputIt>::value_type>::value
+	constexpr string& append(InputIt first, InputIt last);
+	template< class InputIt >
+	requires std::is_same<utf8::Char, typename std::iterator_traits<InputIt>::value_type>::value
 	constexpr string& append(InputIt first, InputIt last);
 	constexpr string& append(std::initializer_list<char> ilist);
 	template< class StringViewLike >
@@ -238,3 +258,4 @@ public:
 };
 	
 } // namespace utf8
+

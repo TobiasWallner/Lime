@@ -166,20 +166,20 @@ public:
 	/// inserts the content from the clipboard into the current active editor.
 	void insert_from_clipboard();
 	
-	static void change_directory(void* ptr, const std::vector<utf8::wstring_view>& commands);
-	static void print_working_directory(void* ptr, const std::vector<utf8::wstring_view>& commands);
+	static void change_directory(void* ptr, const std::vector<utf8::string_view>& commands);
+	static void print_working_directory(void* ptr, const std::vector<utf8::string_view>& commands);
 	
 	/// opens the file at the specified location and loads it into a new or empty and unnamed editor that is in focus
-	static void open(void* ptr, const std::vector<utf8::wstring_view>& commands);
+	static void open(void* ptr, const std::vector<utf8::string_view>& commands);
 	bool open(const std::string& path);
 	
-	static void quit(void* ptr, const std::vector<utf8::wstring_view>& commands);
+	static void quit(void* ptr, const std::vector<utf8::string_view>& commands);
 	
 	/// saves the currently focussed file at the currently specified filepath
-	static void save(void* ptr, const std::vector<utf8::wstring_view>& commands);
+	static void save(void* ptr, const std::vector<utf8::string_view>& commands);
 	bool save();
 	bool save_as(const std::string& path);
 	
-	static void set(void* ptr, const std::vector<utf8::wstring_view>& commands);
-	void set_tab_size(utf8::wstring_view tabSize);
+	static void set(void* ptr, const std::vector<utf8::string_view>& commands);
+	void set_tab_size(utf8::string_view tabSize);
 };

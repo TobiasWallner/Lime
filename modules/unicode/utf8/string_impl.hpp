@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include "string_type.hpp"
 
 #include "char.hpp"
@@ -12,39 +14,58 @@ namespace utf8{
 
 // constructors
 constexpr string::string() : string::Base(){}
+constexpr string::string(char ch){this->append(ch);}
+constexpr string::string(utf8::Char ch){this->append(ch);}
 constexpr string::string(string::size_type count, char ch) : string::Base(count, ch){}
+constexpr string::string(string::size_type count, utf8::Char ch){this->append(count, ch);}
 constexpr string::string(const string& other, string::size_type pos) : string::Base(other, pos){}
 constexpr string::string(const string& other, string::size_type pos, string::size_type count) : string::Base(other, pos, count){}
 constexpr string::string(const char* s, string::size_type count) : string::Base(s, count){}
-constexpr string::string( const char* s) : string::Base(s){}
+constexpr string::string(const utf8::Char* s, string::size_type count){this->append(s, count);}
+constexpr string::string(const char* s) : string::Base(s){}
+constexpr string::string(const utf8::Char* s) : string::Base(){this->append(s);}
 template<class InputIt> 
-constexpr string::string(InputIt first, InputIt last) : string::Base(first, last) {};
+constexpr string::string(InputIt first, InputIt last) {this->append(first, last);}
 constexpr string::string(const string& other) = default;
 constexpr string::string(string&& other) = default;
 constexpr string::string(std::initializer_list<char> ilist) : string::Base(ilist){}
+constexpr string::string(std::initializer_list<utf8::Char> ilist) : string(ilist.begin(), ilist.end()){}
 template<class StringViewLike>
 constexpr string::string(const StringViewLike& t) : string::Base(t){}
 template<class StringViewLike>
 constexpr string::string(const StringViewLike& t, string::size_type pos, string::size_type n) : string::Base(t, pos, n){}
 
 // assignments
+constexpr string& string::operator=(char ch){this->string::Base::operator=(ch); return *this;}
+constexpr string& string::operator=(utf8::Char ch){return this->assign(ch);}
 constexpr string& string::operator=(const string& str) = default;
 constexpr string& string::operator=(string&& str) = default;
 constexpr string& string::operator=(const char* s) {this->string::Base::operator=(s); return *this;}
-constexpr string& string::operator=(char ch) {this->string::Base::operator=(ch); return *this;}
 constexpr string& string::operator=(std::initializer_list<char> ilist) {this->string::Base::operator=(ilist); return *this;}
 template<class StringViewLike> 
 constexpr string& string::operator=(const StringViewLike& t) {this->string::Base::operator=(t); return *this;}
 
+constexpr string& string::assign(char ch){this->string::Base::operator=(ch); return *this;}
+constexpr string& string::assign(utf8::Char ch){this->clear(); return this->append(ch);}
 constexpr string& string::assign(string::size_type count, char ch) {this->string::Base::assign(count, ch); return *this;}
+constexpr string& string::assign(string::size_type count, utf8::Char ch){
+	this->clear();
+	this->reserve(count * ch.size());
+	for(auto itr = this->begin(); itr != this->end(); ++itr){
+		*itr = ch;
+	}
+	return *this;
+}
 constexpr string& string::assign(const string& str) {this->string::Base::assign(str); return *this;}
 constexpr string& string::assign(const string& str, string::size_type pos) {this->string::Base::assign(str, pos); return *this;}
 constexpr string& string::assign(const string& str, string::size_type pos, string::size_type count) {this->string::Base::assign(str, pos, count); return *this;}
 constexpr string& string::assign(string&& str) noexcept {this->string::Base::assign(std::move(str)); return *this;}
 constexpr string& string::assign(const char* s, string::size_type count) {this->string::Base::assign(s, count); return *this;}
+constexpr string& string::assign(const utf8::Char* s, string::size_type count) {this->clear(); return this->append(s, count);}
 constexpr string& string::assign(const char* s) {this->string::Base::assign(s); return *this;}
+constexpr string& string::assign(const utf8::Char* s) {this->clear(); return this->append(s);}
 template<class InputIt> 
-constexpr string& string::assign(InputIt first, InputIt last) {this->string::Base::assign(first, last); return *this;}
+constexpr string& string::assign(InputIt first, InputIt last) {this->clear(); return this->append(first, last);}
 constexpr string& string::assign(std::initializer_list<char> ilist) {this->string::Base::assign(ilist); return *this;}
 template<class StringViewLike> 
 constexpr string& string::assign(const StringViewLike& t) {this->string::Base::assign(t); return *this;}
@@ -189,12 +210,28 @@ constexpr string& string::append(const string& str){this->string::Base::append(&
 constexpr string& string::append(const string::Base& str){this->string::Base::append(str); return *this;}
 constexpr string& string::append(const string::Base& str, string::size_type pos, string::size_type count){this->string::Base::append(str, pos, count); return *this;}
 constexpr string& string::append(const char* str, string::size_type count){this->string::Base::append(str, count); return *this;}
+constexpr string& string::append(const utf8::Char* str, string::size_type count){while(str != str + count) this->append(*str++); return *this;}
 constexpr string& string::append(const char* str){this->string::Base::append(str); return *this;}
+constexpr string& string::append(const utf8::Char* str){while(*str != '\0') this->append(*str++); return *this;}
+
 template< class InputIt >
-constexpr string& string::append(InputIt first, InputIt last){this->string::Base::append(first, last); return *this;}
+requires std::is_same<char, typename std::iterator_traits<InputIt>::value_type>::value
+constexpr string& string::append(InputIt first, InputIt last){this->Base::append(first, last); return *this;}
+
+template< class InputIt >
+requires std::is_same<utf8::Char, typename std::iterator_traits<InputIt>::value_type>::value
+constexpr string& string::append(InputIt first, InputIt last){
+	if constexpr (std::is_same<std::contiguous_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>::value){
+		this->Base::append(&*first, &*last);
+	}else{
+		while(first != last){this->append(*first++);}
+	}
+	return *this;
+}
+
 constexpr string& string::append(std::initializer_list<char> ilist){this->string::Base::append(ilist); return *this;}
 template< class StringViewLike >
-constexpr string& string::append(const StringViewLike& t){this->string::Base::append(t); return *this;}
+constexpr string& string::append(const StringViewLike& t){return this->append(t.cbegin(), t.cend());}
 template< class StringViewLike >
 constexpr string& string::append(const StringViewLike& t, string::size_type pos, string::size_type count){this->string::Base::append(t, pos, count); return *this;}
 

@@ -25,7 +25,7 @@ class ColorString{
 
 public:
 
-	using string_type = utf8::wstring;
+	using string_type = utf8::string;
 	using size_type = string_type::size_type;
 	using difference_type = string_type::difference_type;
 
@@ -63,10 +63,10 @@ public:
 	inline ColorString(size_type count, char ch) : _string(count, ch){}
 	
 	/// 3) Constructs the BaseString with a substring [pos, pos + count) of other.
-	inline ColorString(const utf8::wstring& other, size_type pos, size_type count) : _string(other, pos, count){}
+	inline ColorString(const utf8::string& other, size_type pos, size_type count) : _string(other, pos, count){}
 	
 	/// 4) Constructs the BaseString with the first count characters of character BaseString pointed to by s. 
-	inline ColorString(const utf8::Char* s, size_type count) : _string( s, count){}
+	inline ColorString(const utf8::Char* s, size_type count) : _string(s, count){}
 	
 	/// 4.1) Constructs the BaseString with the first count characters of character BaseString pointed to by s. 
 	/// s can contain null characters. The length of the BaseString is count. 
@@ -138,8 +138,8 @@ public:
 	inline ColorString& append(const std::string& str){this->_string.append(str); return *this;}
 	inline ColorString& append(std::string_view str){this->_string.append(str); return *this;}
 	inline ColorString& append(std::string_view str, size_type pos, size_type n){this->_string.append(str, pos, n); return *this;}
-	inline ColorString& append(const utf8::wstring str){this->_string.append(str); return *this;}
-	inline ColorString& append(const utf8::wstring_view str){this->_string.append(str); return *this;}
+	inline ColorString& append(const utf8::string str){this->_string.append(str); return *this;}
+	inline ColorString& append(const utf8::string_view str){this->_string.append(str); return *this;}
 	
 	
 	inline ColorString& operator+=(utf8::Char c){return this->append(c);}
@@ -147,16 +147,16 @@ public:
 	inline ColorString& operator+=(const char* first){return this->append(first);}
 	inline ColorString& operator+=(const std::string& str){return this->append(str);}
 	inline ColorString& operator+=(std::string_view str){return this->append(str);}
-	inline ColorString& operator+=(const utf8::wstring str){return this->append(str);}
-	inline ColorString& operator+=(const utf8::wstring_view str){return this->append(str);}
+	inline ColorString& operator+=(const utf8::string str){return this->append(str);}
+	inline ColorString& operator+=(const utf8::string_view str){return this->append(str);}
 	
 	inline ColorString& operator<<(utf8::Char c){return this->append(c);}
 	inline ColorString& operator<<(char c){return this->append(c);}
 	inline ColorString& operator<<(const char* first){return this->append(first);}
 	inline ColorString& operator<<(const std::string& str){return this->append(str);}
 	inline ColorString& operator<<(std::string_view str){return this->append(str);}
-	inline ColorString& operator<<(const utf8::wstring str){return this->append(str);}
-	inline ColorString& operator<<(const utf8::wstring_view str){return this->append(str);}
+	inline ColorString& operator<<(const utf8::string str){return this->append(str);}
+	inline ColorString& operator<<(const utf8::string_view str){return this->append(str);}
 	
 	/// appends the given command to the line which will then format all string elements inserted after wards	
 	inline ColorString& append(const FontStyle& fontStyle){
@@ -190,16 +190,16 @@ public:
 	inline ColorString& assign(const std::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(std::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(std::initializer_list<char> ilist){this->_styles.clear(); this->_string.assign(ilist); return *this;}
-	inline ColorString& assign(const utf8::wstring str){this->_string.assign(str); return *this;}
-	inline ColorString& assign(const utf8::wstring_view str){this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string str){this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string_view str){this->_string.assign(str); return *this;}
 	
 	inline ColorString& operator=(utf8::Char c){return this->assign(c);}
 	inline ColorString& operator=(char c){return this->assign(c);}
 	inline ColorString& operator=(const char* first){return this->assign(first);}
 	inline ColorString& operator=(const std::string& str){return this->assign(str);}
 	inline ColorString& operator=(std::string_view str){return this->assign(str);}
-	inline ColorString& operator=(const utf8::wstring str){return this->assign(str);}
-	inline ColorString& operator=(const utf8::wstring_view str){return this->assign(str);}
+	inline ColorString& operator=(const utf8::string str){return this->assign(str);}
+	inline ColorString& operator=(const utf8::string_view str){return this->assign(str);}
 	
 	// TODO: iterators
 	

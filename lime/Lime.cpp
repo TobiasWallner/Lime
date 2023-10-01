@@ -507,7 +507,7 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar->assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
-void Lime::set(void* ptr, const std::vector<utf8::wstring_view>& commands){
+void Lime::set(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	if(commands.size() == 3){
 		//error
@@ -520,7 +520,7 @@ void Lime::set(void* ptr, const std::vector<utf8::wstring_view>& commands){
 	}
 }
 
-void Lime::set_tab_size(utf8::wstring_view tabSize){
+void Lime::set_tab_size(utf8::string_view tabSize){
 	std::int32_t value = 0;
 	const auto read = tabSize.parse_int32(&value);
 	if(read == 0){
@@ -537,7 +537,7 @@ void Lime::set_tab_size(utf8::wstring_view tabSize){
 	}
 }
 
-void Lime::change_directory(void* ptr, const std::vector<utf8::wstring_view>& commands){
+void Lime::change_directory(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -564,7 +564,7 @@ void Lime::change_directory(void* ptr, const std::vector<utf8::wstring_view>& co
 	}
 }
 
-void Lime::print_working_directory(void* ptr, const std::vector<utf8::wstring_view>& commands){
+void Lime::print_working_directory(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	if(commands.size() == 1){
 		const auto path = std::filesystem::current_path();
@@ -574,7 +574,7 @@ void Lime::print_working_directory(void* ptr, const std::vector<utf8::wstring_vi
 	}
 }
 
-void Lime::open(void* ptr, const std::vector<utf8::wstring_view>& commands){
+void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -613,7 +613,7 @@ bool Lime::open(const std::string& path){
 }
 
 
-void Lime::quit(void* ptr, const std::vector<utf8::wstring_view>& commands){
+void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -635,7 +635,7 @@ void Lime::quit(void* ptr, const std::vector<utf8::wstring_view>& commands){
 }
 
 
-void Lime::save(void* ptr, const std::vector<utf8::wstring_view>& commands){
+void Lime::save(void* ptr, const std::vector<utf8::string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {

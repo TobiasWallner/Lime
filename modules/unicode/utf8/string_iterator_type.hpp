@@ -1,18 +1,25 @@
 #pragma once
 
+#include <iterator>
+
 #include "char_type.hpp"
 #include "char_reference_type.hpp"
 
 namespace utf8{
 	
-class string_const_iterator{
+class string_const_iterator : std::contiguous_iterator_tag{
 private:
 	const char* itr;
 	
 public:
+	using value_type = utf8::Char;
+	using reference = utf8::char_reference;
 	using const_reference = utf8::char_const_reference;
 	using size_type = size_t;
-	using distance_type = long;
+	using difference_type = long;
+	using pointer = char*;
+	using const_pointer = const char*;
+	using iterator_category = std::contiguous_iterator_tag;
 
 	constexpr string_const_iterator(const char* pos);
 	constexpr string_const_iterator(const string_const_iterator&);
@@ -34,16 +41,20 @@ public:
 
 class string;
 
-class string_iterator{
+class string_iterator : std::contiguous_iterator_tag{
 private:
 	string* _str;
 	char* itr;
 	
 public:
+	using value_type = utf8::Char;
 	using reference = utf8::char_reference;
 	using const_reference = utf8::char_const_reference;
 	using size_type = size_t;
-	using distance_type = long;
+	using difference_type = long;
+	using pointer = char*;
+	using const_pointer = const char*;
+	using iterator_category = std::contiguous_iterator_tag;
 
 	constexpr string_iterator(string* str, char* pos);
 	constexpr string_iterator(const string_iterator&);
@@ -63,4 +74,32 @@ public:
 
 size_t distance(string_const_iterator first, string_const_iterator last);
 
+}
+
+namespace std{
+	template<>
+	class iterator_traits<utf8::string_const_iterator>{
+	public:
+		using value_type = utf8::Char;
+		using reference = utf8::char_reference;
+		using const_reference = utf8::char_const_reference;
+		using size_type = size_t;
+		using difference_type = long;
+		using pointer = char*;
+		using const_pointer = const char*;
+		using iterator_category = std::contiguous_iterator_tag;
+	};
+
+	template<>
+	class iterator_traits<utf8::string_iterator>{
+	public:
+		using value_type = utf8::Char;
+		using reference = utf8::char_reference;
+		using const_reference = utf8::char_const_reference;
+		using size_type = size_t;
+		using difference_type = long;
+		using pointer = char*;
+		using const_pointer = const char*;
+		using iterator_category = std::contiguous_iterator_tag;
+	};
 }
