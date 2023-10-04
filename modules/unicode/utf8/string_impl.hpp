@@ -28,8 +28,6 @@ template<class InputIt>
 constexpr string::string(InputIt first, InputIt last) {this->append(first, last);}
 constexpr string::string(const string& other) = default;
 constexpr string::string(string&& other) = default;
-constexpr string::string(std::initializer_list<char> ilist) : string::Base(ilist){}
-constexpr string::string(std::initializer_list<utf8::Char> ilist) : string(ilist.begin(), ilist.end()){}
 template<class StringViewLike>
 constexpr string::string(const StringViewLike& t) : string::Base(t){}
 template<class StringViewLike>
@@ -41,7 +39,6 @@ constexpr string& string::operator=(utf8::Char ch){return this->assign(ch);}
 constexpr string& string::operator=(const string& str) = default;
 constexpr string& string::operator=(string&& str) = default;
 constexpr string& string::operator=(const char* s) {this->string::Base::operator=(s); return *this;}
-constexpr string& string::operator=(std::initializer_list<char> ilist) {this->string::Base::operator=(ilist); return *this;}
 template<class StringViewLike> 
 constexpr string& string::operator=(const StringViewLike& t) {this->string::Base::operator=(t); return *this;}
 
@@ -66,13 +63,12 @@ constexpr string& string::assign(const char* s) {this->string::Base::assign(s); 
 constexpr string& string::assign(const utf8::Char* s) {this->clear(); return this->append(s);}
 template<class InputIt> 
 constexpr string& string::assign(InputIt first, InputIt last) {this->clear(); return this->append(first, last);}
-constexpr string& string::assign(std::initializer_list<char> ilist) {this->string::Base::assign(ilist); return *this;}
 template<class StringViewLike> 
-constexpr string& string::assign(const StringViewLike& t) {this->string::Base::assign(t); return *this;}
+constexpr string& string::assign(const StringViewLike& t) {return this->assign(t.begin(), t.end());}
 template<class StringViewLike>
-constexpr string& string::assign(const StringViewLike& t, string::size_type pos) {this->string::Base::assign(t, pos); return *this;}
+constexpr string& string::assign(const StringViewLike& t, size_type pos) {return this->assign(t.begin() + pos, t.end());}
 template<class StringViewLike>
-constexpr string& string::assign(const StringViewLike& t, string::size_type pos, string::size_type count)  {this->string::Base::assign(t, pos, count); return *this;}
+constexpr string& string::assign(const StringViewLike& t, size_type pos, size_type count) {return this->assign(t.begin() + pos, t.begin() + pos + count);}
 
 // allocator
 constexpr string::allocator_type string::get_allocator() const noexcept {return this->string::Base::get_allocator();}
@@ -240,7 +236,6 @@ constexpr string& string::operator+=(utf8::Char ch){return this->append(ch);}
 constexpr string& string::operator+=(const string& str ){return this->append(str);}
 constexpr string& string::operator+=(const string::Base& str ){return this->append(str);}
 constexpr string& string::operator+=(const char* s){return this->append(s);}
-constexpr string& string::operator+=(std::initializer_list<char> ilist){return this->append(ilist);}
 template< class StringViewLike >
 constexpr string& string::operator+=(const StringViewLike& t){return this->append(t);}
 

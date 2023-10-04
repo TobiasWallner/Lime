@@ -7,7 +7,7 @@
 
 namespace utf8{
 	
-class string_const_iterator : std::contiguous_iterator_tag{
+class string_const_iterator : public std::contiguous_iterator_tag {
 private:
 	const char* itr;
 	
@@ -102,4 +102,5 @@ namespace std{
 		using const_pointer = const char*;
 		using iterator_category = std::contiguous_iterator_tag;
 	};
+	
 }

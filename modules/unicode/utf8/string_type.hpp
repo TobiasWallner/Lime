@@ -135,10 +135,10 @@ public:
 	template< class InputIt >
 	constexpr iterator insert(const_iterator pos, InputIt first, InputIt last);
 	constexpr iterator insert(const_iterator pos, std::initializer_list<char> ilist);
-	constexpr string& erase(size_type index = 0);
-	constexpr string& erase(size_type index = 0, size_type count = Base::npos);
+	
 	constexpr iterator erase(const_iterator position);
 	constexpr iterator erase(const_iterator first, const_iterator last);
+	
 	constexpr void push_back(char ascii);
 	constexpr void push_back(utf8::Char ch);
 	
@@ -254,6 +254,40 @@ public:
 	
 	// helper
 	constexpr iterator unconst(const_iterator itr);
+	
+	friend constexpr bool operator==(const string& lhs, const string& rhs){
+		auto li = lhs.cbegin();
+		const auto le = lhs.cend();
+		auto ri = lhs.cbegin();
+		const auto re = rhs.cend();
+		while(li != le && ri != re){
+			if(*li != *ri){
+				return false;
+			}
+			li++;
+			ri++;
+		}
+		return true;
+	}
+	friend constexpr bool operator!=(const string& lhs, const string& rhs){return !(lhs == rhs);}
+	
+	friend constexpr bool operator<(const string& lhs, const string& rhs){
+		auto li = lhs.cbegin();
+		const auto le = lhs.cend();
+		auto ri = lhs.cbegin();
+		const auto re = rhs.cend();
+		while(li != le && ri != re){
+			if(*li < *ri){
+				return true;
+			}
+			li++;
+			ri++;
+		}
+		return false;
+	}
+	friend constexpr bool operator>(const string& lhs, const string& rhs){return rhs < lhs;}
+	friend constexpr bool operator>=(const string& lhs, const string& rhs){return !(lhs < rhs);}
+	friend constexpr bool operator<=(const string& lhs, const string& rhs){return !(lhs > rhs);}
 								
 };
 	

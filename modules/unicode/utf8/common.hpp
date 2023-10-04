@@ -68,7 +68,4 @@ constexpr const char* strend(const char* str){while(*str != '\0'){++str;}; retur
 
 // returns the length of a c_style string not counting the termination character '\0'
 constexpr size_t strlen(const char* str){return utf8::strend(str) - str;}
-
-
-	
 }

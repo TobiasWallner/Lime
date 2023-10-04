@@ -11,7 +11,6 @@
 //project
 #include "GridCell.hpp"
 #include "EditTrait.hpp"
-#include "ColorString.hpp"
 
 #include <cpp-terminal/cursor.hpp>
 
@@ -35,15 +34,14 @@ long max_flag_size(const std::vector<Command::Flag>& flags);
 struct const_command_range { const Command* first; const Command* last;};
 
 /// searches a range of commands that starts with the provided command name in the sorted range of commands
-const_command_range find(const utf8::string_view& commandName, const TermGui::const_command_range& range);
+const_command_range find(const utf8::const_string_view& commandName, const TermGui::const_command_range& range);
 
 /// offers an editable string with a callback function that gets executed on enter.
 /// On construction offer a pointer to the object that should be notified and a 
 /// will move the command string into the provided method
 class CommandLine : public GridCell, public EditTrait{
 public:
-	using string_type = utf8::const_string_view;
-	using value_type = string_type::value_type;
+	using string_type = utf8::string;
 	using size_type = string_type::size_type;
 	using object_pointer = Command::object_pointer;
 	using callback_function = Command::callback_function;
@@ -98,7 +96,7 @@ public:
 	void move_screen_to_cursor();
 	
 	/// returns the first command/word and skips whitespaces
-	utf8::string_view view_first_word() const;
+	utf8::const_string_view view_first_word() const;
 	
 	/// moves the cursor to the rigth, aka. advances the column by one.
 	/// if at the end of line perform a jump to the next line, if it exists

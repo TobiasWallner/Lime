@@ -18,8 +18,8 @@ TermGui::CommandLine::CommandLine(object_pointer objectPtr, const_command_range 
 
 /// parses a utf8 view of a command string into a vector of string views
 /// returns a vector where each element holds one word or string ("..") of the command
-static std::vector<utf8::string_view> parse_command_string(utf8::string_view inputString){
-	std::vector<utf8::string_view> commandList;
+static std::vector<utf8::const_string_view> parse_command_string(utf8::const_string_view inputString){
+	std::vector<utf8::const_string_view> commandList;
 	auto itr = inputString.cbegin();
 	const auto end = inputString.cend();
 	while(itr != end){
@@ -29,31 +29,28 @@ static std::vector<utf8::string_view> parse_command_string(utf8::string_view inp
 			++itr;
 		}else if(*itr == '"'){
 			// find next " or end
-			auto next = itr+1;
-			for (; next != end; ++next) {
-				if (*next == '"') break;
+			const auto first = ++itr;
+			while(true){
+				if(itr == end){
+					commandList.emplace_back(first, itr);
+				}else if(*itr++ == '"'){
+					commandList.emplace_back(first, itr);
+					++itr;
+				}
 			}
-			const bool has_quotation_marks = next != end;
-			const auto distance = std::distance(itr + 1, next);
-			const utf8::string_view::const_pointer pChar = &(*(itr + 1));
-			commandList.emplace_back(pChar, distance);
-			itr = next + has_quotation_marks;
 		}else{
+			const auto first = itr;
 			// find next whitespaces
-			auto next = itr+1;
-			for (; next != end; ++next) {
-				if (utf8::is_whitespace(*next)) break;
+			while(itr != end){
+				if(utf8::is_whitespace(*itr++)) break;
 			}
-			const auto distance = std::distance(itr, next);
-			const utf8::string_view::const_pointer pChar = &(*itr);
-			commandList.emplace_back(pChar, distance);
-			itr = next;
+			commandList.emplace_back(first, itr);
 		}
 	}
 	return commandList;
 }
 
-static bool common_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+static bool common_less(const utf8::const_string_view& lhs, const utf8::const_string_view& rhs) {
 	// TODO: put in utf8 string
 	auto rhsItr = rhs.begin();
 	const auto rhsEnd = rhs.end();
@@ -72,7 +69,7 @@ static bool common_less(const utf8::string_view& lhs, const utf8::string_view& r
 	return false;
 }
 
-static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& rhs) {
+static bool strict_less(const utf8::const_string_view& lhs, const utf8::const_string_view& rhs) {
 	// TODO: put in utf8 string
 	auto rhsItr = rhs.begin();
 	const auto rhsEnd = rhs.end();
@@ -91,16 +88,16 @@ static bool strict_less(const utf8::string_view& lhs, const utf8::string_view& r
 	return lhsItr == lhsEnd && rhsItr != rhsEnd;
 }
 
-static bool lower_bound_fn(const TermGui::Command& com, const utf8::string_view& str){
+static bool lower_bound_fn(const TermGui::Command& com, const utf8::const_string_view& str){
 	return strict_less(com.name, str);
 }
 
 /// returns true if the common string length of the left name is lesser than the right one
-static bool upper_bound_fn(const utf8::string_view& str, const TermGui::Command& com){
+static bool upper_bound_fn(const utf8::const_string_view& str, const TermGui::Command& com){
 	return common_less(str, com.name);
 }
 
-TermGui::const_command_range TermGui::find(const utf8::string_view& command, const TermGui::const_command_range& range) {
+TermGui::const_command_range TermGui::find(const utf8::const_string_view& command, const TermGui::const_command_range& range) {
 	const auto lowerBound = std::lower_bound(range.first, range.last, command, lower_bound_fn);
 	const auto upperBound = std::upper_bound(lowerBound, range.last, command, upper_bound_fn);
 	return TermGui::const_command_range{lowerBound, upperBound};
@@ -205,17 +202,18 @@ void TermGui::CommandLine::enter() {
 
 void TermGui::CommandLine::erase() { 
 	if(!this->is_end_of_line()){
-		this->inputString.erase(this->cursorIndex); 
+		auto itr = this->inputString.begin();
+		std::advance(itr, this->cursorIndex);
+		this->inputString.erase(itr); 
+		this->update_on_input();
 	}
-	this->update_on_input();
 }
 
 void TermGui::CommandLine::Delete() {
 	if(!this->is_start_of_line()){
 		this->move_back();
-		this->inputString.erase(this->cursorIndex);
+		this->erase();
 	}
-	this->update_on_input();
 }
 
 void TermGui::CommandLine::naive_insert(utf8::Char c) {
@@ -225,14 +223,14 @@ void TermGui::CommandLine::naive_insert(utf8::Char c) {
 }
 
 
-utf8::string_view TermGui::CommandLine::view_first_word() const{
+utf8::const_string_view TermGui::CommandLine::view_first_word() const{
 	const auto first = this->inputString.begin();
 	const auto last = this->inputString.end();
 	// skip whitespaces
 	const auto commandBegin = std::find_if_not(first, last, utf8::is_whitespace);
 	// find end of word
 	const auto commandEnd = std::find_if(commandBegin, last, utf8::is_whitespace);
-	utf8::string_view result(commandBegin, commandEnd);
+	utf8::const_string_view result(commandBegin, commandEnd);
 	return result;
 }
 

@@ -21,54 +21,43 @@ TermGui::ColorString& TermGui::ColorString::append(TermGui::ColorString&& other)
 TermGui::ColorString& TermGui::ColorString::move_append(TermGui::ColorString& other, TermGui::ColorString::size_type pos, TermGui::ColorString::size_type n){
 	const auto thisOldSize = this->size();
 	this->_string.append(other._string, pos, n);
-	other._string.erase(pos, n);
 	
-	auto commandItr = this->_styles.begin();
-	const auto commandEnd = this->_styles.end();
-	for(; commandItr != commandEnd; ++commandItr){
-		if(commandItr->index >= pos){
+	auto first = other._string.begin(); std::advance(first, pos);
+	auto last = first; std::advance(last, n);
+	other._string.erase(first, last);
+	
+	auto stylesItr = this->_styles.begin();
+	const auto stylesEnd = this->_styles.end();
+	for(; stylesItr != stylesEnd; ++stylesItr){
+		if(stylesItr->index >= pos){
 			break;
 		}
 	}
 	
-	const auto moveStart = commandItr;
-	for(; commandItr != commandEnd; ++commandItr){
-		if(commandItr->index >= (pos + n)){
+	const auto moveStart = stylesItr;
+	for(; stylesItr != stylesEnd; ++stylesItr){
+		if(stylesItr->index >= (pos + n)){
 			break;
 		}
-		this->_styles.add_override(std::move(commandItr->styles), commandItr->index - pos + thisOldSize);
+		this->_styles.add_override(std::move(stylesItr->styles), stylesItr->index - pos + thisOldSize);
 	}
 	
-	this->_styles.erase(moveStart, commandItr);
+	this->_styles.erase(moveStart, stylesItr);
 	
 	return *this;
 }
 
 void TermGui::ColorString::render(std::string& outputString) const {
-	auto commandItr = this->_styles.cbegin(); // start of the styles
-	const auto commandEnd = this->_styles.cend(); // end of the styles
-	
-	auto indexToHalt = 0;
+	auto stylesItr = this->_styles.cbegin(); // start of the styles
+	const auto stylesEnd = this->_styles.cend(); // end of the styles
 	
 	auto stringItr = this->_string.cbegin(); // start of the string
 	const auto stringEnd = this->_string.cend(); // end of the string
-	auto stringHalt = this->_string.cbegin(); // iterator at which to print a command
+	auto stringIndex = 0;
 	
-	// for loop for printing as long as styles are mixed into the string
-	for(; commandItr != commandEnd; ++commandItr){
-		const auto ci = commandItr->index;
-		const auto diff = ci - indexToHalt;
-		stringHalt += diff;
-		indexToHalt = commandItr->index;
-		for(;stringItr != stringHalt; ++stringItr){
-			outputString += stringItr->to_std_string_view();
-		}
-		commandItr->render(outputString);
-	}
-	
-	// printing the rest of the string without styles
-	for(;stringItr != stringEnd; ++stringItr){
-		outputString += stringItr->to_std_string_view();
+	while(;stringItr != stringEnd; (void)++stringItr, (void)++stringIndex){
+		if(stylesItr->index == stringIndex) stylesItr->render(outputString);
+		outputString += (*stringItr).to_std_string_view();
 	}
 }
 

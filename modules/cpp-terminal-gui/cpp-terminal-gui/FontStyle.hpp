@@ -25,40 +25,40 @@ namespace TermGui{
 class FontStyle{
 public:
 	enum class Width : std::uint8_t{
-		NORMAL = static_cast<std::uint8_t>(Term::Style::RESET_BOLD_DIM),
-		BOLD = static_cast<std::uint8_t>(Term::Style::BOLD),
-		DIM = static_cast<std::uint8_t>(Term::Style::DIM),
+		Normal = static_cast<std::uint8_t>(Term::Style::RESET_BOLD_DIM),
+		Bold = static_cast<std::uint8_t>(Term::Style::BOLD),
+		Dim = static_cast<std::uint8_t>(Term::Style::DIM),
 	};
 	
 	enum class Italic : std::uint8_t{
-		ON = static_cast<std::uint8_t>(Term::Style::ITALIC),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_ITALIC),
+		On = static_cast<std::uint8_t>(Term::Style::ITALIC),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_ITALIC),
 	};
 	
 	enum class Blink : std::uint8_t{
-		SLOW = static_cast<std::uint8_t>(Term::Style::BLINK),
-		FAST = static_cast<std::uint8_t>(Term::Style::BLINK_RAPID),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_BLINKING),
+		Slow = static_cast<std::uint8_t>(Term::Style::BLINK),
+		Fast = static_cast<std::uint8_t>(Term::Style::BLINK_RAPID),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_BLINKING),
 	};
 	
 	enum class Reversed : std::uint8_t{
-		ON = static_cast<std::uint8_t>(Term::Style::REVERSED),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_REVERSED),
+		On = static_cast<std::uint8_t>(Term::Style::REVERSED),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_REVERSED),
 	};
 	
 	enum class Conceal : std::uint8_t{
-		ON = static_cast<std::uint8_t>(Term::Style::CONCEAL),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_CONCEAL),
+		On = static_cast<std::uint8_t>(Term::Style::CONCEAL),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_CONCEAL),
 	};
 	
 	enum class Crossed : std::uint8_t{
-		ON = static_cast<std::uint8_t>(Term::Style::CROSSED),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_CROSSED),
+		On = static_cast<std::uint8_t>(Term::Style::CROSSED),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_CROSSED),
 	};
 	
 	enum class Underline : std::uint8_t{
-		ON = static_cast<std::uint8_t>(Term::Style::UNDERLINE),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_UNDERLINE),
+		On = static_cast<std::uint8_t>(Term::Style::UNDERLINE),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_UNDERLINE),
 	};
 	
 	enum class Font : std::uint8_t{
@@ -76,9 +76,9 @@ public:
 	};
 	
 	enum class Bar : std::uint8_t{
-		LEFT = static_cast<std::uint8_t>(Term::Style::BAR_LEFT),
-		RIGHT = static_cast<std::uint8_t>(Term::Style::BAR_RIGHT),
-		OFF = static_cast<std::uint8_t>(Term::Style::RESET_BAR)
+		Left = static_cast<std::uint8_t>(Term::Style::BAR_LEFT),
+		Right = static_cast<std::uint8_t>(Term::Style::BAR_RIGHT),
+		Off = static_cast<std::uint8_t>(Term::Style::RESET_BAR)
 	};
 
 	struct Reset_t{};

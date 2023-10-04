@@ -1,14 +1,13 @@
 #pragma once
 // c++ std
 #include <utility>
+#include <string>
 
 // utf8_string
 #include <utf8/string.hpp>
 
-// Project
-#include "FontStyle.hpp"
+// Project 
 #include "FontStyleList.hpp"
-
 
 /*
 	A line is the combination of an utf8 string and a list of 
@@ -24,7 +23,6 @@ namespace TermGui{
 class ColorString{
 
 public:
-
 	using string_type = utf8::string;
 	using size_type = string_type::size_type;
 	using difference_type = string_type::difference_type;
@@ -57,51 +55,25 @@ public:
 	inline ColorString& operator = (ColorString&&) = default;
 	
 	/// 2) Constructs the BaseString with count copies of character ch. 
-	inline ColorString(size_type count, utf8::Char ch) : _string(count, ch){}
+	inline ColorString(size_type count, utf8::Char ch){this->append(count, ch);}
 	
 	/// 2.1) Constructs the BaseString with count copies of character ch.
-	inline ColorString(size_type count, char ch) : _string(count, ch){}
-	
-	/// 3) Constructs the BaseString with a substring [pos, pos + count) of other.
-	inline ColorString(const utf8::string& other, size_type pos, size_type count) : _string(other, pos, count){}
-	
-	/// 4) Constructs the BaseString with the first count characters of character BaseString pointed to by s. 
-	inline ColorString(const utf8::Char* s, size_type count) : _string(s, count){}
+	inline ColorString(size_type count, char ch) {this->append(count, ch);}
 	
 	/// 4.1) Constructs the BaseString with the first count characters of character BaseString pointed to by s. 
 	/// s can contain null characters. The length of the BaseString is count. 
 	/// The behavior is undefined if [s, s + count) is not a valid range.
-	inline ColorString(const char* s, size_type count) : _string(s, count){}
-	
-	/// 5) Constructs the BaseString with the contents initialized with a copy of the null-terminated character BaseString
-	explicit inline ColorString(const utf8::Char* s) : _string(s){}
+	inline ColorString(const char* s, size_type count) {this->append(s, count);}
 	
 	/// 5.1) assigns a null terminated c-string to the BaseString class
 	/// **throws** an exception if the provided BaseString is not utf8 compliant
-	explicit inline ColorString(const char* c_str) : _string(c_str) {}
+	explicit inline ColorString(const char* c_str) {this->append(c_str);}
 	
-	/// 6) Constructs the BaseString with the contents of the range [first, last). 
-	template<class InputIt>
-	inline ColorString(InputIt first, InputIt last) : _string(first, last) {}
-	
-	/// 9) Constructs the BaseString with the contents of the initializer list ilist
-	inline ColorString(std::initializer_list<utf8::Char> ilist) : _string(ilist){}
-	
-	/// 9.1) Constructs the BaseString with the contents of the initializer list ilist
-	inline ColorString(std::initializer_list<char> ilist) : _string(ilist){}
-	
-	/// 10) Implicitly converts t to a BaseString view sv as if by std::basic_string_view<utf8::Char, Traits> sv = t;, 
-	/// then initializes the BaseString with the contents of sv, as if by basic_string(sv.data(), sv.size(), alloc). 
-	/// This overload participates in overload resolution only if 
-	/// std::is_convertible_v<const StringViewLike&, std::basic_string_view<utf8::Char, Traits>> 
-	/// is true and std::is_convertible_v<const StringViewLike&, const utf8::Char*> is false
-	template <class StringViewLike>
-	explicit inline ColorString(const StringViewLike& t) : _string(t){}
-	
-	/// Constructs the ColorString with a substring [pos, pos + count) of other. 
-	inline ColorString(const ColorString& other, size_type pos, size_type count) : 
-		_string (other._string, pos, count),
-		_styles(other._styles, pos, count){}
+	explicit inline ColorString(std::string_view str) {this->append(str);}
+	explicit inline ColorString(utf8::const_string_view str) {this->append(str);}
+	explicit inline ColorString(utf8::string_view str) {this->append(str);}
+	explicit inline ColorString(const utf8::string& str) {this->append(str);}
+	explicit inline ColorString(utf8::string&& str) {this->assign(std::move(str));}
 		
 	/// returns true if there is nothing in the list, false otherwise
 	/// the List class has to ensure that if the string is empty 
@@ -129,17 +101,17 @@ public:
 	
 	
 	/// append to the ColorString as you would append to the underlying string type
-	template<class CharItr>
-	inline ColorString& append(CharItr first, CharItr last){this->_string.append(first, last); return *this;}
-	inline ColorString& append(utf8::Char c){this->_string.append(c); return *this;}
-	inline ColorString& append(char c){this->_string.append(c); return *this;}
-	inline ColorString& append(const char* first){this->_string.append(first); return *this;}
-	inline ColorString& append(const char* first, size_type n){this->_string.append(first, first + n); return *this;}
-	inline ColorString& append(const std::string& str){this->_string.append(str); return *this;}
-	inline ColorString& append(std::string_view str){this->_string.append(str); return *this;}
-	inline ColorString& append(std::string_view str, size_type pos, size_type n){this->_string.append(str, pos, n); return *this;}
-	inline ColorString& append(const utf8::string str){this->_string.append(str); return *this;}
-	inline ColorString& append(const utf8::string_view str){this->_string.append(str); return *this;}
+	constexpr ColorString& append(utf8::Char c){this->_string.append(c); return *this;}
+	constexpr ColorString& append(size_type count, utf8::Char c){this->_string.append(count, c); return *this;}
+	constexpr ColorString& append(char c){this->_string.append(c); return *this; return *this;}
+	constexpr ColorString& append(size_type count, char c){this->_string.append(count, c); return *this; return *this;}
+	constexpr ColorString& append(const char* first){return this->append(first, utf8::strlen(first));}
+	constexpr ColorString& append(const char* first, size_type n){return this->append(first, first + n);}
+	constexpr ColorString& append(const char* first, const char* last){return this->append(utf8::const_string_view(first, last));}
+	constexpr ColorString& append(const std::string& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
+	constexpr ColorString& append(const std::string_view& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
+	constexpr ColorString& append(const utf8::string& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
+	constexpr ColorString& append(const utf8::const_string_view str){this->_string.append(str); return *this;}
 	
 	
 	inline ColorString& operator+=(utf8::Char c){return this->append(c);}
@@ -168,8 +140,8 @@ public:
 	inline ColorString& operator += (const FontStyle& fontStyle){ return this->append(fontStyle); }
 	
 	/// push_back as you would to the underlying string 
-	inline void posh_back(char c){this->_string.push_back(c);}
-	inline const char* push_back(const char* c_str){return this->_string.push_back(c_str);}
+	inline void push_back(char c){this->_string.push_back(c);}
+	inline void push_back(const char* c_str){this->_string.push_back(c_str);}
 	
 	template<class CharItr>
 	inline CharItr push_back(CharItr first, CharItr last){return this->_string.push_back(first, last);}
@@ -181,25 +153,27 @@ public:
 
 	
 	/// assigning any unformated and uncolored string to a string will clear the previous stored formats and colores
-	template<class CharItr>
-	inline ColorString& assign(CharItr first, CharItr last){this->_styles.clear(); this->_string.assign(first, last); return *this;}
-	inline ColorString& assign(utf8::Char c){this->_styles.clear(); this->_string.assign(c); return *this;}
+	
+	/*TODO: rewrite the assign functions so that they make sense with the new stylse*/
+	constexpr ColorString& assign(utf8::Char c){this->_styles.clear(); this->_string.assign(c); return *this;}
+	constexpr ColorString& assign(size_type count, utf8::Char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
 	inline ColorString& assign(char c){this->_styles.clear(); this->_string.assign(c); return *this;}
+	inline ColorString& assign(size_type count, char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
 	inline ColorString& assign(const char* first){this->_styles.clear(); this->_string.assign(first); return *this;}
-	inline ColorString& assign(const char* first, size_type n){this->_styles.clear(); this->_string.assign(first, first + n); return *this;}
+	inline ColorString& assign(const char* first, size_type n){return this->assign(first, first + n);}
+	inline ColorString& assign(const char* first, const char* last){this->_styles.clear(); this->_string.assign(first, last); return *this;}
 	inline ColorString& assign(const std::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(std::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(std::initializer_list<char> ilist){this->_styles.clear(); this->_string.assign(ilist); return *this;}
-	inline ColorString& assign(const utf8::string str){this->_string.assign(str); return *this;}
-	inline ColorString& assign(const utf8::string_view str){this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::const_string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	
 	inline ColorString& operator=(utf8::Char c){return this->assign(c);}
 	inline ColorString& operator=(char c){return this->assign(c);}
 	inline ColorString& operator=(const char* first){return this->assign(first);}
 	inline ColorString& operator=(const std::string& str){return this->assign(str);}
 	inline ColorString& operator=(std::string_view str){return this->assign(str);}
-	inline ColorString& operator=(const utf8::string str){return this->assign(str);}
-	inline ColorString& operator=(const utf8::string_view str){return this->assign(str);}
+	inline ColorString& operator=(const utf8::string& str){return this->assign(str);}
+	inline ColorString& operator=(const utf8::const_string_view str){return this->assign(str);}
 	
 	// TODO: iterators
 	
@@ -226,15 +200,10 @@ public:
 	}
 	
 	/// compares equal to the content of the string not the content of the style formats
-	friend inline bool operator==(const ColorString& lhs, const ColorString& rhs){return lhs._string == rhs._string;}
-	friend inline bool operator!=(const ColorString& lhs, const ColorString& rhs){return lhs._string != rhs._string;}
+	friend constexpr bool operator==(const ColorString& lhs, const ColorString& rhs){return lhs._string == rhs._string;}
+	friend constexpr bool operator!=(const ColorString& lhs, const ColorString& rhs){return lhs._string != rhs._string;}
 
 	void render(std::string& outputString) const;
-	
-	utf8::Char& at(size_type index) { return this->_string.at(index);}
-	const utf8::Char& at(size_type index) const { return this->_string.at(index);}
-	
-
 };
 
 }//TermGui
