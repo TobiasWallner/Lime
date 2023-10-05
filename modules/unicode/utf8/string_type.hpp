@@ -158,6 +158,8 @@ public:
 	template< class InputIt >
 	requires std::is_same<char, typename std::iterator_traits<InputIt>::value_type>::value
 	constexpr string& append(InputIt first, InputIt last);
+	constexpr string& append(string_const_iterator first, string_const_iterator last);
+	constexpr string& append(string_iterator first, string_iterator last);
 	template< class InputIt >
 	requires std::is_same<utf8::Char, typename std::iterator_traits<InputIt>::value_type>::value
 	constexpr string& append(InputIt first, InputIt last);

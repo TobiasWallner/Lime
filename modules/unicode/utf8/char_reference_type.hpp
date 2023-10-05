@@ -1,7 +1,5 @@
 #pragma once
 
-#include "string_type.hpp"
-
 namespace utf8{
 	
 class char_const_reference{
@@ -23,7 +21,7 @@ public:
 	
 	constexpr size_type size() const;
 	
-	explicit constexpr operator std::string_view() const;
+	constexpr operator std::string_view() const;
 	
 	constexpr const_pointer operator&() const;
 	
@@ -79,7 +77,7 @@ public:
 	constexpr pointer operator&();
 
 	constexpr operator char_const_reference();
-	explicit constexpr operator std::string_view() const;
+	constexpr operator std::string_view() const;
 	
 	constexpr char_reference& operator = (char c);
 	constexpr char_reference& operator = (const utf8::Char& c);

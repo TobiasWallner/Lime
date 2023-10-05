@@ -7,7 +7,7 @@
 
 namespace utf8{
 	
-class string_const_iterator : public std::contiguous_iterator_tag {
+class string_const_iterator : public std::bidirectional_iterator_tag {
 private:
 	const char* itr;
 	
@@ -87,7 +87,7 @@ namespace std{
 		using difference_type = long;
 		using pointer = char*;
 		using const_pointer = const char*;
-		using iterator_category = std::contiguous_iterator_tag;
+		using iterator_category = std::bidirectional_iterator_tag;
 	};
 
 	template<>
@@ -100,7 +100,7 @@ namespace std{
 		using difference_type = long;
 		using pointer = char*;
 		using const_pointer = const char*;
-		using iterator_category = std::contiguous_iterator_tag;
+		using iterator_category = std::bidirectional_iterator_tag;
 	};
 	
 }

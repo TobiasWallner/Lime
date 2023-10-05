@@ -202,6 +202,11 @@ constexpr void string::pop_back(){this->erase(--this->end(), this->end());}
 constexpr string& string::append(char ascii){this->push_back(ascii); return *this;}
 constexpr string& string::append(utf8::Char ch){this->push_back(ch); return *this;}
 constexpr string& string::append(string::size_type count, char ascii){this->string::Base::append(count, ascii); return *this;}
+constexpr string& string::append(string::size_type count, utf8::Char ch){
+	this->reserve(count * ch.size());
+	for(string::size_type i = 0; i != count; ++count) this->push_back(ch);
+	return *this;
+}
 constexpr string& string::append(const string& str){this->string::Base::append(&*str.begin(), &*str.end()); return *this;}
 constexpr string& string::append(const string::Base& str){this->string::Base::append(str); return *this;}
 constexpr string& string::append(const string::Base& str, string::size_type pos, string::size_type count){this->string::Base::append(str, pos, count); return *this;}
@@ -213,18 +218,17 @@ constexpr string& string::append(const utf8::Char* str){while(*str != '\0') this
 template< class InputIt >
 requires std::is_same<char, typename std::iterator_traits<InputIt>::value_type>::value
 constexpr string& string::append(InputIt first, InputIt last){this->Base::append(first, last); return *this;}
-
 template< class InputIt >
 requires std::is_same<utf8::Char, typename std::iterator_traits<InputIt>::value_type>::value
 constexpr string& string::append(InputIt first, InputIt last){
-	if constexpr (std::is_same<std::contiguous_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>::value){
-		this->Base::append(&*first, &*last);
-	}else{
-		while(first != last){this->append(*first++);}
-	}
+	size_t byte_size = 0;
+	for(auto itr = first; itr != last; ++first) byte_size += itr.size();
+	this->reserve(byte_size);
+	for(auto itr = first; itr != last; ++first) this->push_back(*itr);
 	return *this;
 }
-
+constexpr string& string::append(string_const_iterator first, string_const_iterator last){this->Base::append(&*first, &*last); return *this;}
+constexpr string& string::append(string_iterator first, string_iterator last){this->Base::append(&*first, &*last); return *this;}
 constexpr string& string::append(std::initializer_list<char> ilist){this->string::Base::append(ilist); return *this;}
 template< class StringViewLike >
 constexpr string& string::append(const StringViewLike& t){return this->append(t.cbegin(), t.cend());}

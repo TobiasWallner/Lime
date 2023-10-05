@@ -217,7 +217,9 @@ void TermGui::CommandLine::Delete() {
 }
 
 void TermGui::CommandLine::naive_insert(utf8::Char c) {
-	this->inputString.insert(cursorIndex, c);
+	auto itr = this->inputString.begin();
+	std::advance(itr, this->cursorIndex);
+	this->inputString.insert(itr, c);
 	this->move_forward();
 	this->update_on_input();
 }
@@ -426,15 +428,14 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 	
 	if(lineItr != lineEnd){// print name
 		outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
-		
-		const utf8::string& name = command->name;
-		utf8::string::const_iterator itr = name.begin();
-		const utf8::string::const_iterator end = name.end();
+
+		auto itr = command->name.begin();
+		const auto end = command->name.end();
 		TermGui::ScreenWidth::size_type columnItr = 0;
 		const TermGui::ScreenWidth::size_type columnEnd = infoWidth.x;
 		
 		for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
-			outputString.append(itr->to_std_string_view());
+			outputString.append(*itr);
 		}
 		
 		outputString.append(columnEnd - columnItr, ' ');
@@ -444,14 +445,13 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 	if(lineItr != lineEnd){// print info
 		outputString += Term::cursor_move(static_cast<size_t>(infoPosition.y + lineItr), static_cast<size_t>(infoPosition.x));
 		
-		const utf8::string& info = command->info;
-		utf8::string::const_iterator itr = info.begin();
-		const utf8::string::const_iterator end = info.end();
+		auto itr = command->info.begin();
+		const auto end = command->info.end();
 		TermGui::ScreenWidth::size_type columnItr = 0;
 		const TermGui::ScreenWidth::size_type columnEnd = infoWidth.x;
 		
 		for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
-			outputString.append(itr->to_std_string_view());
+			outputString.append(*itr);
 		}
 		
 		outputString.append(columnEnd - columnItr, ' ');
@@ -472,24 +472,22 @@ void TermGui::CommandLine::render_single_command_info(std::string& outputString)
 			const ScreenWidth::size_type columnEnd = infoWidth.x;
 			
 			{// print flag name
-				const utf8::string& name = flagItr->name;
-				utf8::string::const_iterator itr = name.begin();
-				const utf8::string::const_iterator end = name.end();
+				auto itr = flagItr->name.begin();
+				const auto end = flagItr->name.end();
 				
 				for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
-					outputString.append(itr->to_std_string_view());
+					outputString.append(*itr);
 				}
 				
 				const ScreenWidth::size_type spaceing = 2;
 				outputString.append(std::min(spaceing + maxFlagWidth - columnItr, columnEnd - columnItr), ' ');
 			}
 			{// print flag info
-				const utf8::string& info = flagItr->info;
-				utf8::string::const_iterator itr = info.begin();
-				const utf8::string::const_iterator end = info.end();
+				auto itr = flagItr->info.begin();
+				const auto end = flagItr->info.end();
 				
 				for(; itr != end && columnItr != columnEnd; (void)++itr, (void)++columnItr){
-					outputString.append(itr->to_std_string_view());
+					outputString.append(*itr);
 				}
 				
 				outputString.append(columnEnd - columnItr, ' ');
@@ -514,7 +512,7 @@ void TermGui::CommandLine::render_multiple_command_info(std::string& outputStrin
 	
 	for(auto comItr = this->possibleCommands.first; comItr != this->possibleCommands.last && screenColumn != screenEnd; (void)++comItr){
 		for(auto nameItr = comItr->name.begin(); nameItr != comItr->name.end() && screenColumn != screenEnd; (void)++nameItr, (void)++screenColumn){
-			outputString += nameItr->to_std_string_view();
+			outputString += *nameItr;
 		}
 		if(screenColumn != screenEnd){
 			outputString += ' ';
@@ -529,36 +527,37 @@ void TermGui::CommandLine::render_command_line(std::string& outputString) const 
 	outputString += Term::cursor_move(this->command_line_position().y, this->command_line_position().x);
 	outputString += ':';
 	size_type column = this->screenColumn;
-	const size_type columnEnd = this->inputString.size();
+	auto stringItr = this->inputString.begin();
+	const auto stringEnd = this->inputString.end();
 	size_type screenColumn = 0;
 	const size_type screenColumnEnd = this->input_line_width();
 	
-	for(; column < columnEnd && screenColumn < (screenColumnEnd - this->is_end_of_line()); ++column, (void)++screenColumn){
+	for(; stringItr != stringEnd && screenColumn < (screenColumnEnd - this->is_end_of_line()); ++column, (void)++screenColumn, (void)++stringItr){
 		const size_type show_cursor = this->showCursor && column == this->cursorIndex;
-		if(this->inputString[column] == '\t' && show_cursor){
-			outputString += to_string(TermGui::FontStyle::Reversed::ON);
+		if(*stringItr == '\t' && show_cursor){
+			outputString += to_string(TermGui::FontStyle::Reversed::On);
 			outputString += ' ';
-			outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+			outputString += to_string(TermGui::FontStyle::Reversed::Off);
 			const size_type tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print;
-		}else if(this->inputString[column] == '\t'){
+		}else if(*stringItr == '\t'){
 			const size_type tabs_to_print = std::min(4ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print-1;
 		}else if(show_cursor && column == this->cursorIndex){
-			outputString += to_string(TermGui::FontStyle::Reversed::ON);
-			outputString += this->inputString[column].to_std_string_view();
-			outputString += to_string(TermGui::FontStyle::Reversed::OFF);				
+			outputString += to_string(TermGui::FontStyle::Reversed::On);
+			outputString += *stringItr;
+			outputString += to_string(TermGui::FontStyle::Reversed::Off);				
 		}else{
-			outputString += this->inputString[column].to_std_string_view();
+			outputString += *stringItr;
 		}
 	}
 	
 	if (this->showCursor && this->is_end_of_line()) {
-		outputString += to_string(TermGui::FontStyle::Reversed::ON);
+		outputString += to_string(TermGui::FontStyle::Reversed::On);
 		outputString += ' ';
-		outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+		outputString += to_string(TermGui::FontStyle::Reversed::Off);
 		++screenColumn;
 	}
 	outputString.append(screenColumnEnd - screenColumn, ' ');
@@ -568,35 +567,36 @@ void TermGui::CommandLine::render_message(std::string& outputString) const {
 	outputString += Term::cursor_move(this->GridCell::get_screen_position().y, this->GridCell::get_screen_position().x);
 	outputString += '>';
 	size_type column = 0;
-	const size_type columnEnd = this->message.size();
+	auto messageItr = this->message.begin();
+	const auto messageEnd = this->message.end();
 	size_type screenColumn = 0;
 	const size_type screenColumnEnd = this->input_line_width();
 	
-	if(column < columnEnd && screenColumn < screenColumnEnd && this->showCursor){
+	if(messageItr != messageEnd && screenColumn < screenColumnEnd && this->showCursor){
 		// show cursor is true
-		if(this->message[column] == '\t'){
-			outputString += to_string(TermGui::FontStyle::Reversed::ON);
+		if(*messageItr == '\t'){
+			outputString += to_string(TermGui::FontStyle::Reversed::On);
 			outputString += ' ';
-			outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+			outputString += to_string(TermGui::FontStyle::Reversed::Off);
 			const size_type tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print;
 		}else{
-			outputString += to_string(TermGui::FontStyle::Reversed::ON);
-			outputString += this->message[column].to_std_string_view();
-			outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+			outputString += to_string(TermGui::FontStyle::Reversed::On);
+			outputString += *messageItr;
+			outputString += to_string(TermGui::FontStyle::Reversed::Off);
 		}
-		++column, (void)++screenColumn;
+		++column, (void)++screenColumn, (void)++messageItr;
 	}
 	
-	for(; column < columnEnd && screenColumn < screenColumnEnd; ++column, (void)++screenColumn){
+	for(; messageItr != messageEnd && screenColumn < screenColumnEnd; ++column, (void)++screenColumn, (void)++messageItr){
 		// show cursor is false
-		if(this->message[column] == '\t'){
+		if(*messageItr == '\t'){
 			const size_type tabs_to_print = std::min(4ULL, screenColumnEnd - screenColumn);
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print-1;
 		}else{
-			outputString += this->message[column].to_std_string_view();
+			outputString += *messageItr;
 		}
 	}
 	

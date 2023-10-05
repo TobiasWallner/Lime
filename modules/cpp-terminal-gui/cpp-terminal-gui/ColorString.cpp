@@ -55,30 +55,36 @@ void TermGui::ColorString::render(std::string& outputString) const {
 	const auto stringEnd = this->_string.cend(); // end of the string
 	auto stringIndex = 0;
 	
-	while(;stringItr != stringEnd; (void)++stringItr, (void)++stringIndex){
+	for(;stringItr != stringEnd; (void)++stringItr, (void)++stringIndex){
 		if(stylesItr->index == stringIndex) stylesItr->render(outputString);
-		outputString += (*stringItr).to_std_string_view();
+		outputString += *stringItr;
 	}
 }
 
 TermGui::ColorString& TermGui::ColorString::insert(size_type index, utf8::Char c){
-	this->_string.insert(index, c);
+	auto itr = this->_string.begin();
+	std::advance(itr, index);
+	this->_string.insert(itr, c);
 	this->_styles.offset_index_after(index, 1);
-	
 	return *this;
 }
 
 TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index){
-	this->_string.erase(index);
+	auto itr = this->_string.begin();
+	std::advance(itr, index);
+	this->_string.erase(itr);
 	this->_styles.merge(index, index + 2);
 	this->_styles.offset_index_after(index, -1);
 	return *this;
 }
 
-TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index_from, TermGui::ColorString::size_type index_to){
-	const auto count = index_to - index_from;
-	this->_string.erase(index_from, count);
-	this->_styles.merge(index_from, index_to);
-	this->_styles.offset_index_after(index_from, count);
+TermGui::ColorString& TermGui::ColorString::erase(TermGui::ColorString::size_type index, TermGui::ColorString::size_type count){
+	auto first = this->_string.begin();
+	std::advance(first, index);
+	auto last = first;
+	std::advance(last, count);
+	this->_string.erase(first, last);
+	this->_styles.merge(index, index + count);
+	this->_styles.offset_index_after(index, index + count);
 	return *this;
 }
