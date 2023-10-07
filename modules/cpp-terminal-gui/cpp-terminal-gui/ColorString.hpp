@@ -111,24 +111,26 @@ public:
 	constexpr ColorString& append(const std::string& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
 	constexpr ColorString& append(const std::string_view& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
 	constexpr ColorString& append(const utf8::string& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
-	constexpr ColorString& append(const utf8::const_string_view str){this->_string.append(str); return *this;}
-	
+	constexpr ColorString& append(utf8::string_view str){this->_string.append(str); return *this;}
+	constexpr ColorString& append(utf8::const_string_view str){this->_string.append(str); return *this;}
 	
 	inline ColorString& operator+=(utf8::Char c){return this->append(c);}
 	inline ColorString& operator+=(char c){return this->append(c);}
 	inline ColorString& operator+=(const char* first){return this->append(first);}
 	inline ColorString& operator+=(const std::string& str){return this->append(str);}
 	inline ColorString& operator+=(std::string_view str){return this->append(str);}
-	inline ColorString& operator+=(const utf8::string str){return this->append(str);}
-	inline ColorString& operator+=(const utf8::string_view str){return this->append(str);}
+	inline ColorString& operator+=(const utf8::string& str){return this->append(str);}
+	inline ColorString& operator+=(utf8::string_view str){return this->append(str);}
+	inline ColorString& operator+=(utf8::const_string_view str){return this->append(str);}
 	
 	inline ColorString& operator<<(utf8::Char c){return this->append(c);}
 	inline ColorString& operator<<(char c){return this->append(c);}
 	inline ColorString& operator<<(const char* first){return this->append(first);}
 	inline ColorString& operator<<(const std::string& str){return this->append(str);}
 	inline ColorString& operator<<(std::string_view str){return this->append(str);}
-	inline ColorString& operator<<(const utf8::string str){return this->append(str);}
-	inline ColorString& operator<<(const utf8::string_view str){return this->append(str);}
+	inline ColorString& operator<<(const utf8::string& str){return this->append(str);}
+	inline ColorString& operator<<(utf8::string_view str){return this->append(str);}
+	inline ColorString& operator<<(utf8::const_string_view str){return this->append(str);}
 	
 	/// appends the given command to the line which will then format all string elements inserted after wards	
 	inline ColorString& append(const FontStyle& fontStyle){
