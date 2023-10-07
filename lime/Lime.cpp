@@ -520,10 +520,10 @@ void Lime::set(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	}
 }
 
-void Lime::set_tab_size(utf8::const_string_view tabSize){
+void Lime::set_tab_size(utf8::const_string_view str){
 	std::int32_t value = 0;
-	const auto read = tabSize.parse_int32(&value);
-	if(read == 0){
+	const auto itr = scan_i32(str.begin(), str.end(), value);
+	if(itr == str.begin()){
 		//error
 		this->commandLine->message.assign("Error: tab size has to be an intager number.");
 	}else if(value < 0){
@@ -545,7 +545,7 @@ void Lime::change_directory(void* ptr, const std::vector<utf8::const_string_view
 		}break;
 		
 		case 2 : {
-			const auto path = commands[1].to_std_string();
+			const auto path = commands[1];
 			if(std::filesystem::is_directory(path)){
 				std::error_code ec;
 				std::filesystem::current_path(path, ec);
@@ -650,7 +650,7 @@ void Lime::save(void* ptr, const std::vector<utf8::const_string_view>& commands)
 		}break;
 		case 3 : {
 			if(commands[1] == "-as"){
-				return (void)This->save_as(commands[2].to_std_string());
+				return (void)This->save_as(commands[2]);
 			}else if(commands[1] == "-copy"){
 				return (void)This->commandLine->message.assign("Error: save: -copy flag is not supported yet");
 			}else {
