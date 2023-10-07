@@ -520,7 +520,7 @@ void Lime::set(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	}
 }
 
-void Lime::set_tab_size(utf8::cosnt_string_view tabSize){
+void Lime::set_tab_size(utf8::const_string_view tabSize){
 	std::int32_t value = 0;
 	const auto read = tabSize.parse_int32(&value);
 	if(read == 0){
