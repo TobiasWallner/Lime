@@ -290,7 +290,10 @@ public:
 	friend constexpr bool operator>(const string& lhs, const string& rhs){return rhs < lhs;}
 	friend constexpr bool operator>=(const string& lhs, const string& rhs){return !(lhs < rhs);}
 	friend constexpr bool operator<=(const string& lhs, const string& rhs){return !(lhs > rhs);}
-								
+	
+	template<class OStream>
+	friend inline OStream& operator << (OStream& stream, const string& str);
+	
 };
 	
 } // namespace utf8

@@ -433,4 +433,7 @@ constexpr string::const_iterator string::rfind(const StringViewLike& t) const no
 // helper
 constexpr string::iterator string::unconst(string::const_iterator itr) {return string::iterator(this, &*this->begin() + (&*itr - &*this->begin()));}
 
+template<class OStream>
+inline OStream& operator << (OStream& stream, const string& str){return stream << static_cast<std::string_view>(str);}
+
 } // namespace utf8
