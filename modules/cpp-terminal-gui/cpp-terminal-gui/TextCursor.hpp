@@ -87,7 +87,9 @@ public:
 	TextCursor& move_to_screen_column_after(std::int32_t wantedScreenColumn);
 	
 	inline utf8::Char get_char(){
-		return lineIterator->empty() ? utf8::Char('\0') : this->lineIterator->at(this->columnIndex);
+		auto itr = this->lineIterator->string_cbegin();
+		std::advance(itr, this->columnIndex);
+		return lineIterator->empty() ? utf8::Char('\0') : utf8::Char(*itr);
 	}
 	
 	TextCursor& update_tab_size();
