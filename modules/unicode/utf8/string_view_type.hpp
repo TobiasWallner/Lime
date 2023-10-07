@@ -23,7 +23,6 @@ private:
 	const_iterator _end;
 	
 public:
-	
 	constexpr string_view(utf8::string* str, const char* first, const char* last);
 	constexpr string_view(utf8::string* str, const_iterator first, const_iterator last);
 	constexpr string_view(iterator first, iterator last);
@@ -45,6 +44,8 @@ public:
 	constexpr bool empty() const;
 	
 	constexpr void swap(string_view& other);
+	
+	constexpr operator std::string_view() const;
 };
 
 class const_string_view{
@@ -69,11 +70,9 @@ public:
 	constexpr const_string_view(const const_string_view& other);
 	constexpr const_string_view& operator=(const const_string_view& other);
 	
-	constexpr iterator begin();
 	constexpr const_iterator begin() const;
 	constexpr const_iterator cbegin() const;
 	
-	constexpr iterator end() ;
 	constexpr const_iterator end() const;
 	constexpr const_iterator cend() const;
 	
@@ -82,6 +81,8 @@ public:
 
 	constexpr bool empty() const;
 	constexpr void swap(const_string_view& other);
+	
+	constexpr operator std::string_view() const;
 };
 
 }

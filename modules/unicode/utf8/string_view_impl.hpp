@@ -36,6 +36,7 @@ constexpr void string_view::swap(string_view& other){
 	std::swap(this->_end, other._end);
 }
 
+constexpr string_view::operator std::string_view() const {return std::string_view(&*this->cbegin(), &*this->cend());}
 
 constexpr const_string_view::const_string_view(const utf8::string& str) : _begin(str.begin()), _end(str.end()) {}
 constexpr const_string_view::const_string_view(const char* str) : _begin(str), _end(strend(str)){}
@@ -61,5 +62,7 @@ constexpr void const_string_view::swap(const_string_view& other){
 	std::swap(this->_begin, other._begin);
 	std::swap(this->_end, other._end);
 }
+
+constexpr const_string_view::operator std::string_view() const {return std::string_view(&*this->cbegin(), &*this->cend());}
 
 }
