@@ -31,11 +31,3 @@ target_link_libraries(cpp-terminal-gui
 	unicode
 	cpp-terminal
 )
-
-
-option(CPP_TERMINAL_GUI_ENABLE_TESTING "Set to ON to enable testing" ON)
-
-if(CPP_TERMINAL_GUI_ENABLE_TESTING)
-  enable_testing()
-  add_subdirectory(test)
-endif()

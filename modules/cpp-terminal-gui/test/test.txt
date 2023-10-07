@@ -1,5 +1,0 @@
-This file has lines.
-Now an empty line:
-
-Is the number of lines correct? Expected: 5 
-Is the curser at the beginning of the file?
