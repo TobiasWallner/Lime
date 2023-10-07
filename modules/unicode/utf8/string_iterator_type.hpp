@@ -39,6 +39,8 @@ public:
 	friend constexpr bool operator >= (string_const_iterator lhs, string_const_iterator rhs);
 };
 
+constexpr string_const_iterator scan_i32(string_const_iterator first, string_const_iterator last, std::int32_t& valueOut);
+
 class string;
 
 class string_iterator : std::contiguous_iterator_tag{

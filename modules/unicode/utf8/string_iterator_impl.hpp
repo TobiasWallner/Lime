@@ -50,6 +50,38 @@ constexpr string_iterator& string_iterator::operator=(const string_iterator&) = 
 
 constexpr string_iterator::operator string_const_iterator() {return string_const_iterator(this->itr);}
 
+
+
+
+constexpr string_const_iterator scan_i32(string_const_iterator first, string_const_iterator last, std::int32_t& valueOut){
+	if(first == last) return first;
+	
+	std::int32_t result = 0;
+	bool sign = false;
+	
+	if(*first == '-'){
+		sign = true;
+		++first;
+	}else if(*first == '+'){
+		++first;
+	}
+	
+	for(; first != last; ++first){
+		result *= 10;
+		if('0' <= *first && *first <= '9'){
+			result += (*first)[0] - '0';
+		}else{
+			break;
+		}
+	}
+	
+	valueOut = (sign) ? -result : result;	
+	return first;
+}
+
+
+
+
 constexpr string_iterator::reference string_iterator::operator*(){return reference(this->_str, this->itr);}
 constexpr string_iterator::const_reference string_iterator::operator*() const {return const_reference(this->itr);}
 constexpr string_iterator string_iterator::operator ++ (){
