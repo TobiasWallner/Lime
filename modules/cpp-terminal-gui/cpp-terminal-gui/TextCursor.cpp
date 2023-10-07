@@ -148,8 +148,10 @@ TermGui::TextCursor& TermGui::TextCursor::move_to_end_of_file(){
 TermGui::TextCursor& TermGui::TextCursor::update_tab_size(){
 	this->screenColumn = 0;
 	const auto tabSize = this->pEditor->tab_size();
-	for(std::int32_t i = 0; i < this->columnIndex; ++i){
-		this->screenColumn += (this->lineIterator->at(i) == '\t') ? tabSize : 1;
+	auto strItr = this->lineIterator->string_cbegin();
+	const auto strEnd = this->lineIterator->string_cend();
+	for(std::int32_t i = 0; i != this->columnIndex && strItr != strEnd; (void)++i, (void)++strItr){
+		this->screenColumn += (*strItr == '\t') ? tabSize : 1;
 	}
 	return *this;
 }
