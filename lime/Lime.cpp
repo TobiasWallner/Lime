@@ -545,7 +545,7 @@ void Lime::change_directory(void* ptr, const std::vector<utf8::const_string_view
 		}break;
 		
 		case 2 : {
-			const auto path = commands[1];
+			const auto path = static_cast<std::string_view>(commands[1]);
 			if(std::filesystem::is_directory(path)){
 				std::error_code ec;
 				std::filesystem::current_path(path, ec);
