@@ -101,7 +101,7 @@ static TermGui::Command generate_save_command(){
 		.info = "saves the active file",
 		.flags = std::vector<TermGui::Command::Flag>({
 			TermGui::Command::Flag{"-as", "+ <path>, changes the file to the provided 'path' and saves it. Cannot be used together with '-all'"},
-			TermGui::Command::Flag"-all", "saves all open files"},  
+			TermGui::Command::Flag{"-all", "saves all open files"},  
 			TermGui::Command::Flag{"-copy", "+ <path>, makes a copy of the file and saves it under the provided path. Cannot be used together with '-all'"},  
 		}),
 		.callbackFn = &Lime::save,
@@ -507,7 +507,7 @@ void Lime::prozess_unhandeled_event(Term::Event&& event){
 	this->topMessageBar->assign("Internal Error: Unhandeled Event type ID: ").append(std::to_string(static_cast<int>(event.type())));
 }
 
-void Lime::set(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::set(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	if(commands.size() == 3){
 		//error
@@ -520,7 +520,7 @@ void Lime::set(void* ptr, const std::vector<utf8::string_view>& commands){
 	}
 }
 
-void Lime::set_tab_size(utf8::string_view tabSize){
+void Lime::set_tab_size(utf8::cosnt_string_view tabSize){
 	std::int32_t value = 0;
 	const auto read = tabSize.parse_int32(&value);
 	if(read == 0){
@@ -537,7 +537,7 @@ void Lime::set_tab_size(utf8::string_view tabSize){
 	}
 }
 
-void Lime::change_directory(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::change_directory(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -564,7 +564,7 @@ void Lime::change_directory(void* ptr, const std::vector<utf8::string_view>& com
 	}
 }
 
-void Lime::print_working_directory(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::print_working_directory(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	if(commands.size() == 1){
 		const auto path = std::filesystem::current_path();
@@ -574,7 +574,7 @@ void Lime::print_working_directory(void* ptr, const std::vector<utf8::string_vie
 	}
 }
 
-void Lime::open(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::open(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -613,7 +613,7 @@ bool Lime::open(const std::string& path){
 }
 
 
-void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::quit(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
@@ -635,7 +635,7 @@ void Lime::quit(void* ptr, const std::vector<utf8::string_view>& commands){
 }
 
 
-void Lime::save(void* ptr, const std::vector<utf8::string_view>& commands){
+void Lime::save(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
