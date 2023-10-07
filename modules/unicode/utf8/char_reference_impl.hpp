@@ -13,6 +13,8 @@ constexpr char_const_reference::size_type char_const_reference::size() const {re
 
 constexpr char_const_reference::operator std::string_view() const {return std::string_view(this->_pos, this->size());}
 
+constexpr const char& char_const_reference::operator[] (size_type i) const {return this->_pos[i];}
+
 constexpr bool operator == (char_const_reference lhs, char_const_reference rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
 constexpr bool operator == (char lhs, char_const_reference rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
 constexpr bool operator == (char_const_reference lhs, char rhs){ return utf8::Char(lhs) == utf8::Char(rhs); }
@@ -49,6 +51,9 @@ constexpr char_reference& char_reference::operator = (char c){this->_str->replac
 constexpr char_reference& char_reference::operator = (const utf8::Char& c){this->_str->replace(this->_pos, c);return *this;}	
 
 constexpr char_reference::pointer char_reference::operator&(){return this->_pos;}
+	
+constexpr char& char_reference::operator[] (size_type i){return this->_pos[i];}
+constexpr const char& char_reference::operator[]  (size_type i) const {return this->_pos[i];}
 	
 constexpr bool operator == (char_reference lhs, char_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
 constexpr bool operator == (char_reference lhs, char_const_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}

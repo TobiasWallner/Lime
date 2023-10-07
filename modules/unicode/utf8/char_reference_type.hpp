@@ -23,6 +23,8 @@ public:
 	
 	constexpr operator std::string_view() const;
 	
+	constexpr const char& operator[] (size_type i) const;
+	
 	constexpr const_pointer operator&() const;
 	
 	friend constexpr bool operator == (char_const_reference lhs, char_const_reference rhs);
@@ -73,7 +75,10 @@ public:
 	constexpr char_reference(utf8::Char& ch);
 	
 	constexpr size_type size() const;
-	
+
+	constexpr char& operator[] (size_type i);
+	constexpr const char& operator[] (size_type i) const;
+
 	constexpr pointer operator&();
 
 	constexpr operator char_const_reference();
