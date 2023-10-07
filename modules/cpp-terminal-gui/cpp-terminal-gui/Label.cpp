@@ -3,7 +3,8 @@
 
 
 void TermGui::Label::render(std::string& outputString) const {
-	auto string = this->_string.string_cbegin();
+	auto stringItr = this->_string.string_cbegin();
+	const auto stringEnd = this->_string.string_cend();
 	auto styleItr = this->_string.style_list_cbegin();
 	const auto styleEnd = this->_string.style_list_cend();
 	
@@ -14,7 +15,7 @@ void TermGui::Label::render(std::string& outputString) const {
 	size_type columnNumber = 0;
 	size_type lineNumber = 0;
 	outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
-	for(;index < this->size() && lineNumber < screenWidth.y; (void)++index, (void)++columnNumber){
+	for(;stringItr != stringEnd && lineNumber < screenWidth.y; (void)++index, (void)++columnNumber, (void)++stringItr){
 		// render styles
 		if(styleItr != styleEnd){
 			if(styleItr->index == index){
@@ -25,20 +26,20 @@ void TermGui::Label::render(std::string& outputString) const {
 
 		if (columnNumber < screenWidth.x) {
 			// print characters that can be seen on the screen
-			if (string[index] == '\n') {
+			if (*stringItr == '\n') {
 				outputString.append(screenWidth.x - columnNumber, ' '); // clear after end of line
 				++lineNumber;
 				columnNumber = 0;
 				outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
-			}else if (string[index] == '\t') {
+			}else if (*stringItr == '\t') {
 				const auto tabs_to_print = std::min(4ULL, screenWidth.x - columnNumber);
 				outputString.append(tabs_to_print, ' ');
 				columnNumber += tabs_to_print - 1;
 			}else{
-				outputString += string[index].to_std_string_view();
+				outputString += *stringItr;
 			}
 		}
-		else if (string[index] == '\n') {
+		else if (*stringItr == '\n') {
 			// line break that cannot be seen on the screen
 			++lineNumber;
 			columnNumber = 0;
