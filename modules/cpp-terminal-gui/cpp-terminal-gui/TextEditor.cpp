@@ -156,7 +156,7 @@ void TermGui::TextEditor::move_to_end_of_file() {
 void TermGui::TextEditor::render(std::string& outputString) const {
 	// render file name and saved status
 	outputString += Term::cursor_move(this->header_position().y, this->header_position().x);
-	outputString += to_string(TermGui::FontStyle::Reversed::ON);
+	outputString += to_string(TermGui::FontStyle::Reversed::On);
 	outputString += (this->saved) ? ' ' : '*';
 	const std::string filename = this->_filename.filename().empty() ? std::string("%Unnamed") : this->_filename.filename().string();
 	if(filename.size() + 1 <= (this->text_width())){
@@ -165,7 +165,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	}else{
 		outputString.append(filename.begin(), filename.begin() + this->text_width() - 1);
 	}
-	outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+	outputString += to_string(TermGui::FontStyle::Reversed::Off);
 	
 	// render text field
 	size_type screenLineNumber = 0;
@@ -198,9 +198,9 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 			
 			const auto print_cursor = this->showCursor && renderCursor == this->_cursor;
 			if(renderCursor.get_char() == '\t' && print_cursor){
-				outputString += to_string(FontStyle::Reversed::ON);
+				outputString += to_string(FontStyle::Reversed::On);
 				outputString += ' ';
-				outputString += to_string(FontStyle::Reversed::OFF);
+				outputString += to_string(FontStyle::Reversed::Off);
 				const auto tabs_to_print = std::min(static_cast<size_type>(this->tabSize - 1), 
 													static_cast<size_type>(screenColumnEnd - renderCursor.screen_column()));
 				outputString.append(tabs_to_print, ' ');
@@ -210,9 +210,9 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 				outputString.append(tabs_to_print, ' ');
 			}else if(print_cursor) {
 				// print cursor in text
-				outputString += to_string(TermGui::FontStyle::Reversed::ON);
+				outputString += to_string(TermGui::FontStyle::Reversed::On);
 				outputString += renderCursor.get_char().to_std_string_view();
-				outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+				outputString += to_string(TermGui::FontStyle::Reversed::Off);
 			}else{
 				outputString += renderCursor.get_char().to_std_string_view();
 			}
@@ -225,9 +225,9 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 		
 		// print cursor past the end of the line
 		if (this->showCursor && renderCursor == this->_cursor) {
-			outputString += to_string(FontStyle::Reversed::ON);
+			outputString += to_string(FontStyle::Reversed::On);
 			outputString += ' ';
-			outputString += to_string(FontStyle::Reversed::OFF);
+			outputString += to_string(FontStyle::Reversed::Off);
 			outputString.append(screenColumnEnd - renderCursor.screen_column(), ' ');
 		}else{
 			// override characters until the end of the provided screen
@@ -249,7 +249,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 	// render text footer
 	std::int32_t column = 0;
 	outputString += Term::cursor_move(this->footer_position().y, this->footer_position().x);
-	outputString += to_string(TermGui::FontStyle::Reversed::ON);
+	outputString += to_string(TermGui::FontStyle::Reversed::On);
 	{	
 		if(column + sizeof("Line: ")-1 > this->text_width()) goto BREAK;
 		outputString += "Line: ";
@@ -291,7 +291,7 @@ void TermGui::TextEditor::render(std::string& outputString) const {
 
 	
 	outputString.append(this->text_width() - column, ' ');
-	outputString += to_string(TermGui::FontStyle::Reversed::OFF);
+	outputString += to_string(TermGui::FontStyle::Reversed::Off);
 	
 }
 
