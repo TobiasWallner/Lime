@@ -20,6 +20,10 @@ public:
 	constexpr char_const_reference(const_iterator pos);
 	
 	constexpr size_type size() const;
+	constexpr const_iterator begin() const;
+	constexpr const_iterator cbegin() const;
+	constexpr const_iterator end() const;
+	constexpr const_iterator cend() const;
 	
 	constexpr operator std::string_view() const;
 	
@@ -75,6 +79,12 @@ public:
 	constexpr char_reference(utf8::Char& ch);
 	
 	constexpr size_type size() const;
+	constexpr iterator begin();
+	constexpr const_iterator begin() const;
+	constexpr const_iterator cbegin() const;
+	constexpr iterator end();
+	constexpr const_iterator end() const;
+	constexpr const_iterator cend() const;
 
 	constexpr char& operator[] (size_type i);
 	constexpr const char& operator[] (size_type i) const;

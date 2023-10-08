@@ -10,6 +10,10 @@ constexpr char_const_reference::char_const_reference(const_iterator pos) : _pos(
 
 constexpr char_const_reference::const_pointer char_const_reference::operator&() const {return this->_pos;}
 constexpr char_const_reference::size_type char_const_reference::size() const {return static_cast<size_type>(utf8::identify(*this->_pos));}
+constexpr char_const_reference::const_iterator char_const_reference::begin() const {return this->_pos;}
+constexpr char_const_reference::const_iterator char_const_reference::cbegin() const {return this->_pos;}
+constexpr char_const_reference::const_iterator char_const_reference::end() const {return this->_pos + static_cast<int>(identify(*(this->_pos)));}
+constexpr char_const_reference::const_iterator char_const_reference::cend() const {return this->_pos + static_cast<int>(identify(*(this->_pos)));}
 
 constexpr char_const_reference::operator std::string_view() const {return std::string_view(this->_pos, this->size());}
 
@@ -44,6 +48,13 @@ constexpr char_reference::char_reference(utf8::string* str, char_reference::iter
 constexpr char_reference::operator char_const_reference(){return char_const_reference(this->_pos);}
 
 constexpr char_reference::size_type char_reference::size() const {return static_cast<char_reference::size_type>(utf8::identify(*this->_pos));}
+
+constexpr char_reference::iterator char_reference::begin() {return this->_pos;}
+constexpr char_reference::const_iterator char_reference::begin() const {return this->_pos;}
+constexpr char_reference::const_iterator char_reference::cbegin() const {return this->_pos;}
+constexpr char_reference::iterator char_reference::end() {return this->_pos + static_cast<int>(identify(*(this->_pos)));}
+constexpr char_reference::const_iterator char_reference::end() const {return this->_pos + static_cast<int>(identify(*(this->_pos)));}
+constexpr char_reference::const_iterator char_reference::cend() const {return this->_pos + static_cast<int>(identify(*(this->_pos)));}
 
 constexpr char_reference::operator std::string_view() const {return std::string_view(this->_pos, this->size());}
 
@@ -90,4 +101,5 @@ constexpr bool operator >= (char_reference lhs, char_const_reference rhs) {retur
 constexpr bool operator >= (char_const_reference lhs, char_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
 constexpr bool operator >= (char lhs, char_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
 constexpr bool operator >= (char_reference lhs, char rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
+
 } // namespace utf8
