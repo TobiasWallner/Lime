@@ -157,8 +157,8 @@ public:
 	/// assigning any unformated and uncolored string to a string will clear the previous stored formats and colores
 	
 	/*TODO: rewrite the assign functions so that they make sense with the new stylse*/
-	constexpr ColorString& assign(utf8::Char c){this->_styles.clear(); this->_string.assign(c); return *this;}
-	constexpr ColorString& assign(size_type count, utf8::Char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
+	inline ColorString& assign(utf8::Char c){this->_styles.clear(); this->_string.assign(c); return *this;}
+	inline ColorString& assign(size_type count, utf8::Char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
 	inline ColorString& assign(char c){this->_styles.clear(); this->_string.assign(c); return *this;}
 	inline ColorString& assign(size_type count, char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
 	inline ColorString& assign(const char* first){this->_styles.clear(); this->_string.assign(first); return *this;}
@@ -167,6 +167,7 @@ public:
 	inline ColorString& assign(const std::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(std::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(const utf8::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	inline ColorString& assign(const utf8::const_string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
 	
 	inline ColorString& operator=(utf8::Char c){return this->assign(c);}
