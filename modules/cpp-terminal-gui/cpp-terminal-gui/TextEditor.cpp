@@ -321,12 +321,12 @@ bool TermGui::TextEditor::save() {
 	return true;
 }
 
-bool TermGui::TextEditor::save_as(std::filesystem::path newFilename){
+bool TermGui::TextEditor::save_as(const std::filesystem::path& newFilename){
 	this->_filename = newFilename;
 	return this->save();
 }
 
-bool TermGui::TextEditor::open(std::filesystem::path filename){
+bool TermGui::TextEditor::open(const std::filesystem::path& filename){
 	std::ifstream file(filename);
 
 	if(!file.is_open()) {

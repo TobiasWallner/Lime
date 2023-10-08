@@ -193,8 +193,8 @@ public:
 	void render(std::string& outputString) const override;
 	
 	bool save();
-	bool save_as(std::filesystem::path newFilename);
-	bool open(std::filesystem::path filename);
+	bool save_as(const std::filesystem::path& newFilename);
+	bool open(const std::filesystem::path& filename);
 	
 	friend bool operator==(const TermGui::TextEditor& lhs, const TermGui::TextEditor& rhs);
 	friend inline bool operator!=(const TextEditor& lhs, const TextEditor& rhs){return !(lhs == rhs);}
