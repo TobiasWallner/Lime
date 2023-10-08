@@ -111,7 +111,7 @@ constexpr string_iterator string_iterator::operator -- (int) {
 constexpr string* string_iterator::container() {return this->_str;}
 constexpr const string* string_iterator::container() const {return this->_str;}
 
-size_t distance(string_const_iterator first, string_const_iterator last){
+constexpr size_t distance(string_const_iterator first, string_const_iterator last){
 	size_t count = 0;
 	while(first != last){
 		++first;

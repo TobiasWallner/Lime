@@ -74,7 +74,7 @@ public:
 	constexpr string_iterator operator -- (int);
 };
 
-size_t distance(string_const_iterator first, string_const_iterator last);
+constexpr size_t distance(string_const_iterator first, string_const_iterator last);
 
 }
 
