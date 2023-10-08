@@ -84,10 +84,10 @@ public:
 	constexpr Char(CharItr first, size_type n);
 	
 	/// reads first utf8 character from the string and makes sure not to read more than the strings content
-	 explicit Char(const std::string& str);
+	explicit constexpr Char(const std::string& str);
 	
 	/// reads first utf8 character from the string and makes sure not to read more than the strings content
-	 explicit Char(const std::string_view& str);
+	explicit constexpr Char(const std::string_view& str);
 	
 	/// assigns the ascii character to the utf8 character
 	constexpr void assign(char ascii);
@@ -161,18 +161,18 @@ public:
 	constexpr const_pointer data() const;
 	
 	/// writes this character into an std::string
-	 void print(std::string& str) const;
+	constexpr void print(std::string& str) const;
 	
 	/// turns this utf8 character string into an std::string
-	 std::string to_std_string() const;
+	constexpr std::string to_std_string() const;
 	
 	/// writes this char into an std::ostream useing the stream operator <<
 	template<class OStream>
-	friend std::ostream& operator << (OStream& stream, Char c);
+	friend constexpr std::ostream& operator << (OStream& stream, Char c);
 	
 	/// reads an utf8 char from the input stream
 	template<class IStream>
-	friend IStream& operator >> (IStream& stream, Char& c);
+	friend constexpr IStream& operator >> (IStream& stream, Char& c);
 	
 	constexpr int_type to_int() const;
 	
@@ -217,19 +217,19 @@ public:
 	
 	/// unequality comparison with char range
 	template<class Range>
-	friend bool operator!=(const Range& lhs, Char rhs);
+	friend constexpr bool operator!=(const Range& lhs, Char rhs);
 	
 	/// unequality comparison with char range
 	template<class Range>
-	friend bool operator!=(Char lhs, const Range& rhs);
+	friend constexpr bool operator!=(Char lhs, const Range& rhs);
 	friend constexpr bool operator<(Char lhs, const char* rhs);
 	friend constexpr bool operator>(Char lhs, const char* rhs);
 	
 	template<class Range>
-	friend bool operator<(Char lhs, const Range& rhs);
+	friend constexpr bool operator<(Char lhs, const Range& rhs);
 	
 	template<class Range>
-	friend bool operator>(Char lhs, const Range& rhs);
+	friend constexpr bool operator>(Char lhs, const Range& rhs);
 	
 	friend constexpr bool operator<(Char lhs, char rhs);
 	friend constexpr bool operator<(char lhs, Char rhs);

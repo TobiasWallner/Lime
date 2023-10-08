@@ -138,10 +138,10 @@ template<class CharItr>
 constexpr Char::Char(CharItr first, size_type n) : utf8{0} {this->assign(first, first + n);}
 
 /// reads first utf8 character from the string and makes sure not to read more than the strings content
-Char::Char(const std::string& str) : utf8{0} {this->assign(str);}
+constexpr Char::Char(const std::string& str) : utf8{0} {this->assign(str);}
 
 /// reads first utf8 character from the string and makes sure not to read more than the strings content
-Char::Char(const std::string_view& str) : utf8{0} {this->assign(str);}
+constexpr Char::Char(const std::string_view& str) : utf8{0} {this->assign(str);}
 
 /// assigns the ascii character to the utf8 character
 constexpr void Char::assign(char ascii){utf8[0] = ascii;}
@@ -187,8 +187,8 @@ constexpr CharItr Char::assign(CharItr first){
 	}	
 }
 
-constexpr void Char::assign(char_const_reference ch){this->assign(static_cast<Char>(ch));}
-constexpr void Char::assign(char_reference ch){this->assign(static_cast<Char>(ch));}
+constexpr void Char::assign(char_const_reference ch){this->assign(ch.begin());}
+constexpr void Char::assign(char_reference ch){this->assign(ch.begin());}
 
 /// reads the first utf8 character from the string and stores it in the character
 /// returns the string iterator after the read character
@@ -248,35 +248,36 @@ constexpr Char::pointer Char::data() {return this->utf8;}
 constexpr Char::const_pointer Char::data() const {return this->utf8;}
 
 /// writes this character into an std::string
-void Char::print(std::string& str) const {str.append(this->utf8, this->size());}
+constexpr void Char::print(std::string& str) const {str.append(this->utf8, this->size());}
 
 /// turns this utf8 character string into an std::string
-std::string Char::to_std_string() const {return std::string(this->utf8, this->size());}
+constexpr std::string Char::to_std_string() const {return std::string(this->utf8, this->size());}
 
 /// writes this char into an std::ostream useing the stream operator <<
 template<class OStream>
-std::ostream& operator << (OStream& stream, Char c) {
+constexpr std::ostream& operator << (OStream& stream, Char c) {
 	stream.write(c.utf8, c.size()); return stream;
 }
 
 /// reads an utf8 char from the input stream
 template<class IStream>
-IStream& operator >> (IStream& stream, Char& c) {
+constexpr IStream& operator >> (IStream& stream, Char& c) {
 	c[0] = stream.get();
 	const auto length = identify(c[0]);
 	switch(length){
-		case 2: {
+		case Identifier::Bytes2: {
 			c[1] = stream.get();
 		}break;
-		case 3: {
+		case Identifier::Bytes3: {
 			c[1] = stream.get();
 			c[2] = stream.get();
 		}break;
-		case 4: {
+		case Identifier::Bytes4: {
 			c[1] = stream.get();
 			c[2] = stream.get();
 			c[3] = stream.get();
 		}break;
+		default : break;
 	}
 	return stream;
 }
@@ -350,11 +351,11 @@ constexpr bool operator!=(const char* lhs, Char rhs){return !(lhs == rhs);}
 
 /// unequality comparison with char range
 template<class Range>
-bool operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
+constexpr bool operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
 
 /// unequality comparison with char range
 template<class Range>
-bool operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
+constexpr bool operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
 
 constexpr bool operator != (utf8::Char lhs, char_const_reference rhs){ return lhs != utf8::Char(rhs); }
 constexpr bool operator != (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) != rhs; }
@@ -380,7 +381,7 @@ constexpr bool operator>(Char lhs, const char* rhs){
 }
 
 template<class Range>
-bool operator<(Char lhs, const Range& rhs){
+constexpr bool operator<(Char lhs, const Range& rhs){
 	auto lhsItr = lhs.cbegin();
 	const auto lhsEnd = lhs.cend();
 	auto rhsItr = rhs.cbegin();
@@ -392,7 +393,7 @@ bool operator<(Char lhs, const Range& rhs){
 }
 
 template<class Range>
-bool operator>(Char lhs, const Range& rhs){
+constexpr bool operator>(Char lhs, const Range& rhs){
 	auto lhsItr = lhs.cbegin();
 	const auto lhsEnd = lhs.cend();
 	auto rhsItr = rhs.cbegin();
