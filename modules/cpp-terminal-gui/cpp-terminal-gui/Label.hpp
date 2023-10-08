@@ -158,7 +158,7 @@ public:
 		return *this;
 	}
 	
-	inline Label& append(const utf8::string_view str){
+	inline Label& append(const utf8::const_string_view str){
 		update_on_append(str.begin(), str.end());
 		this->_string.append(str); 
 		return *this;
@@ -170,7 +170,7 @@ public:
 	inline Label& operator+=(const std::string& str){return this->append(str);}
 	inline Label& operator+=(std::string_view str){return this->append(str);}
 	inline Label& operator+=(const utf8::string str){return this->append(str);}
-	inline Label& operator+=(const utf8::string_view str){return this->append(str);}
+	inline Label& operator+=(const utf8::const_string_view str){return this->append(str);}
 	
 	inline Label& operator<<(utf8::Char c){return this->append(c);}
 	inline Label& operator<<(char c){return this->append(c);}
@@ -178,7 +178,7 @@ public:
 	inline Label& operator<<(const std::string& str){return this->append(str);}
 	inline Label& operator<<(std::string_view str){return this->append(str);}
 	inline Label& operator<<(const utf8::string str){return this->append(str);}
-	inline Label& operator<<(const utf8::string_view str){return this->append(str);}
+	inline Label& operator<<(const utf8::const_string_view str){return this->append(str);}
 	
 	
 	
@@ -242,13 +242,13 @@ public:
 	}
 	
 	
-	inline Label& assign(const utf8::string str){
+	inline Label& assign(const utf8::string& str){
 		update_on_assign(str.begin(), str.end());
 		this->_string.assign(str);
 		return *this;
 	}
 	
-	inline Label& assign(const utf8::string_view str){
+	inline Label& assign(utf8::const_string_view str){
 		update_on_assign(str.begin(), str.end());
 		this->_string.assign(str);
 		return *this;
@@ -259,8 +259,8 @@ public:
 	inline Label& operator=(const char* first){return this->assign(first);}
 	inline Label& operator=(const std::string& str){return this->assign(str);}
 	inline Label& operator=(std::string_view str){return this->assign(str);}
-	inline Label& operator=(const utf8::string str){return this->assign(str);}
-	inline Label& operator=(const utf8::string_view str){return this->assign(str);}
+	inline Label& operator=(utf8::const_string_view str){return this->assign(str);}
+	inline Label& operator=(const utf8::string& str){return this->assign(str);}
 
 	
 };
