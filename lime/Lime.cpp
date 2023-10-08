@@ -581,7 +581,8 @@ void Lime::open(void* ptr, const std::vector<utf8::const_string_view>& commands)
 			This->commandLine->message = "Error: the command 'open' needs a filename";
 		}break;
 		case 2 : {
-			const bool successful_read = This->open(commands[1].to_std_string());
+			const std::filesystem::path path(&*commands[1].begin(), &*commands[1].end());
+			const bool successful_read = This->open(path);
 			if (!successful_read) {
 				This->commandLine->message.assign("Error: could not read filename")
 					.append("'").append(commands[1]).append("'");
@@ -604,7 +605,7 @@ void Lime::open(void* ptr, const std::vector<utf8::const_string_view>& commands)
 	}
 }
 
-bool Lime::open(const std::string& path){
+bool Lime::open(const std::filesystem::path& path){
 	const bool successfulRead = this->textEditor->open(path);
 	if (!successfulRead) {
 		this->commandLine->message.assign("Error: could not read file");
@@ -650,7 +651,9 @@ void Lime::save(void* ptr, const std::vector<utf8::const_string_view>& commands)
 		}break;
 		case 3 : {
 			if(commands[1] == "-as"){
-				return (void)This->save_as(commands[2]);
+				std::string_view strPath = commands[2];
+				const std::filesystem::path path(strPath);
+				return (void)This->save_as(path);
 			}else if(commands[1] == "-copy"){
 				return (void)This->commandLine->message.assign("Error: save: -copy flag is not supported yet");
 			}else {
@@ -671,7 +674,7 @@ bool Lime::save(){
 	return successful_write;
 }
 
-bool Lime::save_as(const std::string& path){
+bool Lime::save_as(const std::filesystem::path& path){
 	return this->textEditor->save_as(path);
 }
 

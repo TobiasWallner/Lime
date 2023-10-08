@@ -171,14 +171,14 @@ public:
 	
 	/// opens the file at the specified location and loads it into a new or empty and unnamed editor that is in focus
 	static void open(void* ptr, const std::vector<utf8::const_string_view>& commands);
-	bool open(const std::string& path);
+	bool open(const std::filesystem::path& path);
 	
 	static void quit(void* ptr, const std::vector<utf8::const_string_view>& commands);
 	
 	/// saves the currently focussed file at the currently specified filepath
 	static void save(void* ptr, const std::vector<utf8::const_string_view>& commands);
 	bool save();
-	bool save_as(const std::string& path);
+	bool save_as(const std::filesystem::path& path);
 	
 	static void set(void* ptr, const std::vector<utf8::const_string_view>& commands);
 	void set_tab_size(utf8::const_string_view tabSize);
