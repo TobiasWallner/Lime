@@ -44,15 +44,6 @@ constexpr bool operator <= (string_const_iterator lhs, string_const_iterator rhs
 constexpr bool operator > (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr > rhs.itr;}
 constexpr bool operator >= (string_const_iterator lhs, string_const_iterator rhs){return lhs.itr >= rhs.itr;}
 
-constexpr string_iterator::string_iterator(string* str, char* pos) : _str(str), itr(pos){}
-constexpr string_iterator::string_iterator(const string_iterator&) = default;
-constexpr string_iterator& string_iterator::operator=(const string_iterator&) = default;
-
-constexpr string_iterator::operator string_const_iterator() {return string_const_iterator(this->itr);}
-
-
-
-
 constexpr string_const_iterator scan_i32(string_const_iterator first, string_const_iterator last, std::int32_t& valueOut){
 	if(first == last) return first;
 	
@@ -79,7 +70,13 @@ constexpr string_const_iterator scan_i32(string_const_iterator first, string_con
 	return first;
 }
 
+constexpr string_const_iterator::const_pointer string_const_iterator::operator->() const {return this->itr;}
 
+constexpr string_iterator::string_iterator(string* str, char* pos) : _str(str), itr(pos){}
+constexpr string_iterator::string_iterator(const string_iterator&) = default;
+constexpr string_iterator& string_iterator::operator=(const string_iterator&) = default;
+
+constexpr string_iterator::operator string_const_iterator() {return string_const_iterator(this->itr);}
 
 
 constexpr string_iterator::reference string_iterator::operator*(){return reference(this->_str, this->itr);}
@@ -119,5 +116,8 @@ constexpr size_t distance(string_const_iterator first, string_const_iterator las
 	}
 	return count;
 }
+
+constexpr string_iterator::pointer string_iterator::operator->(){return this->itr;}
+constexpr string_iterator::const_pointer string_iterator::operator->() const {return this->itr;}
 
 }

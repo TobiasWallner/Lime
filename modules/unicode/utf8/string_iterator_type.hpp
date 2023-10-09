@@ -37,6 +37,8 @@ public:
 	friend constexpr bool operator <= (string_const_iterator lhs, string_const_iterator rhs);
 	friend constexpr bool operator > (string_const_iterator lhs, string_const_iterator rhs);
 	friend constexpr bool operator >= (string_const_iterator lhs, string_const_iterator rhs);
+	
+	constexpr const_pointer operator->() const;
 };
 
 constexpr string_const_iterator scan_i32(string_const_iterator first, string_const_iterator last, std::int32_t& valueOut);
@@ -72,6 +74,9 @@ public:
 	constexpr string_iterator operator ++ (int);
 	constexpr string_iterator operator -- ();
 	constexpr string_iterator operator -- (int);
+	
+	constexpr pointer operator->();
+	constexpr const_pointer operator->() const;
 };
 
 constexpr size_t distance(string_const_iterator first, string_const_iterator last);
@@ -105,4 +110,14 @@ namespace std{
 		using iterator_category = std::bidirectional_iterator_tag;
 	};
 	
+}
+
+
+namespace std{
+
+constexpr const char* to_address(const utf8::string_const_iterator& p) noexcept{return p.operator->();}
+constexpr const char* to_address(const utf8::string_iterator& p) noexcept{return p.operator->();}
+constexpr char* to_address(utf8::string_iterator& p) noexcept{return p.operator->();}
+constexpr char* to_address(utf8::string_iterator&& p) noexcept{return p.operator->();}
+
 }
