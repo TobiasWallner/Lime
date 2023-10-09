@@ -108,9 +108,9 @@ public:
 	constexpr ColorString& append(const char* first){return this->append(first, utf8::strlen(first));}
 	constexpr ColorString& append(const char* first, size_type n){return this->append(first, first + n);}
 	constexpr ColorString& append(const char* first, const char* last){return this->append(utf8::const_string_view(first, last));}
-	constexpr ColorString& append(const std::string& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
-	constexpr ColorString& append(const std::string_view& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
-	constexpr ColorString& append(const utf8::string& str){return this->append(utf8::const_string_view(&*str.begin(), &*str.end()));}
+	constexpr ColorString& append(const std::string& str){return this->append(utf8::const_string_view(std::to_address(str.begin()), std::to_address(str.end())));}
+	constexpr ColorString& append(const std::string_view& str){return this->append(utf8::const_string_view(std::to_address(str.begin()), std::to_address(str.end())));}
+	constexpr ColorString& append(const utf8::string& str){return this->append(utf8::const_string_view(std::to_address(str.begin()), std::to_address(str.end())));}
 	constexpr ColorString& append(utf8::string_view str){this->_string.append(str); return *this;}
 	constexpr ColorString& append(utf8::const_string_view str){this->_string.append(str); return *this;}
 	
@@ -157,18 +157,18 @@ public:
 	/// assigning any unformated and uncolored string to a string will clear the previous stored formats and colores
 	
 	/*TODO: rewrite the assign functions so that they make sense with the new stylse*/
-	inline ColorString& assign(utf8::Char c){this->_styles.clear(); this->_string.assign(c); return *this;}
-	inline ColorString& assign(size_type count, utf8::Char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
-	inline ColorString& assign(char c){this->_styles.clear(); this->_string.assign(c); return *this;}
-	inline ColorString& assign(size_type count, char ch){this->_styles.clear(); this->_string.assign(count, ch); return *this;}
-	inline ColorString& assign(const char* first){this->_styles.clear(); this->_string.assign(first); return *this;}
-	inline ColorString& assign(const char* first, size_type n){return this->assign(first, first + n);}
-	inline ColorString& assign(const char* first, const char* last){this->_styles.clear(); this->_string.assign(first, last); return *this;}
-	inline ColorString& assign(const std::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(std::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(const utf8::string& str){this->_styles.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(const utf8::string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
-	inline ColorString& assign(const utf8::const_string_view str){this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(utf8::Char c)						{this->_styles.clear(); this->_string.assign(c); return *this;}
+	inline ColorString& assign(size_type count, utf8::Char ch)		{this->_styles.clear(); this->_string.assign(count, ch); return *this;}
+	inline ColorString& assign(char c)								{this->_styles.clear(); this->_string.assign(c); return *this;}
+	inline ColorString& assign(size_type count, char ch)			{this->_styles.clear(); this->_string.assign(count, ch); return *this;}
+	inline ColorString& assign(const char* first)					{this->_styles.clear(); this->_string.assign(first); return *this;}
+	inline ColorString& assign(const char* first, size_type n)		{this->_styles.clear(); this->_string.assign(first, first + n); return *this;}
+	inline ColorString& assign(const char* first, const char* last)	{this->_styles.clear(); this->_string.assign(first, last); return *this;}
+	inline ColorString& assign(const std::string& str)				{this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(std::string_view str)				{this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string& str)				{this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::string_view str)			{this->_styles.clear(); this->_string.assign(str); return *this;}
+	inline ColorString& assign(const utf8::const_string_view str)	{this->_styles.clear(); this->_string.assign(str); return *this;}
 	
 	inline ColorString& operator=(utf8::Char c){return this->assign(c);}
 	inline ColorString& operator=(char c){return this->assign(c);}
