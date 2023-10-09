@@ -581,7 +581,7 @@ void Lime::open(void* ptr, const std::vector<utf8::const_string_view>& commands)
 			This->commandLine->message = "Error: the command 'open' needs a filename";
 		}break;
 		case 2 : {
-			const std::filesystem::path path(&*commands[1].begin(), &*commands[1].end());
+			const std::filesystem::path path(std::to_address(commands[1].begin()), std::to_address(commands[1].end()));
 			const bool successful_read = This->open(path);
 			if (!successful_read) {
 				This->commandLine->message.assign("Error: could not read filename")
