@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <memory>
 
 #include "string_type.hpp"
 
@@ -87,21 +88,21 @@ constexpr const char* string::c_str() const noexcept {return this->string::Base:
 
 constexpr string::operator std::string_view() const noexcept {return this->Base::operator std::string_view();}
 
-constexpr string::iterator string::begin() noexcept {return string::iterator(this, &*this->string::Base::begin());}
-constexpr string::const_iterator string::begin() const noexcept {return string::const_iterator(&*this->string::Base::cbegin());}
-constexpr string::const_iterator string::cbegin() const noexcept {return string::const_iterator(&*this->string::Base::cbegin());}
+constexpr string::iterator string::begin() noexcept {return string::iterator(this, std::to_address(this->string::Base::begin())); }
+constexpr string::const_iterator string::begin() const noexcept {return string::const_iterator(std::to_address(this->string::Base::cbegin()));}
+constexpr string::const_iterator string::cbegin() const noexcept {return string::const_iterator(std::to_address(this->string::Base::cbegin())); }
 
-constexpr string::iterator string::end() noexcept {return string::iterator(this, &*this->string::Base::end());}
-constexpr string::const_iterator string::end() const noexcept {return string::const_iterator(&*this->string::Base::end());}
-constexpr string::const_iterator string::cend() const noexcept {return string::const_iterator(&*this->string::Base::end());}
+constexpr string::iterator string::end() noexcept {return string::iterator(this, std::to_address(this->string::Base::end()));}
+constexpr string::const_iterator string::end() const noexcept {return string::const_iterator(std::to_address(this->string::Base::cend()));}
+constexpr string::const_iterator string::cend() const noexcept {return string::const_iterator(std::to_address(this->string::Base::cend()));}
 
-//constexpr string::reverse_iterator string::rbegin() noexcept {return string::iterator(&*this->end());}
-//constexpr string::const_reverse_iterator string::rbegin() const noexcept {return string::iterator(&*this->cend());}
-//constexpr string::const_reverse_iterator string::crbegin() const noexcept {return string::iterator(&*this->cend());}
+//constexpr string::reverse_iterator string::rbegin() noexcept {return string::iterator(std::to_address(this->end()));}
+//constexpr string::const_reverse_iterator string::rbegin() const noexcept {return string::iterator(std::to_address(this->cend()));}
+//constexpr string::const_reverse_iterator string::crbegin() const noexcept {return string::iterator(std::to_address(this->cend()));}
 
-//constexpr string::iterator string::rend() noexcept {return string::iterator(&*this->begin());}
-//constexpr string::const_reverse_iterator string::rend() const noexcept {return string::iterator(&*this->begin());}
-//constexpr string::const_reverse_iterator string::crend() const noexcept {return string::iterator(&*this->begin());}
+//constexpr string::iterator string::rend() noexcept {return string::iterator(std::to_address(this->begin()));}
+//constexpr string::const_reverse_iterator string::rend() const noexcept {return string::iterator(std::to_address(this->begin()));}
+//constexpr string::const_reverse_iterator string::crend() const noexcept {return string::iterator(std::to_address(this->begin()));}
 
 // Capacity
 constexpr bool string::empty() const noexcept {return this->string::Base::empty();}
@@ -116,30 +117,30 @@ constexpr void string::shrink_to_fit() {this->string::Base::shrink_to_fit();}
 // Operations
 constexpr void string::clear() noexcept {this->string::Base::clear();}
 constexpr string::iterator string::insert(string::const_iterator pos, char ascii){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, ascii);
+	char* r = std::to_address(this->string::Base::insert(itr, ascii));
 	const string::iterator result(this, r);
 	return result;
 }	
 constexpr string::iterator string::insert(string::const_iterator pos, utf8::Char ch){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, ch.cbegin(), ch.cend());
+	char* r = std::to_address(this->string::Base::insert(itr, ch.cbegin(), ch.cend()));
 	const string::iterator result(this, r);
 	return result;
 }	
 constexpr string::iterator string::insert(string::const_iterator pos, string::size_type count, char ascii){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, count, ascii);
+	char* r = std::to_address(this->string::Base::insert(itr, count, ascii));
 	const string::iterator result(this, r);
 	return result;
 }	
 constexpr string::iterator string::insert(string::const_iterator pos, string::size_type count, utf8::Char ch){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, count * ch.size(), ' ');
+	char* r = std::to_address(this->string::Base::insert(itr, count * ch.size(), ' '));
 	for(string::size_type i = 0; i != count; (void)++i, (void)++pos){
 		*pos = ch;
 	}
@@ -147,49 +148,49 @@ constexpr string::iterator string::insert(string::const_iterator pos, string::si
 	return result;
 }
 constexpr string::iterator string::insert(string::const_iterator pos, const char* str){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, str, utf8::strend(str));
+	char* r = std::to_address(this->string::Base::insert(itr, str, utf8::strend(str)));
 	const string::iterator result(this, r);
 	return result;
 }
 constexpr string::iterator string::insert(string::const_iterator pos, const char* str, string::size_type count){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, str, str + count);
+	char* r = std::to_address(this->string::Base::insert(itr, str, str + count));
 	const string::iterator result(this, r);
 	return result;
 }
 template< class InputIt >
 constexpr string::iterator string::insert(string::const_iterator pos, InputIt first, InputIt last){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, first, last);
+	char* r = std::to_address(this->string::Base::insert(itr, first, last));
 	const string::iterator result(this, r);
 	return result;
 }
 constexpr string::iterator string::insert(string::const_iterator pos, std::initializer_list<char> ilist){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator itr = this->Base::cbegin() + index;
-	char* r = &*this->string::Base::insert(itr, ilist);
+	char* r = std::to_address(this->string::Base::insert(itr, ilist));
 	const string::iterator result(this, r);
 	return result;
 }
 
 constexpr string::iterator string::erase(string::const_iterator pos){
-	const std::size_t index = &*pos - &*this->cbegin();
+	const std::size_t index = std::to_address(pos) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator erase_from = this->Base::cbegin() + index;
 	const utf8::string::Base::const_iterator erase_to = erase_from + (*pos).size();
-	char* r = &*this->string::Base::erase(erase_from, erase_to);
+	char* r = std::to_address(this->string::Base::erase(erase_from, erase_to));
 	const string::iterator result(this, r);
 	return result;
 }
 constexpr string::iterator string::erase(string::const_iterator first, string::const_iterator last){
-	const std::size_t index_first = &*first - &*this->cbegin();
-	const std::size_t index_last = &*last - &*this->cbegin();
+	const std::size_t index_first = std::to_address(first) - std::to_address(this->cbegin());
+	const std::size_t index_last = std::to_address(last) - std::to_address(this->cbegin());
 	const utf8::string::Base::const_iterator erase_from = this->Base::cbegin() + index_first;
 	const utf8::string::Base::const_iterator erase_to = this->Base::cbegin() + index_last + (*last).size();
-	char* r = &*this->string::Base::erase(erase_from, erase_to);
+	char* r = std::to_address(this->string::Base::erase(erase_from, erase_to));
 	const string::iterator result(this, r);
 	return result;
 }
@@ -207,7 +208,7 @@ constexpr string& string::append(string::size_type count, utf8::Char ch){
 	for(string::size_type i = 0; i != count; ++count) this->push_back(ch);
 	return *this;
 }
-constexpr string& string::append(const string& str){this->string::Base::append(&*str.begin(), &*str.end()); return *this;}
+constexpr string& string::append(const string& str){this->string::Base::append(std::to_address(str.begin()), std::to_address(str.end())); return *this;}
 constexpr string& string::append(const string::Base& str){this->string::Base::append(str); return *this;}
 constexpr string& string::append(const string::Base& str, string::size_type pos, string::size_type count){this->string::Base::append(str, pos, count); return *this;}
 constexpr string& string::append(const char* str, string::size_type count){this->string::Base::append(str, count); return *this;}
@@ -227,8 +228,8 @@ constexpr string& string::append(InputIt first, InputIt last){
 	for(auto itr = first; itr != last; ++first) this->push_back(*itr);
 	return *this;
 }
-constexpr string& string::append(string_const_iterator first, string_const_iterator last){this->Base::append(&*first, &*last); return *this;}
-constexpr string& string::append(string_iterator first, string_iterator last){this->Base::append(&*first, &*last); return *this;}
+constexpr string& string::append(string_const_iterator first, string_const_iterator last){this->Base::append(std::to_address(first), std::to_address(last)); return *this;}
+constexpr string& string::append(string_iterator first, string_iterator last){this->Base::append(std::to_address(first), std::to_address(last)); return *this;}
 constexpr string& string::append(std::initializer_list<char> ilist){this->string::Base::append(ilist); return *this;}
 template< class StringViewLike >
 constexpr string& string::append(const StringViewLike& t){return this->append(t.cbegin(), t.cend());}
@@ -279,36 +280,38 @@ constexpr bool string::contains(const char* str) const {return utf8::contains(th
 
 constexpr string& string::replace(string::const_iterator pos, char c){
 	auto unconst_pos = this->unconst(pos);
-	*&*unconst_pos = c;
-	const auto erase_pos = (&*pos - &*this->Base::begin()) + 1;
+	*std::to_address(unconst_pos) = c;
+	const auto erase_pos = (std::to_address(pos) - std::to_address(this->Base::begin())) + 1;
 	const auto erase_count = (*pos).size() - 1;
 	this->Base::erase(erase_pos, erase_count);
 	return *this;
 }
 constexpr string& string::replace(string::const_iterator pos, utf8::Char c){
 	if((*pos).size() > c.size()){
-		const auto copy_first = c.cbegin();
-		const auto copy_last = c.cend();
-		const auto dest = &*this->unconst(pos);
+		const char* copy_first = std::to_address(c.cbegin());
+		const char* copy_last = std::to_address(c.cend());
+		string::iterator unconst_pos = this->unconst(pos);
+		char* dest = std::to_address(unconst_pos);
 		std::copy(copy_first, copy_last, dest);
 		
-		const auto erase_pos = (&*pos - &*this->Base::cbegin()) + c.size();
-		const auto erase_count = (*pos).size() - c.size();
+		std::size_t erase_pos = (std::to_address(pos) - std::to_address(this->Base::cbegin())) + c.size();
+		std::size_t erase_count = (*pos).size() - c.size();
 		this->Base::erase(erase_pos, erase_count);
 	}else if((*pos).size() < c.size()){
-		const auto copy_first = c.cbegin();
-		const auto copy_last = c.cbegin() + (*pos).size();
-		const auto copy_dest = &*this->unconst(pos);
+		const char* copy_first = c.cbegin();
+		const char* copy_last = c.cbegin() + (*pos).size();
+		string::iterator unconst_pos = this->unconst(pos);
+		char* copy_dest = std::to_address(unconst_pos);
 		std::copy(copy_first, copy_last, copy_dest);
 		
-		const auto insert_pos = this->Base::cbegin() + ((&*pos - &*this->cbegin()) + (*pos).size());
+		const auto insert_pos = this->Base::cbegin() + ((std::to_address(pos) - std::to_address(this->cbegin())) + (*pos).size());
 		const auto insert_first =  c.cbegin() + (*pos).size();
 		const auto insert_last = c.cend();
 		this->Base::insert(insert_pos, insert_first, insert_last);
 	}else{
-		const auto copy_first = c.cbegin();
-		const auto copy_last = c.cend();
-		const auto copy_dest = &*this->unconst(pos);
+		const char* copy_first = c.cbegin();
+		const char* copy_last = c.cend();
+		char* copy_dest = std::to_address(this->unconst(pos));
 		std::copy(copy_first, copy_last, copy_dest);
 	}
 	return *this;
@@ -374,64 +377,64 @@ constexpr void string::swap( string& other ) {this->string::Base::swap(other);}
 // search
 
 constexpr string::const_iterator string::find(const string& str, string::const_iterator pos) const noexcept {
-	string::size_type foundPos = this->string::Base::find(str, utf8::distance(&*this->cbegin(), &*pos));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::find(str, utf8::distance(std::to_address(this->cbegin()), std::to_address(pos)));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 
 constexpr string::const_iterator string::find(const string& str) const noexcept {return this->find(str, this->cbegin());}
 
 constexpr string::const_iterator string::find(const char* s, string::const_iterator pos, string::size_type count) const {
-	string::size_type foundPos = this->string::Base::find(s, (&*pos - &*this->cbegin()), count);
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::find(s, (std::to_address(pos) - std::to_address(this->cbegin())), count);
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::find(const char* s, string::const_iterator pos) const {
-	string::size_type foundPos = this->string::Base::find(s, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::find(s, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::find(const char* s) const {return this->find(s, this->cbegin());}
 constexpr string::const_iterator string::find(char ch, string::const_iterator pos) const noexcept{
-	string::size_type foundPos = this->string::Base::find(ch, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::find(ch, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::find(char ch) const noexcept {return this->find(ch, this->begin());}
 template<class StringViewLike>
 constexpr string::const_iterator string::find(const StringViewLike& t, string::const_iterator pos) const noexcept {
-	string::size_type foundPos = this->string::Base::find(t, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::find(t, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 template<class StringViewLike>
 constexpr string::const_iterator string::find(const StringViewLike& t) const noexcept{return this->find(t, this->begin());}
 
 constexpr string::const_iterator string::rfind(const string& str, string::const_iterator pos) const noexcept {
-	string::size_type foundPos = this->string::Base::rfind(str, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::rfind(str, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::rfind(const string& str) const noexcept{return this->rfind(str, this->begin());}
 constexpr string::const_iterator string::rfind(const char* s, string::const_iterator pos, string::size_type count) const {
-	string::size_type foundPos = this->string::Base::rfind(s, (&*pos - &*this->cbegin()), count);
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::rfind(s, (std::to_address(pos) - std::to_address(this->cbegin())), count);
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::rfind(const char* s, string::const_iterator pos) const {
-	string::size_type foundPos = this->string::Base::rfind(s, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::rfind(s, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::rfind(const char* s) const{return this->rfind(s, this->begin());}
 constexpr string::const_iterator string::rfind(char ch, string::const_iterator pos) const noexcept{
-	string::size_type foundPos = this->string::Base::rfind(ch, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::rfind(ch, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 constexpr string::const_iterator string::rfind(char ch) const noexcept{return this->rfind(ch, this->begin());}
 template<class StringViewLike>
 constexpr string::const_iterator string::rfind(const StringViewLike& t, string::const_iterator pos) const noexcept {
-	string::size_type foundPos = this->string::Base::rfind(t, (&*pos - &*this->cbegin()));
-	return string::const_iterator(&*this->cbegin() + foundPos);
+	string::size_type foundPos = this->string::Base::rfind(t, (std::to_address(pos) - std::to_address(this->cbegin())));
+	return string::const_iterator(std::to_address(this->cbegin()) + foundPos);
 }
 template<class StringViewLike>
 constexpr string::const_iterator string::rfind(const StringViewLike& t) const noexcept{return this->rfind(t, this->begin());}
 
 
 // helper
-constexpr string::iterator string::unconst(string::const_iterator itr) {return string::iterator(this, &*this->begin() + (&*itr - &*this->begin()));}
+constexpr string::iterator string::unconst(string::const_iterator itr) {return string::iterator(this, std::to_address(this->begin()) + (std::to_address(itr) - std::to_address(this->begin())));}
 
 template<class OStream>
 inline OStream& operator << (OStream& stream, const string& str){return stream << static_cast<std::string_view>(str);}
