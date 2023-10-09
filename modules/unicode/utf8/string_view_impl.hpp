@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <memory>
 
 #include "common.hpp"
 #include "string_view_type.hpp"
@@ -15,8 +16,8 @@ constexpr const_string_view::const_string_view(const utf8::string& str) : _begin
 constexpr const_string_view::const_string_view(const char* str) : _begin(str), _end(strend(str)){}
 constexpr const_string_view::const_string_view(const char* first, const char* last) : _begin(first), _end(last){}
 constexpr const_string_view::const_string_view(const_string_view::const_iterator first, const_string_view::const_iterator last) : _begin(first), _end(last){}
-constexpr const_string_view::const_string_view(std::string_view other) : _begin(&*other.begin()), _end(&*other.end()){}
-constexpr const_string_view& const_string_view::operator=(std::string_view other) {this->_begin = &*other.begin(); this->_end = &*other.end();return *this;}
+constexpr const_string_view::const_string_view(std::string_view other) : _begin(std::to_address(other.begin())), _end(std::to_address(other.end())){}
+constexpr const_string_view& const_string_view::operator=(std::string_view other) {this->_begin = std::to_address(other.begin()); this->_end = std::to_address(other.end());return *this;}
 
 constexpr const_string_view::const_iterator const_string_view::begin() const {return _begin;}
 constexpr const_string_view::const_iterator const_string_view::cbegin() const {return _begin;}
@@ -34,7 +35,7 @@ constexpr void const_string_view::swap(const_string_view& other){
 	std::swap(this->_end, other._end);
 }
 
-constexpr const_string_view::operator std::string_view() const {return std::string_view(&*this->cbegin(), &*this->cend());}
+constexpr const_string_view::operator std::string_view() const {return std::string_view(std::to_address(this->cbegin()), std::to_address(std::to_address(this->cend())));}
 
 
 
@@ -62,8 +63,8 @@ constexpr void string_view::swap(string_view& other){
 	std::swap(this->_end, other._end);
 }
 
-constexpr string_view::operator std::string_view() const {return std::string_view(&*this->cbegin(), &*this->cend());}
-constexpr string_view::operator utf8::const_string_view() const{return utf8::const_string_view(&*this->cbegin(), &*this->cend());}
+constexpr string_view::operator std::string_view() const {return std::string_view(std::to_address(this->cbegin()), std::to_address(this->cend()));}
+constexpr string_view::operator utf8::const_string_view() const{return utf8::const_string_view(std::to_address(this->cbegin()), std::to_address(this->cend()));}
 
 
 }
