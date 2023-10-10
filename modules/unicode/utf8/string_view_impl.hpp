@@ -37,6 +37,19 @@ constexpr void const_string_view::swap(const_string_view& other){
 
 constexpr const_string_view::operator std::string_view() const {return std::string_view(std::to_address(this->cbegin()), std::to_address(std::to_address(this->cend())));}
 
+constexpr bool operator == (const_string_view lhs, const_string_view rhs){ return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (const char* lhs, const_string_view rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (std::string_view lhs, const_string_view rhs) { return lhs == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (const_string_view lhs, const char* rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (const_string_view lhs, std::string_view rhs) { return static_cast<std::string_view>(lhs) == rhs; }
+
+constexpr bool operator != (const_string_view lhs, const_string_view rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (const char* lhs, const_string_view rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (std::string_view lhs, const_string_view rhs) { return lhs != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (const_string_view lhs, const char* rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (const_string_view lhs, std::string_view rhs) { return static_cast<std::string_view>(lhs) != rhs; }
+
+
 
 
 constexpr string_view::string_view(utf8::string* str, const char* first, const char* last) : _str(str), _begin(first), _end(last){}
@@ -66,5 +79,21 @@ constexpr void string_view::swap(string_view& other){
 constexpr string_view::operator std::string_view() const {return std::string_view(std::to_address(this->cbegin()), std::to_address(this->cend()));}
 constexpr string_view::operator utf8::const_string_view() const{return utf8::const_string_view(std::to_address(this->cbegin()), std::to_address(this->cend()));}
 
+
+constexpr bool operator == (string_view lhs, string_view rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (const char* lhs, string_view rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (std::string_view lhs, string_view rhs) { return lhs == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (const_string_view lhs, string_view rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (string_view lhs, const char* rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+constexpr bool operator == (string_view lhs, std::string_view rhs) { return static_cast<std::string_view>(lhs) == rhs; }
+constexpr bool operator == (string_view lhs, const_string_view rhs) { return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs); }
+
+constexpr bool operator != (string_view lhs, string_view rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (const char* lhs, string_view rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (std::string_view lhs, string_view rhs) { return lhs != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (const_string_view lhs, string_view rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (string_view lhs, const char* rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
+constexpr bool operator != (string_view lhs, std::string_view rhs) { return static_cast<std::string_view>(lhs) != rhs; }
+constexpr bool operator != (string_view lhs, const_string_view rhs) { return static_cast<std::string_view>(lhs) != static_cast<std::string_view>(rhs); }
 
 }
