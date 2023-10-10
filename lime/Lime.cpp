@@ -240,13 +240,27 @@ int Lime::run(int numberOfArguments, const char* const* listOfArgumentStrings){
 	return this->run();
 }
 
+void Lime::force_quit(){ 
+	this->main_loop_continue = false; 
+	std::cout << "exiting Lime" << std::endl;
+}
+
 void Lime::quit(){
 	/**
 		Savely quit the program.
 	*/
-	std::cout << "Quitting Lime" << std::endl;
-	this->main_loop_continue = false;
+	if(this->has_unsaved_changes()){
+		this->commandLine->message.assign("Unsaved changes, use ':quit -s' to save all unsaved files or ':quit -f' to force quit."); 
+	}else{
+		this->force_quit();
+	}
 }
+
+void Lime::save_quit(){
+	this->save_all();
+	this->force_quit();
+}
+
 
 static bool is_ignore_event(const Term::Event& event){
 	switch(event.type()){
@@ -613,18 +627,21 @@ bool Lime::open(const std::filesystem::path& path){
 	return successfulRead;
 }
 
+bool Lime::has_unsaved_changes() const{
+	return textEditor->has_unsaved_changes(); // TODO: later ask all editors
+}
 
 void Lime::quit(void* ptr, const std::vector<utf8::const_string_view>& commands){
 	Lime* This = reinterpret_cast<Lime*>(ptr);
 	switch(commands.size()){
 		case 1 : {
-			This->quit(); //TODO: -> save_quit();
+			This->quit();
 		}break;
 		case 2 : {
 			if(commands[1] == "-s"){
-				This->commandLine->message.assign("Error: open: -s flag is not supported yet");
+				This->save_quit();
 			}else if(commands[1] == "-f"){
-				This->quit(); //TODO: -> force_quit();
+				This->force_quit(); //TODO: -> force_quit();
 			}else {
 				This->commandLine->message.assign("Error: '").append(commands[1]).append("' is not a valid flag");
 			}
@@ -671,6 +688,15 @@ bool Lime::save(){
 	if (!successful_write) {
 		this->commandLine->message.assign("Error: could not write file");
 	}
+	return successful_write;
+}
+
+bool Lime::save_all(){
+	bool successful_write = true;
+	
+	//TODO: ask all text editors instead
+	successful_write &= this->textEditor->save();
+	
 	return successful_write;
 }
 

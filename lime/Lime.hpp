@@ -15,7 +15,7 @@
 
 class Lime{
 	
-	static const TermGui::Command commandList[]; // sorted array of commans
+	static const TermGui::Command commandList[]; // sorted array of commands
 	
 	TermGui::VerticalGrid mainGrid;
 	
@@ -64,6 +64,8 @@ public:
 
 	int run(int numberOfArguments, const char * const* listOfArgumentStrings);
 
+	bool has_unsaved_changes() const;
+
 	/**
 		Savely quits the editor from the current state.
 		May asks/prompts the user to save unsaved files before 
@@ -72,6 +74,8 @@ public:
 		(May feed the quit event in the received events.)
 	*/
 	void quit();
+	void save_quit();
+	void force_quit();
 	
 //private:
 	void activate_command_line();
@@ -179,6 +183,7 @@ public:
 	static void save(void* ptr, const std::vector<utf8::const_string_view>& commands);
 	bool save();
 	bool save_as(const std::filesystem::path& path);
+	bool save_all();
 	
 	static void set(void* ptr, const std::vector<utf8::const_string_view>& commands);
 	void set_tab_size(utf8::const_string_view tabSize);
