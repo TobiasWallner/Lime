@@ -317,19 +317,6 @@ constexpr bool operator==(Char lhs, const char* rhs){
 /// equality comparison with a const char* string symbol
 constexpr bool operator==(const char* lhs, Char rhs){return (rhs == lhs);}
 
-/// equality comparison with a range. has to support cbegin() and cend() !
-template<class Range>
-bool operator==(Char lhs, const Range& rhs){
-	auto lhsItr = lhs.cbegin();
-	const auto lhsEnd = lhs.cend();
-	auto rhsItr = rhs.cbegin();
-	const auto rhsEnd = rhs.cend();
-	for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
-		if(*lhsItr != *rhsItr) return false;
-	}
-	return lhsItr == lhsEnd && rhsItr == rhsEnd;
-}
-
 constexpr bool operator == (utf8::Char lhs, char_const_reference rhs){ return lhs == utf8::Char(rhs); }
 constexpr bool operator == (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) == rhs; }
 constexpr bool operator == (utf8::Char lhs, char_reference rhs) {return utf8::Char(lhs) == utf8::Char(rhs);}
@@ -338,24 +325,12 @@ constexpr bool operator == (char_reference lhs, utf8::Char rhs) {return utf8::Ch
 constexpr bool operator!=(Char lhs, char rhs){return !(lhs == rhs);}
 constexpr bool operator!=(char lhs, Char rhs){return !(lhs == rhs);}
 
-/// equality comparison with a range. has to support cbegin() and cend() !
-template<class Range>
-constexpr bool operator==(const Range& lhs, Char rhs){return (rhs == lhs);}
-
 /// unequality comparison with self
 constexpr bool operator!=(Char lhs, Char rhs){return lhs.to_int() != rhs.to_int();}
 
 /// unequality comparison with c_string
 constexpr bool operator!=(Char lhs, const char* rhs){return !(lhs == rhs);}
 constexpr bool operator!=(const char* lhs, Char rhs){return !(lhs == rhs);}
-
-/// unequality comparison with char range
-template<class Range>
-constexpr bool operator!=(const Range& lhs, Char rhs){return !(lhs == rhs);}
-
-/// unequality comparison with char range
-template<class Range>
-constexpr bool operator!=(Char lhs, const Range& rhs){return !(lhs == rhs);}
 
 constexpr bool operator != (utf8::Char lhs, char_const_reference rhs){ return lhs != utf8::Char(rhs); }
 constexpr bool operator != (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) != rhs; }
@@ -380,35 +355,10 @@ constexpr bool operator>(Char lhs, const char* rhs){
 	return *rhs == '\0';
 }
 
-template<class Range>
-constexpr bool operator<(Char lhs, const Range& rhs){
-	auto lhsItr = lhs.cbegin();
-	const auto lhsEnd = lhs.cend();
-	auto rhsItr = rhs.cbegin();
-	const auto rhsEnd = rhs.cend();
-	for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
-		if(*lhsItr >= *rhsItr) return false;
-	}
-	return lhsItr == lhsEnd && rhsItr == rhsEnd;
-}
-
-template<class Range>
-constexpr bool operator>(Char lhs, const Range& rhs){
-	auto lhsItr = lhs.cbegin();
-	const auto lhsEnd = lhs.cend();
-	auto rhsItr = rhs.cbegin();
-	const auto rhsEnd = rhs.cend();
-	for(; lhsItr != lhsEnd && rhsItr != rhsEnd; ++lhsItr, (void)++rhsItr){
-		if(*lhsItr <= *rhsItr) return false;
-	}
-	return lhsItr == lhsEnd && rhsItr == rhsEnd;
-}
-
 constexpr bool operator<(Char lhs, char rhs){return lhs.to_int() < static_cast<Char::int_type>(rhs);}
 constexpr bool operator<(char lhs, Char rhs){return static_cast<Char::int_type>(lhs) < rhs.to_int();}
 constexpr bool operator<(Char lhs, Char rhs){return lhs.to_int() < rhs.to_int();}
 constexpr bool operator<(const char* lhs, Char rhs){return rhs > lhs;}
-template<class Range> constexpr bool operator<(const Range& lhs, Char rhs){return rhs > lhs;}
 
 constexpr bool operator < (utf8::Char lhs, char_const_reference rhs){ return lhs < utf8::Char(rhs); }
 constexpr bool operator < (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) < rhs; }
@@ -419,7 +369,6 @@ constexpr bool operator>(Char lhs, char rhs){return rhs < lhs;}
 constexpr bool operator>(char lhs, Char rhs){return rhs < lhs;}
 constexpr bool operator>(Char lhs, Char rhs){return lhs.to_int() > rhs.to_int();}
 constexpr bool operator>(const char* lhs, Char rhs){return rhs < lhs;}
-template<class Range> constexpr bool operator>(const Range& lhs, Char rhs){return rhs < lhs;}
 constexpr bool operator > (utf8::Char lhs, char_const_reference rhs){ return lhs > utf8::Char(rhs); }
 constexpr bool operator > (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) > rhs; }
 constexpr bool operator > (utf8::Char lhs, char_reference rhs) {return utf8::Char(lhs) > utf8::Char(rhs);}
@@ -430,8 +379,6 @@ constexpr bool operator<=(char lhs, Char rhs){return !(lhs > rhs);}
 constexpr bool operator<=(Char lhs, Char rhs){return lhs.to_int() <= rhs.to_int();}
 constexpr bool operator<=(Char lhs, const char* rhs){return !(lhs > rhs);}
 constexpr bool operator<=(const char* lhs, Char rhs){return !(rhs < lhs);}
-template<class Range> constexpr bool operator<=(Char lhs, const Range& rhs){return !(lhs > rhs);}
-template<class Range> constexpr bool operator<=(const Range& lhs, Char rhs){return !(rhs < lhs);}
 constexpr bool operator <= (utf8::Char lhs, char_const_reference rhs){ return lhs <= utf8::Char(rhs); }
 constexpr bool operator <= (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) <= rhs; }
 constexpr bool operator <= (utf8::Char lhs, char_reference rhs) {return utf8::Char(lhs) <= utf8::Char(rhs);}
@@ -442,8 +389,6 @@ constexpr bool operator>=(char lhs, Char rhs){return !(lhs < rhs);}
 constexpr bool operator>=(Char lhs, Char rhs){return lhs.to_int() >= rhs.to_int();}
 constexpr bool operator>=(Char lhs, const char* rhs){return !(lhs < rhs);}
 constexpr bool operator>=(const char* lhs, Char rhs){return !(rhs > lhs);}
-template<class Range> constexpr bool operator>=(Char lhs, const Range& rhs){return !(lhs < rhs);}
-template<class Range> constexpr bool operator>=(const Range& lhs, Char rhs){return !(rhs > lhs);}
 constexpr bool operator >= (utf8::Char lhs, char_const_reference rhs){ return lhs >= utf8::Char(rhs); }
 constexpr bool operator >= (char_const_reference lhs, utf8::Char rhs){ return utf8::Char(lhs) >= rhs; }
 constexpr bool operator >= (utf8::Char lhs, char_reference rhs) {return utf8::Char(lhs) >= utf8::Char(rhs);}
