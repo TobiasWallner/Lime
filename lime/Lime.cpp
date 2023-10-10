@@ -268,7 +268,7 @@ static bool is_ignore_event(const Term::Event& event){
 		}break;
 		case Term::Event::Type::CopyPaste : {
 			// TODO: remove the static_cast as soon as cpp-terminal fixes the API of Term::Event
-			return event.get_if_copy_paste().empty();
+			return event.get_if_copy_paste()->empty();
 		}break; 
 		default : {
 			return true;
