@@ -71,6 +71,8 @@ public:
 	bool empty() const;
 	void clear() override;
 	
+	inline bool has_unsaved_changes() const {return !this->saved;}
+	
 	inline iterator un_const(const_iterator constIterator) {return this->_text.erase(constIterator, constIterator);}
 	
 	inline iterator begin(){return this->_text.begin();}
