@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include "GridTrait.hpp"
 #include "RenderTrait.hpp"
 
