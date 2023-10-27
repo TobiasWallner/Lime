@@ -15,7 +15,7 @@ Lime is a text editor that works directly in the terminal. It aims to take featu
 git clone --recurse-submodules https://github.com/TobiasWallner/Lime.git
 ```
 
-last stable commit of the cpp-terminal library: 49e3160358237a3af25e7c7c3e70e593812cd0fe
+last stable commit of the cpp-terminal library: 80d1dd8d427b9ffba0d5cc498f147ff0eda4535b
 
 after cloning this repo. Go into the cpp-terminal library and checkout the commit above.
 
