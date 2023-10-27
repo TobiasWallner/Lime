@@ -372,7 +372,7 @@ TermGui::ScreenPosition TermGui::CommandLine::command_line_position() const{
 }
 
 TermGui::ScreenWidth TermGui::CommandLine::command_line_width() const{
-	const TermGui::ScreenWidth result{.x = this->GridCell::get_screen_width().x, .y = std::min(this->GridCell::get_screen_width().y, 1)};
+	const TermGui::ScreenWidth result{.x = this->GridCell::get_screen_width().x, .y = std::min(static_cast<TermGui::ScreenWidth::size_type>(this->GridCell::get_screen_width().y), static_cast<TermGui::ScreenWidth::size_type>(1))};
 	return result;
 }
 
@@ -538,11 +538,11 @@ void TermGui::CommandLine::render_command_line(std::string& outputString) const 
 			outputString += to_string(TermGui::FontStyle::Reversed::On);
 			outputString += ' ';
 			outputString += to_string(TermGui::FontStyle::Reversed::Off);
-			const size_type tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+			const size_type tabs_to_print = std::min(static_cast<size_type>(3), static_cast<size_type>((screenColumnEnd - this->is_end_of_line()) - screenColumn));
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print;
 		}else if(*stringItr == '\t'){
-			const size_type tabs_to_print = std::min(4ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+			const size_type tabs_to_print = std::min(static_cast<size_type>(4), static_cast<size_type>((screenColumnEnd - this->is_end_of_line()) - screenColumn));
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print-1;
 		}else if(show_cursor && column == this->cursorIndex){
@@ -578,7 +578,7 @@ void TermGui::CommandLine::render_message(std::string& outputString) const {
 			outputString += to_string(TermGui::FontStyle::Reversed::On);
 			outputString += ' ';
 			outputString += to_string(TermGui::FontStyle::Reversed::Off);
-			const size_type tabs_to_print = std::min(3ULL, (screenColumnEnd - this->is_end_of_line()) - screenColumn);
+			const size_type tabs_to_print = std::min(static_cast<size_type>(3), static_cast<size_type>((screenColumnEnd - this->is_end_of_line()) - screenColumn));
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print;
 		}else{
@@ -592,7 +592,7 @@ void TermGui::CommandLine::render_message(std::string& outputString) const {
 	for(; messageItr != messageEnd && screenColumn < screenColumnEnd; ++column, (void)++screenColumn, (void)++messageItr){
 		// show cursor is false
 		if(*messageItr == '\t'){
-			const size_type tabs_to_print = std::min(4ULL, screenColumnEnd - screenColumn);
+			const size_type tabs_to_print = std::min(static_cast<size_type>(4), static_cast<size_type>(screenColumnEnd - screenColumn));
 			outputString.append(tabs_to_print, ' ');
 			screenColumn += tabs_to_print-1;
 		}else{
