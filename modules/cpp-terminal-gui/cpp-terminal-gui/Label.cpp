@@ -32,7 +32,7 @@ void TermGui::Label::render(std::string& outputString) const {
 				columnNumber = 0;
 				outputString += Term::cursor_move(screenPosition.y + lineNumber, screenPosition.x);
 			}else if (*stringItr == '\t') {
-				const auto tabs_to_print = std::min(4ULL, screenWidth.x - columnNumber);
+				const auto tabs_to_print = std::min(std::size_t(4), static_cast<std::size_t>(screenWidth.x - columnNumber));
 				outputString.append(tabs_to_print, ' ');
 				columnNumber += tabs_to_print - 1;
 			}else{
