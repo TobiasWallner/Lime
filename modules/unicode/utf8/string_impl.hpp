@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <memory>
+#include <cstring>
 
 #include "string_type.hpp"
 
